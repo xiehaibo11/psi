@@ -8,6 +8,7 @@ import io.finer.erp.base.service.IBasBillOptionsService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.aspect.annotation.AutoLog;
 import org.jeecg.common.system.base.controller.JeecgController;
@@ -81,6 +82,7 @@ public class BasBillOptionsController extends JeecgController<BasBillOptions, IB
 	 */
 	@AutoLog(value = "bas_bill_options-新增")
 	@ApiOperation(value="bas_bill_options-新增", notes="bas_bill_options-新增")
+	@RequiresPermissions("base:bill:options:add") //20240806 cfm add
 	@PostMapping(value = "/add")
 	public Result<?> add(@RequestBody BasBillOptions basBillOptions) {
 		basBillOptionsService.save(basBillOptions);
@@ -95,6 +97,7 @@ public class BasBillOptionsController extends JeecgController<BasBillOptions, IB
 	 */
 	@AutoLog(value = "bas_bill_options-编辑")
 	@ApiOperation(value="bas_bill_options-编辑", notes="bas_bill_options-编辑")
+	@RequiresPermissions("base:bill:options:edit") //20240806 cfm add
 	@PutMapping(value = "/edit")
 	public Result<?> edit(@RequestBody BasBillOptions basBillOptions) {
 		basBillOptionsService.updateById(basBillOptions);
@@ -109,6 +112,7 @@ public class BasBillOptionsController extends JeecgController<BasBillOptions, IB
 	 */
 	@AutoLog(value = "bas_bill_options-通过id删除")
 	@ApiOperation(value="bas_bill_options-通过id删除", notes="bas_bill_options-通过id删除")
+	@RequiresPermissions("base:bill:options:delete") //20240806 cfm add
 	@DeleteMapping(value = "/delete")
 	public Result<?> delete(@RequestParam(name="id",required=true) String id) {
 		basBillOptionsService.removeById(id);
@@ -123,6 +127,7 @@ public class BasBillOptionsController extends JeecgController<BasBillOptions, IB
 	 */
 	@AutoLog(value = "bas_bill_options-批量删除")
 	@ApiOperation(value="bas_bill_options-批量删除", notes="bas_bill_options-批量删除")
+	@RequiresPermissions("base:bill:options:delete") //20240806 cfm add
 	@DeleteMapping(value = "/deleteBatch")
 	public Result<?> deleteBatch(@RequestParam(name="ids",required=true) String ids) {
 		this.basBillOptionsService.removeByIds(Arrays.asList(ids.split(",")));
@@ -149,6 +154,7 @@ public class BasBillOptionsController extends JeecgController<BasBillOptions, IB
     * @return
     */
 	@AutoLog(value = "通过excel导入数据")
+	@RequiresPermissions("base:bill:options:import") //20240806 cfm add
     @RequestMapping(value = "/importExcel", method = RequestMethod.POST)
     public Result<?> importExcel(HttpServletRequest request, HttpServletResponse response) {
         return super.importExcel(request, response, BasBillOptions.class);

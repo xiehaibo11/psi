@@ -2,10 +2,10 @@
   <a-card :bordered="false">
     <!-- 操作按钮区域 -->
     <div class="table-operator">
-      <a-button type="link" @click="myHandleAdd" icon="plus">新增</a-button>
-      <a-button type="link" icon="download" @click="handleExportXls('单据选项')">导出</a-button>
+      <a-button :disabled="isDisabledAuth('BasBillOptions:add')" @click="myHandleAdd" type="link" icon="plus">新增</a-button>
+      <a-button :disabled="isDisabledAuth('BasBillOptions:add')" type="link" icon="download" @click="handleExportXls('单据选项')">导出</a-button>
       <a-upload name="file" :showUploadList="false" :multiple="false" :headers="tokenHeader" :action="importExcelUrl" @change="handleImportExcel">
-        <a-button type="link" icon="import">导入</a-button>
+        <a-button :disabled="isDisabledAuth('BasBillOptions:add')" type="link" icon="import">导入</a-button>
       </a-upload>
 
       <i class="anticon anticon-info-circle ant-alert-icon"></i> 已选择 <a style="font-weight: 600">{{ selectedRowKeys.length }}</a>项
@@ -31,14 +31,14 @@
         <a slot="billType_dictText" @click="myHandleDetail(record)" slot-scope="text, record">{{text}}</a>
 
         <span slot="action" slot-scope="text, record">
-          <a @click="handleEdit(record)">编辑</a>
+          <a :disabled="isDisabledAuth('BasBillOptions:edit')" @click="handleEdit(record)">编辑</a>
 
           <a-divider type="vertical" />
           <a-dropdown>
             <a class="ant-dropdown-link">更多 <a-icon type="down" /></a>
             <a-menu slot="overlay">
-              <a-menu-item>
-                <a-popconfirm title="确定删除吗?" @confirm="() => handleDelete(record.id)">删除</a-popconfirm>
+              <a-menu-item :disabled="isDisabledAuth('BasBillOptions:delete')" key="1">
+                <a-popconfirm :disabled="isDisabledAuth('BasBillOptions:delete')" title="确定删除吗?" @confirm="() => handleDelete(record.id)">删除</a-popconfirm>
               </a-menu-item>
             </a-menu>
           </a-dropdown>
@@ -70,6 +70,7 @@
             title: '#',
             dataIndex: '',
             key:'rowIndex',
+            fixed:"left",
             width:60,
             align:"center",
             customRender: (t,r,index)=>parseInt(index)+1,
@@ -77,7 +78,6 @@
           {
             title:'单据类型',
             align:"center",
-            sorter: true,
             dataIndex: 'billType_dictText',
             scopedSlots: { customRender: 'billType_dictText' }
           },
@@ -152,7 +152,7 @@
           delete: "/base/basBillOptions/delete",
           deleteBatch: "/base/basBillOptions/deleteBatch",
           exportXlsUrl: "/base/basBillOptions/exportXls",
-          importExcelUrl: "bas/basBillOptions/importExcel",
+          importExcelUrl: "base/basBillOptions/importExcel",
 
         },
         dictOptions:{},

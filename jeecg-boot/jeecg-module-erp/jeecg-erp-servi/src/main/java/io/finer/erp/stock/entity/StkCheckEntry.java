@@ -59,13 +59,25 @@ public class StkCheckEntry extends Entry {
 	@ApiModelProperty(value = "实存数量")
 	private java.math.BigDecimal qty;
 
+	// 20231111 cfm modi：同一entry下，single可能赢或亏
+	//	/**盘盈数量*/
+	//	@TableField(exist = false)
+	//	private java.math.BigDecimal profitQty;
+	//	public java.math.BigDecimal getProfitQty() {
+	//		//controller中，QueryWrapper也会创建entity；
+	//		//(profitQty == null)，是为了避免作为查询数据库参数。
+	//		return (this.getId() == null || qty == null) ? null : qty.subtract(bookQty);
+	//	}
+	/**个体账存数量*/
+	@Excel(name = "个体账存数量", width = 15)
+	@ApiModelProperty(value = "个体账存数量")
+	private java.math.BigDecimal singleBookQty;
 	/**盘盈数量*/
-	@TableField(exist = false)
+	@Excel(name = "盘盈数量", width = 15)
+	@ApiModelProperty(value = "盘盈数量")
 	private java.math.BigDecimal profitQty;
-	public java.math.BigDecimal getProfitQty() {
-		//controller中，QueryWrapper也会创建entity；
-		//(profitQty == null)，是为了避免作为查询数据库参数。
-		return (this.getId() == null || qty == null) ? null : qty.subtract(bookQty);
-	}
-
+	/**盘亏数量*/
+	@Excel(name = "盘亏数量", width = 15)
+	@ApiModelProperty(value = "盘亏数量")
+	private java.math.BigDecimal lossQty;
 }

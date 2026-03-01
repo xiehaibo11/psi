@@ -7,6 +7,7 @@ import io.finer.erp.base.service.IBasBizPeriodService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.aspect.annotation.AutoLog;
 import org.jeecg.common.system.base.controller.JeecgController;
@@ -52,6 +53,7 @@ public class BasBizPeriodController extends JeecgController<BasBizPeriod, IBasBi
 	 */
 	@AutoLog(value = "bas_biz_period-编辑")
 	@ApiOperation(value="bas_biz_period-编辑", notes="bas_biz_period-编辑")
+	@RequiresPermissions("base:biz:period:edit") //20240806 cfm add
 	@PutMapping(value = "/edit")
 	public Result<?> edit(@RequestBody BasBizPeriod basBizPeriod) {
 		basBizPeriodService.updateById(basBizPeriod);
@@ -68,6 +70,7 @@ public class BasBizPeriodController extends JeecgController<BasBizPeriod, IBasBi
 
 	 @AutoLog(value = "当前月度回退")
 	 @ApiOperation(value="当前月度回退", notes="当前月度回退")
+	 @RequiresPermissions("base:biz:period:back") //20240806 cfm add
 	 @PutMapping(value = "/backPeriod")
 	 public Result<?> backPeriod(@RequestBody JSONObject json) {
 		 BasBizPeriod basBizPeriod =  basBizPeriodService.backPeriod(json.getInteger("year"), json.getInteger("month"));

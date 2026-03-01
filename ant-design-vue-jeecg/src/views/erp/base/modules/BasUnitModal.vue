@@ -33,6 +33,7 @@
         </a-form-model-item>
         <a-form-model-item label="换算系数" :labelCol="labelCol" :wrapperCol="wrapperCol" prop="factor">
           <a-input-number v-model="model.factor" placeholder="请输入" style="width: 100%" :disabled="disableSubmit"/>
+          <div>示例：基准单位千克为1，则吨为1000，克为0.001</div>
         </a-form-model-item>
         <a-form-model-item label="启用" :labelCol="labelCol" :wrapperCol="wrapperCol" prop="isEnabled">
           <j-dict-select-tag v-model="model.isEnabled"  dictCode="yn" placeholder="请选择" :disabled="disableSubmit"/>
@@ -75,7 +76,7 @@
     data () {
       return {
         title:"",
-        width:800,
+        width:Math.min(600, window.innerWidth),
         visible: false,
         disableSubmit: false,
         model:{},
@@ -104,7 +105,10 @@
             { required: true, message: '请输入符号!'},
             { validator: (rule, value, callback) => validateDuplicateValue('bas_unit', 'symbol', value, this.model.id, callback) }
           ],
-          factor: [{ required: true, message: '请输入换算系数!'}, { pattern: /^-?\d+\.?\d*$/, message: '请输入数字!'},],
+          factor: [
+            { required: true, message: '请输入换算系数!'},
+            { validator: (rule, value, callBack) => {if(value <= 0) {callBack('请输入正数！')} else {callBack()}}},
+          ],
           isEnabled: [{ required: true, message: '请输入是否启用!'},],
         },
         url: {

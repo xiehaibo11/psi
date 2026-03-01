@@ -866,7 +866,8 @@ public class ThirdAppDingtalkServiceImpl implements IThirdAppService {
             return null;
         }
         int agentId = thirdAppConfig.getDingtalk().getAgentIdInt();
-        return JdtMessageAPI.recallMessage(agentId, msgTaskId, getAccessToken());
+        //20240107 cfm modi for [jeewx-api 1.5.0 -> 1.5.2]: agentId -> String.valueOf(agentId)
+        return JdtMessageAPI.recallMessage(String.valueOf(agentId), msgTaskId, getAccessToken());
     }
 
     /**

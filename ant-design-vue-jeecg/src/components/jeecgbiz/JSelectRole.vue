@@ -12,7 +12,8 @@
 
     v-on="$listeners"
     v-bind="$attrs"
-  />
+    ref="selectBiz"
+  /> <!-- 2025018 cfm modi: 增加 ref="selectBiz" -->
 </template>
 
 <script>

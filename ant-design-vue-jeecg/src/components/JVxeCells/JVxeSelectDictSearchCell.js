@@ -23,6 +23,13 @@ const common = {
     dict() {
       return this.originColumn.dict
     },
+
+    //20240328 cfm add
+    pageSize() {
+      this.originColumn.pageSize = this.originColumn.pageSize || 5
+      return this.originColumn.pageSize
+    },
+
     options() {
       if (this.isAsync) {
         return this.innerOptions
@@ -191,7 +198,7 @@ export const DictSearchInputCell = {
       }
       // 字典code格式：table,text,code
       this.hasRequest = true
-      getAction(`/sys/dict/loadDict/${this.dict}`, {keyword: value}).then(res => {
+      getAction(`/sys/dict/loadDict/${this.dict}`, {keyword: value, pageSize: this.pageSize}).then(res => { //20240328 cfm add: pageSize: this.pageSize
         if (currentRequestId !== requestId) {
           return
         }

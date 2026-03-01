@@ -11,7 +11,9 @@
         </a-row>
       </a-checkbox-group>
     </template>
-    <a-button type="link" icon="setting">自定义列</a-button>
+    <a-tooltip title="自定义列" placement="topRight">
+      <a-button type="link" icon="setting"/>
+    </a-tooltip>
   </a-popover>
 </template>
 

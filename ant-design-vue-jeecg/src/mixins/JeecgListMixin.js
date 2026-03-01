@@ -8,8 +8,10 @@ import { deleteAction, getAction,downFile,getFileAccessHttpUrl } from '@/api/man
 import Vue from 'vue'
 import { ACCESS_TOKEN, TENANT_ID } from "@/store/mutation-types"
 import store from '@/store'
+import { mixinDevice } from '@/utils/mixin.js' //20240718 cfm add
 
 export const JeecgListMixin = {
+  mixins: [mixinDevice], //20240718 cfm add
   data(){
     return {
       /* 查询条件-请不要在queryParam中声明非字符串值的属性 */
@@ -57,6 +59,19 @@ export const JeecgListMixin = {
         this.loadData();
         //初始化字典配置 在自己页面定义
         this.initDictConfig();
+      }
+
+      //20240718 cfm add
+      if (this.isMobile()) {
+        //删除列的fixed，以便手机端时可以左右滑动
+        this.columns.forEach(column => {if (column.key !== 'rowIndex') delete column.fixed});
+        //action列移到左边
+        if (this.columns[this.columns.length-1].dataIndex === 'action') {
+          const last = this.columns.pop();
+          const first = (this.columns[0].key === 'rowIndex') ? this.columns.shift() : null;
+          this.columns.unshift(last);
+          if (!!first) this.columns.unshift(first);
+        }
       }
   },
   computed: {
@@ -203,6 +218,11 @@ export const JeecgListMixin = {
       var that = this;
       deleteAction(that.url.delete, {id: id}).then((res) => {
         if (res.success) {
+          //20250118 cfm add：
+          // 选中多行，删除其中一行后，未从selectedRowKeys、selectionRows自动移除，导致批量删除出错！
+          // 在这儿强行移除也不正常，故清除选中。
+          that.onClearSelected();
+
           //重新计算分页问题
           that.reCalculatePage(1)
           that.$message.success(res.message);

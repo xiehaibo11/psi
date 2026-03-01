@@ -7,6 +7,7 @@ import io.finer.erp.biz.service.ICloseAccountsService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.aspect.annotation.AutoLog;
 import org.jeecg.common.system.base.controller.JeecgController;
@@ -32,6 +33,7 @@ public class CloseAccoutsController extends JeecgController<BasBizPeriod, IBasBi
 
    @AutoLog(value = "月度结账")
    @ApiOperation(value="月度结账", notes="月度结账")
+   @RequiresPermissions("biz:closeAccount") //20240806 cfm add
    @PutMapping(value = "/month")
    public Result<?> closeAccount(@RequestBody JSONObject json) {
        BasBizPeriod basBizPeriod = closeAccountsService.closeAccounts(json.getInteger("year"), json.getInteger("month"));

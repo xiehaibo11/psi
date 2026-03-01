@@ -37,8 +37,8 @@ public class MaterialAspect {
     private ObjectMapper objectMapper;
 
     // 定义切点Pointcut
-    @Pointcut("execution(public * io.finer..*.*Controller.query*EntryList*(..))"
-            + "|| execution(public * io.finer..*.StkInventoryController.query*(..)) ")
+    @Pointcut("execution(public * io.finer..*.*Controller.query*ListByMainId*(..))" //20231211 cfm modi
+            + "|| execution(public * io.finer..*.StkInventory*Controller.query*(..)) ")
     public void queryPointcut() {
     }
 
@@ -53,7 +53,7 @@ public class MaterialAspect {
                 List<?> records = (List<?>)obj;
                 List<JSONObject> jsonObjs = this.addFields(records);
                 ((Result) result).setResult(jsonObjs);
-            } else {
+            } else if (obj != null){ //20231022 cfm modi: 增加【if (...)】
                 List<?> records = Arrays.asList(obj);
                 List<JSONObject> jsonObjs = this.addFields(records);
                 ((Result) result).setResult(jsonObjs.get(0));
@@ -90,6 +90,10 @@ public class MaterialAspect {
                     }
                     if (!jsonObj.containsKey("materialModel")) {
                         jsonObj.put("materialModel", m.getModel());
+                    }
+                    //20240513 cfm add
+                    if (!jsonObj.containsKey("barcode")) {
+                        jsonObj.put("barcode", m.getBarcode());
                     }
                 }
             }

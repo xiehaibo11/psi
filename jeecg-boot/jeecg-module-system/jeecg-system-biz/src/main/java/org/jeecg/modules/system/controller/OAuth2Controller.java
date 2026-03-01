@@ -3,6 +3,7 @@ package org.jeecg.modules.system.controller;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.xkcoding.justauth.AuthRequestFactory;
+import com.xkcoding.justauth.autoconfigure.JustAuthProperties;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import me.zhyd.oauth.model.AuthCallback;
@@ -23,6 +24,7 @@ import org.jeecg.modules.system.entity.SysUser;
 import org.jeecg.modules.system.model.ThirdLoginModel;
 import org.jeecg.modules.system.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -50,6 +52,7 @@ public class OAuth2Controller {
 	private ISysThirdAccountService sysThirdAccountService;
 	@Autowired
 	private RedisUtil redisUtil;
+	@Lazy //20230913 cfm add
 	@Autowired
 	private AuthRequestFactory factory;
 	@Autowired
@@ -59,24 +62,46 @@ public class OAuth2Controller {
 	@Autowired
     private ISysDictService sysDictService;
 
+	//20240227 cfm add
+	@Autowired
+	private JustAuthProperties justAuthProperties;
+	/**
+	 * 获取第三方登录是否启用
+	 */
+	@GetMapping("/getEnabled/{source}")
+	public Result getEnabled(@PathVariable("source") String source) {
+		boolean b = justAuthProperties.isEnabled() && justAuthProperties.getType().get(source.toUpperCase()) != null;
+		return Result.OK(b);
+	}
+
 	/**
 	 * 获取第三方平台的授权链接
 	 * @param source 第三方授权平台
 	 */
 	@RequestMapping("/render/{source}")
 	public void renderAuth(@PathVariable("source") String source, @RequestParam("from") String from, HttpServletResponse response) throws IOException {
-		AuthRequest authRequest = factory.get(source);
-		String state = AuthStateUtils.createState();
-		String authorizeUrl = authRequest.authorize(state);
-		if (ThirdAppConfig.DINGTALK.equalsIgnoreCase(source)) {
-			//justAuth V1.15.7只实现了qrconnect
-			authorizeUrl = authorizeUrl.replace("/connect/qrconnect?", "/connect/oauth2/sns_authorize?");
-			authorizeUrl = authorizeUrl.replace("scope=snsapi_login", "scope=snsapi_auth");
-		}
+		//20230229 cfm modi: 增加try，catch异常并处理
+		try {
+			AuthRequest authRequest = factory.get(source); //20230229 cfm comment：当source在justauth.type中未配置时，会null异常
+			String state = AuthStateUtils.createState();
+			String authorizeUrl = authRequest.authorize(state);
+			if (ThirdAppConfig.DINGTALK.equalsIgnoreCase(source)) {
+				//justAuth V1.15.7只实现了qrconnect
+				authorizeUrl = authorizeUrl.replace("/connect/qrconnect?", "/connect/oauth2/sns_authorize?");
+				authorizeUrl = authorizeUrl.replace("scope=snsapi_login", "scope=snsapi_auth");
+			}
 
-		redisUtil.set(state, from,60*30);
-		log.info("OAuth2: {}  授权链接:{}", new Object[]{source, authorizeUrl});
-		response.sendRedirect(authorizeUrl);
+			redisUtil.set(state, from,60*30);
+			log.info("OAuth2: {}  授权链接:{}", new Object[]{source, authorizeUrl});
+			response.sendRedirect(authorizeUrl);
+		} catch (Exception e) {
+			String s = from;
+			if (!s.contains("exOAuth2=")) {
+				s += s.contains("?") ? "&" : "?";
+				s +=  "exOAuth2=1"; //排除OAuth2
+			}
+			response.sendRedirect(s);
+		}
 	}
 
 	/**

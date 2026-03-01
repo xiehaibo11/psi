@@ -119,7 +119,7 @@
                 v-if="
                 maxHeight == null ||
                 (rowIndex >= parseInt(`${(scrollTop-rowHeight) / rowHeight}`) &&
-                  (parseInt(`${scrollTop / rowHeight}`) + 9) > rowIndex)
+                  (parseInt(`${scrollTop / rowHeight}`) + maxShowLines) > rowIndex)
               "
                 :id="`${caseId}tbody-tr-${rowIndex}`"
                 :data-idx="rowIndex"
@@ -806,6 +806,11 @@
         type: Number,
         default: 400
       },
+      // 最大显示行数
+      maxShowLines: {
+        type: Number,
+        default: 9
+      },
       // 要禁用的行
       disabledRows: {
         type: Object,
@@ -1128,7 +1133,7 @@
         this.visibleTrEls = []
         // 判断是否是首次进入该方法，如果是就不清空行，防止删除了预添加的数据
         if (!this.isFirst) {
-         this.clearRow();
+          this.clearRow();
         } else {
           this.isFirst = false
         }
@@ -1441,7 +1446,8 @@
         this.inputValues.forEach((item, index) => {
           let val = item[column.key], num
           try {
-            num = parseInt(val)
+            // 20211123 cfm modi：parseInt --> parseFloat
+            num = parseFloat(val)
           } catch {
             num = 0
           }
@@ -2127,7 +2133,8 @@
               let value = item[key]
               if (value && count !== '-') {
                 try {
-                  count += Number.parseInt(value)
+                  // 20200528 cfm modi：parseInt --> parseFloat
+                  count += Number.parseFloat(value)
                 } catch (e) {
                   count = '-'
                 }
@@ -3481,18 +3488,18 @@
 
 </style>
 <style lang="less">
-// 新增按钮配置气泡的样式
-.j-add-btn-settings {
-  width: 240px;
+  // 新增按钮配置气泡的样式
+  .j-add-btn-settings {
+    width: 240px;
 
-  .ant-form {
-    .ant-form-item {
-      margin-bottom: 0;
+    .ant-form {
+      .ant-form-item {
+        margin-bottom: 0;
 
-      .ant-input-number {
-        width: 100%;
+        .ant-input-number {
+          width: 100%;
+        }
       }
     }
   }
-}
 </style>

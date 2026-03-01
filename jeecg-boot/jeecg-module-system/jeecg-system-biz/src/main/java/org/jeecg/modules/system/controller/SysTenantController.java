@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.aspect.annotation.PermissionData;
 import org.jeecg.common.constant.SymbolConstant;
@@ -41,6 +42,7 @@ public class SysTenantController {
      * @param req
      * @return
      */
+    @RequiresPermissions("system:tenant:list") //20240806 cfm add
     @PermissionData(pageComponent = "system/TenantList")
 	@RequestMapping(value = "/list", method = RequestMethod.GET)
 	public Result<IPage<SysTenant>> queryPageList(SysTenant sysTenant,@RequestParam(name="pageNo", defaultValue="1") Integer pageNo,
@@ -75,6 +77,7 @@ public class SysTenantController {
      * @param
      * @return
      */
+    @RequiresPermissions("system:tenant:add") //20240806 cfm add
     @RequestMapping(value = "/add", method = RequestMethod.POST)
     public Result<SysTenant> add(@RequestBody SysTenant sysTenant) {
         Result<SysTenant> result = new Result();
@@ -96,6 +99,7 @@ public class SysTenantController {
      * @param
      * @return
      */
+    @RequiresPermissions("system:tenant:edit") //20240806 cfm add
     @RequestMapping(value = "/edit", method ={RequestMethod.PUT, RequestMethod.POST})
     public Result<SysTenant> edit(@RequestBody SysTenant tenant) {
         Result<SysTenant> result = new Result();
@@ -115,6 +119,7 @@ public class SysTenantController {
      * @param id
      * @return
      */
+    @RequiresPermissions("system:tenant:delete") //20240806 cfm add
     @RequestMapping(value = "/delete", method ={RequestMethod.DELETE, RequestMethod.POST})
     public Result<?> delete(@RequestParam(name="id",required=true) String id) {
         sysTenantService.removeTenantById(id);
@@ -126,6 +131,7 @@ public class SysTenantController {
      * @param ids
      * @return
      */
+    @RequiresPermissions("system:tenant:delete") //20240806 cfm add
     @RequestMapping(value = "/deleteBatch", method = RequestMethod.DELETE)
     public Result<?> deleteBatch(@RequestParam(name="ids",required=true) String ids) {
         Result<?> result = new Result<>();
@@ -178,6 +184,7 @@ public class SysTenantController {
      * 查询有效的 租户数据
      * @return
      */
+    @RequiresPermissions("system:tenant:queryList") //20240806 cfm add
     @RequestMapping(value = "/queryList", method = RequestMethod.GET)
     public Result<List<SysTenant>> queryList(@RequestParam(name="ids",required=false) String ids) {
         Result<List<SysTenant>> result = new Result<List<SysTenant>>();

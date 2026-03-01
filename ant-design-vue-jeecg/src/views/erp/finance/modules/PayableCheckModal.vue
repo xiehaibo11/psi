@@ -5,17 +5,16 @@
     :visible="visible"
     :maskClosable="false"
     :keyboard="false"
-    draggable
     switchFullscreen
     :okButtonProps="{ class:{'jee-hidden': disableSubmit} }"
     @cancel="handleCancel">
 
     <template slot="footer">
-      <a-button v-if="disableSubmit" key="print" @click="handlePrint" style="margin-right: 48px">打印</a-button>
+      <a-button v-if="disableSubmit" :disabled="isDisabledAuth('PayableCheck:print')" key="print" @click="handlePrint" style="margin-right: 48px">打印</a-button>
       <a-button @click="handleCancel" :type="action==='detail'?'primary':''">{{action==='detail'?'关闭':'取消'}}</a-button>
-      <a-button v-if="!disableSubmit" key="save" @click="handleSave" type="primary">保存</a-button>
+      <a-button v-if="!disableSubmit" key="save" @click="handleSave" type="primary" :disabled="loading">保存</a-button>
       <a-tooltip :title="canSubmit ? '' : '无核销或上下合计不等，不能提交！'" placement="bottom">
-        <a-button v-if="!disableSubmit" key="submit" @click="handleMySubmit" type="primary" :disabled="!canSubmit">提交</a-button>
+        <a-button v-if="!disableSubmit" key="submit" @click="handleMySubmit" type="primary" :disabled="loading || !canSubmit">提交</a-button>
       </a-tooltip>
       <a-button v-if="action==='check'" key="check" @click="handleCheck" type="primary">审核</a-button>
       <a-button v-if="action==='ebpm'" key="ebpm" @click="handleEbpm" type="primary">结束审批</a-button>
@@ -24,12 +23,12 @@
         <a-button v-if="action==='void'" key="void" type="primary">作废</a-button>
       </a-popconfirm>
     </template>
-    <payable-check-form ref="realForm" @ok="submitCallback" :disabled="disableSubmit" :canSubmit.sync="canSubmit"/>
+    <payable-check-form ref="realForm" @ok="submitCallback" :disabled="disableSubmit" :loading.sync="loading" :canSubmit.sync="canSubmit"/>
   </j-modal>
 </template>
 
 <script>
-  import { BillModalMixin } from '../../common/mixins/BillModalMixin'
+  import { BillModalMixin } from '../../common/mixins/bill/BillModalMixin'
   import PayableCheckForm from "./PayableCheckForm";
 
   export default {
@@ -39,8 +38,7 @@
 
     data() {
       return {
-        width:1300,
-        canSubmit: false
+         canSubmit: false
       }
     },
 
@@ -51,6 +49,3 @@
     },
   }
 </script>
-
-<style scoped>
-</style>

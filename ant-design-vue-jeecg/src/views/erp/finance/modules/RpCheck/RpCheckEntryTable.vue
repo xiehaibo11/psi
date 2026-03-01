@@ -20,12 +20,12 @@
 
 <script>
   import { JVXETypes } from '@/components/jeecg/JVxeTable'
-  import { BillVxeTableMixin } from '../../../common/mixins/BillVxeTableMixin'
+  import {DetailMixin} from '../../../common/mixins/bill/DetailMixin'
   import XEUtils from "xe-utils";
 
   export default {
     name: "RpCheckEntryTable",
-    mixins: [BillVxeTableMixin],
+    mixins: [DetailMixin],
     props: {
       checkType: {type: String, default: ""},// 核销类型
       checkSide: {type: String, default: ""},// 核销方向: 1-应收应付， 2-收款付款
@@ -39,7 +39,7 @@
         dataSource:[],
         columns: [
           {
-            title: '分录号',
+            title: '#',
             key: 'entryNo',
             type: JVXETypes.input,
             width:"90px",
@@ -61,6 +61,7 @@
             key: 'srcBillType',
             type: JVXETypes.select,
             dictCode:"x_bill_type",
+            options:[],
             width:"120px",
             defaultValue:'',
             disabled: true,

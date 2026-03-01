@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.aspect.annotation.AutoLog;
 import org.jeecg.common.system.base.controller.JeecgController;
@@ -79,6 +80,7 @@ public class SysFillRuleController extends JeecgController<SysFillRule, ISysFill
      */
     @AutoLog(value = "填值规则-添加")
     @ApiOperation(value = "填值规则-添加", notes = "填值规则-添加")
+    @RequiresPermissions("system:fillRule:add") //20240806 cfm add
     @PostMapping(value = "/add")
     public Result<?> add(@RequestBody SysFillRule sysFillRule) {
         sysFillRuleService.save(sysFillRule);
@@ -93,6 +95,7 @@ public class SysFillRuleController extends JeecgController<SysFillRule, ISysFill
      */
     @AutoLog(value = "填值规则-编辑")
     @ApiOperation(value = "填值规则-编辑", notes = "填值规则-编辑")
+    @RequiresPermissions("system:fillRule:edit") //20240806 cfm add
     @RequestMapping(value = "/edit", method = {RequestMethod.PUT,RequestMethod.POST})
     public Result<?> edit(@RequestBody SysFillRule sysFillRule) {
         sysFillRuleService.updateById(sysFillRule);
@@ -107,6 +110,7 @@ public class SysFillRuleController extends JeecgController<SysFillRule, ISysFill
      */
     @AutoLog(value = "填值规则-通过id删除")
     @ApiOperation(value = "填值规则-通过id删除", notes = "填值规则-通过id删除")
+    @RequiresPermissions("system:fillRule:delete") //20240806 cfm add
     @DeleteMapping(value = "/delete")
     public Result<?> delete(@RequestParam(name = "id", required = true) String id) {
         sysFillRuleService.removeById(id);
@@ -121,6 +125,7 @@ public class SysFillRuleController extends JeecgController<SysFillRule, ISysFill
      */
     @AutoLog(value = "填值规则-批量删除")
     @ApiOperation(value = "填值规则-批量删除", notes = "填值规则-批量删除")
+    @RequiresPermissions("system:fillRule:delete") //20240806 cfm add
     @DeleteMapping(value = "/deleteBatch")
     public Result<?> deleteBatch(@RequestParam(name = "ids", required = true) String ids) {
         this.sysFillRuleService.removeByIds(Arrays.asList(ids.split(",")));
@@ -159,6 +164,7 @@ public class SysFillRuleController extends JeecgController<SysFillRule, ISysFill
      * @param response
      * @return
      */
+    @RequiresPermissions("system:fillRule:import") //20240806 cfm add
     @RequestMapping(value = "/importExcel", method = RequestMethod.POST)
     public Result<?> importExcel(HttpServletRequest request, HttpServletResponse response) {
         return super.importExcel(request, response, SysFillRule.class);

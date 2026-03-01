@@ -5,18 +5,18 @@
       <a-form layout="inline" @keyup.enter.native="searchQuery">
         <a-row :gutter="24">
 
-          <a-col :span="6">
+          <a-col :xl="6" :lg="7" :md="8" :sm="24">
             <a-form-item label="标题">
               <a-input placeholder="请输入标题" v-model="queryParam.titile"></a-input>
             </a-form-item>
           </a-col>
-          <a-col :span="6">
+          <a-col :xl="6" :lg="7" :md="8" :sm="24">
             <a-form-item label="发布人">
               <a-input placeholder="请输入发布人" v-model="queryParam.sender"></a-input>
             </a-form-item>
           </a-col>
 
-          <a-col :span="8" >
+          <a-col :xl="8" :lg="8" :md="12" :sm="24">
             <span style="float: left;overflow: hidden;" class="table-page-search-submitButtons">
               <a-button type="primary" @click="searchQuery" icon="search">查询</a-button>
               <a-button type="primary" @click="searchReset" icon="reload" style="margin-left: 8px">重置</a-button>
@@ -36,6 +36,7 @@
       size="default"
       bordered
       rowKey="id"
+      :scroll="{ x: 1300}"
       :columns="columns"
       :dataSource="dataSource"
       :pagination="ipagination"
@@ -124,6 +125,7 @@
         },{
           title: '操作',
           dataIndex: 'action',
+          width:100,
           align:"center",
           scopedSlots: { customRender: 'action' },
         }],
@@ -179,14 +181,9 @@
     }
   }
 </script>
-<style scoped>
-  .ant-card-body .table-operator{
-    margin-bottom: 18px;
-  }
-  .anty-row-operator button{margin: 0 5px}
-  .ant-btn-danger{background-color: #ffffff}z
 
-  .ant-modal-cust-warp{height: 100%}
-  .ant-modal-cust-warp .ant-modal-body{height:calc(100% - 110px) !important;overflow-y: auto}
-  .ant-modal-cust-warp .ant-modal-content{height:90% !important;overflow-y: hidden}
+//20240721 cfm modi
+<style lang="less" scoped>
+  @import '~@assets/less/common.less';
+  @import '../erp/common/less/List.less';
 </style>

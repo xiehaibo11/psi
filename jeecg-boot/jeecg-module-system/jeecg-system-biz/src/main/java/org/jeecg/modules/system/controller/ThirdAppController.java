@@ -3,6 +3,7 @@ package org.jeecg.modules.system.controller;
 import com.alibaba.fastjson.JSONObject;
 import com.jeecg.dingtalk.api.core.response.Response;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.jeecg.common.api.dto.message.MessageDTO;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.system.util.JwtUtil;
@@ -51,6 +52,7 @@ public class ThirdAppController {
      * @param ids
      * @return
      */
+    @RequiresPermissions("system:thirdApp:syncWechatEnterpriseUserToApp") //20240806 cfm add
     @GetMapping("/sync/wechatEnterprise/user/toApp")
     public Result syncWechatEnterpriseUserToApp(@RequestParam(value = "ids", required = false) String ids) {
         if (thirdAppConfig.isWechatEnterpriseEnabled()) {
@@ -91,6 +93,7 @@ public class ThirdAppController {
      * @param ids
      * @return
      */
+    @RequiresPermissions("system:thirdApp:syncWechatEnterpriseDepartToApp") //20240806 cfm add
     @GetMapping("/sync/wechatEnterprise/depart/toApp")
     public Result syncWechatEnterpriseDepartToApp(@RequestParam(value = "ids", required = false) String ids) {
         if (thirdAppConfig.isWechatEnterpriseEnabled()) {
@@ -110,6 +113,7 @@ public class ThirdAppController {
      * @param ids
      * @return
      */
+    @RequiresPermissions("system:thirdApp:syncWechatEnterpriseDepartToLocal") //20240806 cfm add
     @GetMapping("/sync/wechatEnterprise/depart/toLocal")
     public Result syncWechatEnterpriseDepartToLocal(@RequestParam(value = "ids", required = false) String ids) {
         if (thirdAppConfig.isWechatEnterpriseEnabled()) {
@@ -129,6 +133,7 @@ public class ThirdAppController {
      * @param ids
      * @return
      */
+    @RequiresPermissions("system:thirdApp:syncDingtalkDepartToApp") //20240806 cfm add
     @GetMapping("/sync/dingtalk/depart/toApp")
     public Result syncDingtalkDepartToApp(@RequestParam(value = "ids", required = false) String ids) {
         if (thirdAppConfig.isDingtalkEnabled()) {
@@ -148,6 +153,7 @@ public class ThirdAppController {
      * @param ids
      * @return
      */
+    @RequiresPermissions("system:thirdApp:syncDingtalkDepartToLocal") //20240806 cfm add
     @GetMapping("/sync/dingtalk/depart/toLocal")
     public Result syncDingtalkDepartToLocal(@RequestParam(value = "ids", required = false) String ids) {
         if (thirdAppConfig.isDingtalkEnabled()) {
@@ -167,6 +173,7 @@ public class ThirdAppController {
      * @param ids
      * @return
      */
+    @RequiresPermissions("system:thirdApp:syncDingtalkUserToApp") //20240806 cfm add
     @GetMapping("/sync/dingtalk/user/toApp")
     public Result syncDingtalkUserToApp(@RequestParam(value = "ids", required = false) String ids) {
         if (thirdAppConfig.isDingtalkEnabled()) {
@@ -186,6 +193,7 @@ public class ThirdAppController {
      * @param ids 作废
      * @return
      */
+    @RequiresPermissions("system:thirdApp:syncDingtalkUserToLocal") //20240806 cfm add
     @GetMapping("/sync/dingtalk/user/toLocal")
     public Result syncDingtalkUserToLocal(@RequestParam(value = "ids", required = false) String ids) {
         if (thirdAppConfig.isDingtalkEnabled()) {

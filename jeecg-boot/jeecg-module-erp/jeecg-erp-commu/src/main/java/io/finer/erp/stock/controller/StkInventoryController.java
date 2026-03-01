@@ -8,6 +8,7 @@ import io.finer.erp.stock.service.IStkInventoryService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.aspect.annotation.AutoLog;
 import org.jeecg.common.system.base.controller.JeecgController;
@@ -74,6 +75,16 @@ public class StkInventoryController extends JeecgController<StkInventory, IStkIn
 		 return Result.OK(stkInventory);
 	 }
 
+	 //@AutoLog(value = "库存-通过物料批次仓库查询")
+	 @ApiOperation(value="库存-通过物料批次仓库查询", notes="库存-通过物料批次仓库查询")
+	 @GetMapping(value = "/queryByMbw")
+	 public Result<?> queryByMbw(@RequestParam String materialId, @RequestParam String batchNo, @RequestParam String warehouseId) {
+		 StkInventory stkInventory = stkInventoryService.getInventory(batchNo, materialId, warehouseId);
+		 if(stkInventory==null) {
+			 return Result.error("未找到对应数据");
+		 }
+		 return Result.OK(stkInventory);
+	 }
 
 	 /**
 	 *  编辑
@@ -83,6 +94,7 @@ public class StkInventoryController extends JeecgController<StkInventory, IStkIn
 	 */
 	@AutoLog(value = "库存-编辑")
 	@ApiOperation(value="库存-编辑", notes="库存-编辑")
+	@RequiresPermissions("stock:inventory:edit") //20240806 cfm add
 	@PutMapping(value = "/edit")
 	public Result<?> edit(@RequestBody StkInventory stkInventory) {
 		stkInventoryService.updateById(stkInventory);
@@ -97,6 +109,7 @@ public class StkInventoryController extends JeecgController<StkInventory, IStkIn
 	 */
 	@AutoLog(value = "库存-通过id删除")
 	@ApiOperation(value="库存-通过id删除", notes="库存-通过id删除")
+	@RequiresPermissions("stock:inventory:delete") //20240806 cfm add
 	@DeleteMapping(value = "/delete")
 	public Result<?> delete(@RequestParam(name="id",required=true) String id) {
 		stkInventoryService.removeById(id);
@@ -111,6 +124,7 @@ public class StkInventoryController extends JeecgController<StkInventory, IStkIn
 	 */
 	@AutoLog(value = "库存-批量删除")
 	@ApiOperation(value="库存-批量删除", notes="库存-批量删除")
+	@RequiresPermissions("stock:inventory:delete") //20240806 cfm add
 	@DeleteMapping(value = "/deleteBatch")
 	public Result<?> deleteBatch(@RequestParam(name="ids",required=true) String ids) {
 		this.stkInventoryService.removeByIds(Arrays.asList(ids.split(",")));
@@ -124,7 +138,8 @@ public class StkInventoryController extends JeecgController<StkInventory, IStkIn
     * @param stkInventory
     */
 	@AutoLog(value = "导出为excel")
-    @RequestMapping(value = "/exportXls")
+	@RequiresPermissions("stock:inventory:export") //20240806 cfm add
+	@RequestMapping(value = "/exportXls")
     public ModelAndView exportXls(HttpServletRequest request, StkInventory stkInventory) {
         return super.exportXls(request, stkInventory, StkInventory.class, "详细即时库存");
     }
@@ -137,6 +152,7 @@ public class StkInventoryController extends JeecgController<StkInventory, IStkIn
     * @return
     */
 	@AutoLog(value = "通过excel导入数据")
+	@RequiresPermissions("stock:inventory:import") //20240806 cfm add
     @RequestMapping(value = "/importExcel", method = RequestMethod.POST)
     public Result<?> importExcel(HttpServletRequest request, HttpServletResponse response) {
         return super.importExcel(request, response, StkInventory.class);

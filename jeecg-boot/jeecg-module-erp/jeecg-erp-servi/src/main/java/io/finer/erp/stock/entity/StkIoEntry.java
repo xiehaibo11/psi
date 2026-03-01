@@ -90,7 +90,6 @@ public class StkIoEntry extends Entry {
 	@Excel(name = "结算金额", width = 15)
 	@ApiModelProperty(value = "结算金额")
 	private java.math.BigDecimal settleAmt;
-
 	/**已开票数量*/
 	@Excel(name = "已开票数量", width = 15)
 	@ApiModelProperty(value = "已开票数量")
@@ -100,13 +99,13 @@ public class StkIoEntry extends Entry {
 	@ApiModelProperty(value = "已开票金额")
 	private java.math.BigDecimal invoicedAmt;
 
-	/**实时库存计量单位*/
+	/**即时库存计量单位*/
 	@TableField(exist = false)
 	private java.lang.String inventoryUnitId;
-	/**实时库存数量*/
+	/**即时库存数量*/
 	@TableField(exist = false)
 	private java.math.BigDecimal inventoryQty;
-	/**实时库存成本*/
+	/**即时库存成本*/
 	@TableField(exist = false)
 	private java.math.BigDecimal inventoryCost;
 }

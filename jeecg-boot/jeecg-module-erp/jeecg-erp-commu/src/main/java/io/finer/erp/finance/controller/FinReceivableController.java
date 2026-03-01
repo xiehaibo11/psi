@@ -9,6 +9,7 @@ import io.finer.erp.finance.service.IFinReceivableService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.aspect.annotation.AutoLog;
 import org.jeecg.common.exception.JeecgBootException;
@@ -72,7 +73,7 @@ public class FinReceivableController extends JeecgController<FinReceivable, IFin
 		 QueryWrapper<FinReceivable> queryWrapper = QueryGenerator.initQueryWrapper(finReceivable, req.getParameterMap());
 		 queryWrapper.eq("is_effective", 1);
 		 queryWrapper.eq("is_voided", 0);
-		 queryWrapper.apply("amt - checked_amt > 0");
+		 queryWrapper.apply("amt - checked_amt != 0"); //20231217 cfm modi: > 0 改成 != 0
 		 Page<FinReceivable> page = new Page<FinReceivable>(pageNo, pageSize);
 		 IPage<FinReceivable> pageList = finReceivableService.page(page, queryWrapper);
 		 return Result.ok(pageList);
@@ -103,6 +104,7 @@ public class FinReceivableController extends JeecgController<FinReceivable, IFin
 	 */
 	@AutoLog(value = "应收单-新增")
 	@ApiOperation(value="应收单-新增", notes="应收单-新增")
+	@RequiresPermissions("finance:receivable:add") //20240806 cfm add
 	@PostMapping(value = "/add/{action}")
 	public Result<?> add(@RequestBody FinReceivable finReceivable, @PathVariable String action) {
 		try {
@@ -126,6 +128,7 @@ public class FinReceivableController extends JeecgController<FinReceivable, IFin
 	 */
 	@AutoLog(value = "应收单-编辑")
 	@ApiOperation(value="应收单-编辑", notes="应收单-编辑")
+	@RequiresPermissions("finance:receivable:edit") //20240806 cfm add
 	@PutMapping(value = "/edit/{action}")
 	public Result<?> edit(@RequestBody FinReceivable finReceivable, @PathVariable String action) {
 		try {
@@ -149,6 +152,7 @@ public class FinReceivableController extends JeecgController<FinReceivable, IFin
 	 */
 	@AutoLog(value = "应收单-通过id删除")
 	@ApiOperation(value="应收单-通过id删除", notes="应收单-通过id删除")
+	@RequiresPermissions("finance:receivable:delete") //20240806 cfm add
 	@DeleteMapping(value = "/delete")
 	public Result<?> delete(@RequestParam(name="id",required=true) String id) {
 		try {
@@ -167,6 +171,7 @@ public class FinReceivableController extends JeecgController<FinReceivable, IFin
 	 */
 	@AutoLog(value = "应收单-批量删除")
 	@ApiOperation(value="应收单-批量删除", notes="应收单-批量删除")
+	@RequiresPermissions("finance:receivable:delete") //20240806 cfm add
 	@DeleteMapping(value = "/deleteBatch")
 	public Result<?> deleteBatch(@RequestParam(name="ids",required=true) String ids) {
 		try {
@@ -179,6 +184,7 @@ public class FinReceivableController extends JeecgController<FinReceivable, IFin
 
 	 @AutoLog(value = "应收单-审核")
 	 @ApiOperation(value="应收单-审核", notes="应收单-审核")
+	 @RequiresPermissions("finance:receivable:check") //20240806 cfm add
 	 @PutMapping(value = "/check")
 	 public Result<?> check(@RequestBody JSONObject json) {
 		 try {
@@ -205,6 +211,7 @@ public class FinReceivableController extends JeecgController<FinReceivable, IFin
 
 	 @AutoLog(value = "应收单-结束审批")
 	 @ApiOperation(value="应收单-结束审批", notes="应收单-结束审批")
+	 @RequiresPermissions("finance:receivable:bpm:end") //20240806 cfm add
 	 @PutMapping(value = "/bpm/end")
 	 public Result<?> bpmInstanceManualEnd(@RequestBody JSONObject json) {
 		 try {
@@ -219,6 +226,7 @@ public class FinReceivableController extends JeecgController<FinReceivable, IFin
 
 	 @AutoLog(value = "应收单-执行")
 	 @ApiOperation(value="应收单-执行", notes="应收单-执行")
+	 @RequiresPermissions("finance:receivable:execute") //20240806 cfm add
 	 @PutMapping(value = "/execute")
 	 public Result<?> execute(@RequestBody JSONObject json) {
 		 try {
@@ -231,6 +239,7 @@ public class FinReceivableController extends JeecgController<FinReceivable, IFin
 
 	 @AutoLog(value = "应收单-关闭")
 	 @ApiOperation(value="应收单-关闭", notes="应收单-关闭")
+	 @RequiresPermissions("finance:receivable:close") //20240806 cfm add
 	 @PutMapping(value = "/close")
 	 public Result<?> close(@RequestBody JSONObject json) {
 		 try {
@@ -243,6 +252,7 @@ public class FinReceivableController extends JeecgController<FinReceivable, IFin
 
 	 @AutoLog(value = "应收单--反关闭")
 	 @ApiOperation(value="应收单--反关闭", notes="应收单--反关闭")
+	 @RequiresPermissions("finance:receivable:unclose") //20240806 cfm add
 	 @PutMapping(value = "/unclose")
 	 public Result<?> unclose(@RequestBody JSONObject json) {
 		 try {
@@ -261,6 +271,7 @@ public class FinReceivableController extends JeecgController<FinReceivable, IFin
 	  */
 	 @AutoLog(value = "应收单-批量关闭")
 	 @ApiOperation(value="应收单-批量关闭", notes="应收单-批量关闭")
+	 @RequiresPermissions("finance:receivable:close") //20240806 cfm add
 	 @PutMapping(value = "/closeBatch")
 	 public Result<String> closeBatch(@RequestBody JSONObject json) {
 		 try {
@@ -279,6 +290,7 @@ public class FinReceivableController extends JeecgController<FinReceivable, IFin
 	  */
 	 @AutoLog(value = "应收单-批量反关闭")
 	 @ApiOperation(value="应收单-批量反关闭", notes="应收单-批量反关闭")
+	 @RequiresPermissions("finance:receivable:unclose") //20240806 cfm add
 	 @PutMapping(value = "/uncloseBatch")
 	 public Result<String> uncloseBatch(@RequestBody JSONObject json) {
 		 try {
@@ -291,6 +303,7 @@ public class FinReceivableController extends JeecgController<FinReceivable, IFin
 
 	 @AutoLog(value = "应收单-作废")
 	 @ApiOperation(value="应收单-作废", notes="应收单-作废")
+	 @RequiresPermissions("finance:receivable:void") //20240806 cfm add
 	 @PutMapping(value = "/void")
 	 public Result<?> voidBill(@RequestBody JSONObject json) {
 		 try {
@@ -308,7 +321,8 @@ public class FinReceivableController extends JeecgController<FinReceivable, IFin
     * @param finReceivable
     */
 	@AutoLog(value = "导出为excel")
-    @RequestMapping(value = {"/exportXls", "/exportXls/{receivableType}"})
+	@RequiresPermissions("finance:receivable:export") //20240806 cfm add
+	@RequestMapping(value = {"/exportXls", "/exportXls/{receivableType}"})
     public ModelAndView exportXls(HttpServletRequest request, FinReceivable finReceivable) {
         return super.exportXls(request, finReceivable, FinReceivable.class, "应收单");
     }
@@ -320,7 +334,8 @@ public class FinReceivableController extends JeecgController<FinReceivable, IFin
     * @return
     */
 	@AutoLog(value = "通过excel导入数据")
-    @RequestMapping(value = {"/importExcel", "/importExcel/{receivableType}"}, method = RequestMethod.POST)
+	@RequiresPermissions("finance:receivable:import") //20240806 cfm add
+	@RequestMapping(value = {"/importExcel", "/importExcel/{receivableType}"}, method = RequestMethod.POST)
     public Result<?> importExcel(HttpServletRequest request, @PathVariable(required = false) String receivableType) {
 		//20211205 cfm modi: 不用jeecg-boot生成代码，以进行数据合法性检查和事务化
         //return super.importExcel(request, response, FinReceivable.class);

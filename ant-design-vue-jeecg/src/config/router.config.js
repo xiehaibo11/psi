@@ -362,6 +362,12 @@ export const constantRouterMap = [
     ]
   },
 
+  {
+    // 20211102 cfm add: OAuth2 页面路由
+    path: '/oauth2',
+    name: 'oauth2',
+    component: () => import(/* webpackChunkName: "oauth2" */ '@/views/user/oauth2/OAuth2')
+  },
 
   {
     path: '/test',

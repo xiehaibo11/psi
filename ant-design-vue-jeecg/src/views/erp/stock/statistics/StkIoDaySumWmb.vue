@@ -19,7 +19,7 @@
           </a-col>
           <a-col :xl="5" :lg="6" :md="7" :sm="24">
             <a-form-item label="物料">
-              <j-search-select-tag v-model="queryParam.materialId" :async="true" dict="bas_material,aux_name,id" placeholder="请选择"/>
+              <j-search-select-tag v-model="queryParam.materialId" dict="bas_material,aux_name,id" placeholder="请选择"/>
             </a-form-item>
           </a-col>
 

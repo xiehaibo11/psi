@@ -7,7 +7,6 @@ import io.finer.erp.finance.mapper.FinReceiptMapper;
 import io.finer.erp.finance.service.IFinReceiptReqService;
 import io.finer.erp.finance.service.IFinReceiptService;
 import io.finer.erp.finance.service.IFinReceivableCheckService;
-import io.finer.erp.sale.service.ISalOrderService;
 import org.apache.commons.lang3.StringUtils;
 import org.jeecg.common.exception.JeecgBootException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,10 +30,6 @@ import java.util.Map;
 public class FinReceiptServiceImpl
 		extends BillWithEntryServiceImpl<FinReceiptMapper, FinReceipt, FinReceiptEntryMapper, FinReceiptEntry>
 		implements IFinReceiptService {
-
-	@Lazy
-	@Autowired
-	private ISalOrderService salOrderService;
 
 	@Autowired
 	private IFinReceiptReqService finReceiptReqService;
@@ -105,17 +100,6 @@ public class FinReceiptServiceImpl
 
 		//回写{如果明细源单为销售退货退款申请}
 		finReceiptReqService.receiptWriteBack(bill, entryList, reverse);
-
-		if (bill.getReceiptType().startsWith("101")) { //101 销售预收单
-			//回写{如果明细源单为销售订单}
-			for(FinReceiptEntry entry: entryList) {
-				//如果源单不为SalOrder，不用获取salOrderService
-				if (!StringUtils.isEmpty(entry.getSrcBillType()) && entry.getSrcBillType().startsWith("SalOrder")) {
-					salOrderService.receiptWriteBackPrereceiptBal(entryList, reverse);
-					break;
-				}
-			}
-		}
 	}
 
 	@Override
@@ -168,18 +152,6 @@ public class FinReceiptServiceImpl
 		for(FinReceipt bill: billMap.values()) {
 			this.baseMapper.updateById(bill);
 			this.refreshExecuteStage(bill);
-		}
-
-		//向前回调：预收款核销，需回写销售订单的预收余额
-		if (checkEntryList1.size() > 0) {
-			//{销售预收单明细的源单为销售订单}
-			for(FinReceivableCheckEntry entry: checkEntryList1) {
-				//如果源单不为SalOrder，不用获取salOrderService
-				if (!StringUtils.isEmpty(entry.getSrcBillType()) && entry.getSrcBillType().startsWith("SalOrder")) {
-					salOrderService.receivableCheckWriteBackPrereceiptBal(checkEntryList1, reverse);
-					break;
-				}
-			}
 		}
 	}
 

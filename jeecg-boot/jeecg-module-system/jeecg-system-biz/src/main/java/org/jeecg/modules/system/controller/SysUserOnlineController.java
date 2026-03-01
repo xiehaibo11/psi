@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.constant.CacheConstant;
 import org.jeecg.common.constant.CommonConstant;
@@ -49,6 +50,7 @@ public class SysUserOnlineController {
     @Resource
     private BaseCommonService baseCommonService;
 
+    @RequiresPermissions("system:user:online:list") //20240806 cfm add
     @RequestMapping(value = "/list", method = RequestMethod.GET)
     public Result<Page<SysUserOnlineVO>> list(@RequestParam(name="username", required=false) String username,
                                               @RequestParam(name="pageNo", defaultValue="1") Integer pageNo,@RequestParam(name="pageSize", defaultValue="10") Integer pageSize) {
@@ -103,6 +105,7 @@ public class SysUserOnlineController {
     /**
      * 强退用户
      */
+    @RequiresPermissions("system:user:online:forceLogout") //20240806 cfm add
     @RequestMapping(value = "/forceLogout",method = RequestMethod.POST)
     public Result<Object> forceLogout(@RequestBody SysUserOnlineVO online) {
         //用户退出逻辑

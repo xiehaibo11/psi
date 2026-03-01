@@ -444,6 +444,7 @@
       initDictOptionData(dictOptions){
         let obj = { }
         Object.keys(dictOptions).map(k=>{
+          if (dictOptions[k] != null) //20230225 cfm add
           obj[k] = dictOptions[k].filter(item=>{
             return item!=null
           });

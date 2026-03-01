@@ -19,8 +19,13 @@ const getters = {
   },
   sysSafeMode: state => state.user.sysSafeMode,
 
-  //201221108 cfm add
+  //20221108 cfm add
   bizPeriod: state => state.user.bizPeriod,
+  //20221218 cfm add
+  bizOptions: state => state.user.bizOptions,
+  materialList: state => state.user.materialList,
+  //20230217 cfm add
+  unitList: state => state.user.unitList,
 }
 
 export default getters

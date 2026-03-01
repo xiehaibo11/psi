@@ -25,7 +25,7 @@
           </a-col>
           <a-col :xl="5" :lg="6" :md="7" :sm="24">
             <a-form-item label="物料">
-              <j-search-select-tag v-model="queryParam.material_id" :async="true" dict="bas_material,aux_name,id" placeholder="请选择"/>
+              <j-search-select-tag v-model="queryParam.material_id" dict="bas_material,aux_name,id" placeholder="请选择"/>
             </a-form-item>
           </a-col>
 
@@ -67,6 +67,7 @@
         class="j-table-force-nowrap"
         @change="handleTableChange">
       </a-table>
+      <p style="float: right">提示：【月度结账】后才能查看【出入库月汇总】数据！</p>
     </div>
 
   </a-card>
@@ -76,12 +77,13 @@
   import '@/assets/less/TableExpand.less'
   import { JeecgListMixin } from '@/mixins/JeecgListMixin'
   import { ListMixin } from '../../common/mixins/ListMixin'
+  import { CgreportMixin } from '../../common/mixins/CgreportMixin'
   import JYearPicker from '../../common/components/JYearPicker'
   import XEUtils from "xe-utils";
 
   export default {
     name: "StkIoMonthSumWm",
-    mixins: [JeecgListMixin, ListMixin],
+    mixins: [JeecgListMixin, ListMixin, CgreportMixin],
     components: {JYearPicker},
 
     data () {
@@ -92,7 +94,6 @@
           year: '',
           month: ''
         },
-
 
         // 表头
         columns: [
@@ -120,7 +121,7 @@
           {
             title:'仓库',
             align:"left",
-            dataIndex: 'warehouse_id_dictText',
+            dataIndex: 'warehouse_id',
           },
           {
             title:'物料编码',
@@ -128,7 +129,7 @@
           },
           {
             title:'物料名称',
-            dataIndex: 'material_id_dictText',
+            dataIndex: 'material_id',
           },
           {
             title:'规格型号',
@@ -138,7 +139,7 @@
             title:'单位',
             width:80,
             align:"center",
-            dataIndex: 'unit_id_dictText'
+            dataIndex: 'unit_id'
           },
           {
             title:'期初数量',
@@ -199,11 +200,8 @@
           {
           },
         ],
-        url: {
-          list: "/wrapper/cgreport/getData/1575380033020686337",
-          exportXlsUrl: "/online/cgreport/api/exportManySheetXls/1575380033020686337",
-        },
 
+        cgreportId: '1575380033020686337',
         disableMixinCreated: true
       }
     },
@@ -221,7 +219,7 @@
       this.queryParam.year = y.toString();
       this.queryParam.month = m.toString();
 
-      this.loadData();
+      this.initReport();
     },
 
   }

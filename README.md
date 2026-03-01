@@ -3,41 +3,48 @@ Finer 进销存系统
 
 [![AUR](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg)]()
 [![](https://img.shields.io/badge/Author-FINER团队-orange.svg)]()
-[![](https://img.shields.io/badge/version-1.3.5-brightgreen.svg)]()
+[![](https://img.shields.io/badge/version-2.1.0-brightgreen.svg)]()
 
 介绍
 -----------------------------------
-Finer 进销存系统是一款面向中小企业的管理软件，基于十多年的中小企业管理经验，由ERP领域的资深专家分析设计；
-以Jeecg-Boot为基础平台开发，前后端分离架构SpringBoot2.x、Ant Design&Vue、Mybatis-plus、Shiro、JWT；
-具有方便快捷的定制和二次开发能力，在Jeecg-Boot支撑下，利用其强大的代码生成器，无需写任何代码就可以快速实现大多功能，
+Finer 进销存系统是一款面向中小企业的管理软件，基于二十多年的中小企业管理经验，由ERP领域的资深专家分析设计；
+以jeecgboot(Vue2)为基础平台开发，前后端分离架构SpringBoot2.x、Ant Design&Vue、Mybatis-plus、Shiro、JWT；
+具有方便快捷的定制和二次开发能力，在jeecgboot支撑下，利用其强大的代码生成器，无需写任何代码就可以快速实现大多功能，
 也可手工加入复杂的业务逻辑，快速满足中小企业灵活多样的个性化需求！
 
 Finer 进销存的社区版和商业版：
  - 社区版：实现进销存业务的结果管理，直接出入库并自动生成应收应付，进行收付款并自动核销应收应付。
- - 商业版：实现进销存业务的全过程管理，包括申请、询价、报价、比价、订单、出入库、生产出入库、应收应付、收付款、发票登记等的业务全过程，自动跟踪单据的处理情况，实时反映库存、客户欠款和欠供应商款等情况，集成钉钉等第三方审批系统。
+   社区版不包括采购管理、销售管理、扫码出入库、安卓App，详看后面的功能模块说明。
+ - 标准版：实现进销存业务的全过程管理，包括申请、询价、报价、比价、订单、出入库、生产出入库、应收应付、收付款、发票登记等的业务全过程，
+   自动跟踪单据的处理情况，实时反映库存、客户欠款和欠供应商款等情况，集成钉钉等第三方审批系统；
+   支持扫码出入库和库存盘点，在PC浏览器中可接扫描枪扫码，在手机App中可使用相机扫码。
+ - 审批流版：在标准版的基础上，内置了审批流功能，提供从‌流程设计、流程执行、流程监控、数据分析到业务集成‌的全方位能力，
+   可与OA、ERP、CRM、MES等业务系统无缝集成。
 
 交流与支持
 -----------------------------------
 - 微信： cfm999-qq-com
 - 邮件： cfm999@qq.com 
 
-商业版演示
+演示系统
 -----------------------------------
- http://39.106.43.40
- - 用户名：psi
- - 密　码：123456
- - 浏览器：Chrome、Edge、Firefox、360浏览器，不建议IE
- - 说　明：
-   - 演示用户未开放部分在线开发和系统管理功能，如需要全功能，请联系我们；
-   - 为配合演示，需要BPM审批的单据，我们会在钉钉尽快处理，您稍后重新查询单据列表即可看到审批结果。
- 如果我们未能及时处理，或因其它原因未能及时看到审批完成，您可使用独立权限控制的【结束审批】功能代替钉钉审批。
-   - 为方便正常演示，请不要：删除已有的或他人的数据、修改admin密码等影响演示的数据，谢谢！
- - 支　持：有问题可微信或邮件联系我们
- 
+http://117.72.79.154
+- 用户名：psi
+- 密　码：123456
+- 浏览器：Chrome、Edge、Firefox、360浏览器，不建议IE
+- 说　明：
+ - 手机App：在PC端“登录页面”右下角，使用手机浏览器扫码下载。
+ - 演示用户未开放部分在线开发和系统管理功能，如需要全功能或比较独立的环境，请联系我们。
+ - 为方便正常演示，请不要：删除已有的或他人的数据、修改演示用户密码等影响演示的数据。
+ - 有问题可微信或邮件联系我们。
+
+
 功能模块
 -----------------------------------
 ```
-┌─销售管理（商业版）
+┌─App（商业版，目前仅支持安卓）
+│
+├─销售管理（商业版）
 │  ├─销售报价
 │  ├─销售订单
 │  └─销售统计
@@ -55,8 +62,6 @@ Finer 进销存的社区版和商业版：
 │  ├─采购报价
 │  ├─采购比价
 │  ├─采购订单
-│  ├─采购预付申请
-│  ├─采购付款申请
 │  └─采购统计
 │     ├─采购订单执行情况
 │     ├─采购订单汇总
@@ -64,7 +69,7 @@ Finer 进销存的社区版和商业版：
 │     ├─采购订单汇总-业务员
 │     ├─采购订单汇总-供应商
 │     └─采购订单汇总-物料
-├─库存管理
+├─库存管理（（商业版可以扫码出入库和盘点）
 │  ├─生产管理（商业版）
 │  │  ├─生产领料
 │  │  ├─生产退料
@@ -87,7 +92,7 @@ Finer 进销存的社区版和商业版：
 │  │  ├─销售退货入库：自动生成红字销售应收
 │  │  ├─盘亏出库
 │  │  └─其他出库
-│  ├─扫序列码入库（商业版）
+│  ├─扫序列码出库（商业版）
 │  │  ├─销售出库SN：自动生成销售应收
 │  │  ├─销售退货入库SN：自动生成红字销售应收
 │  │  ├─盘亏出库SN
@@ -136,17 +141,19 @@ Finer 进销存的社区版和商业版：
 │  │  ├─其他应付
 │  │  └─应付核销
 │  ├─预付管理
-│  │  ├─采购预付(有申请)
+│  │  ├─采购预付申请
+│  │  ├─采购预付
 │  │  ├─采购预付(无申请)
 │  │  ├─其他预付申请
-│  │  ├─其他预付(无申请)
+│  │  ├─其他预付
 │  │  └─其他预付(无申请)
 │  ├─付款管理
+│  │  ├─采购付款申请
+│  │  ├─采购付款：自动生成应付核销
 │  │  ├─采购付款(无申请)：自动生成应付核销
-│  │  ├─采购付款(有申请)：自动生成应付核销
 │  │  ├─采购退货退款：自动生成应付核销
 │  │  ├─其他付款申请
-│  │  ├─其他付款(有申请)
+│  │  ├─其他付款
 │  │  └─其他付款(无申请)
 │  └─应付统计
 │     ├─应付对账
@@ -245,18 +252,18 @@ Finer 进销存的社区版和商业版：
 技术架构
 -----------------------------------
 #### 开发环境
-- 语言：Java 8+ (小于17)
+- 语言：Java 8
 - IDE(JAVA)： IDEA (必须安装lombok插件 )
 - IDE(前端)： Vscode、WebStorm、IDEA
 - 依赖管理：Maven
 - 缓存：Redis
-- 数据库脚本：MySQL5.7（其他数据库，[需要自己转](https://my.oschina.net/jeecg/blog/4905722)）
+- 数据库脚本：MySQL5.7
 
 #### 后端
 - 基础框架：Spring Boot 2.6.6
 - 微服务框架： Spring Cloud Alibaba 2021.0.1.0
 - 持久层框架：MybatisPlus 3.5.1
-- 报表工具： JimuReport 1.5.2
+- 报表工具： JimuReport 1.6.6
 - 安全框架：Apache Shiro 1.8.0，Jwt 3.11.0
 - 微服务技术栈：Spring Cloud Alibaba、Nacos、Gateway、Sentinel、Skywalking
 - 数据库连接池：阿里巴巴Druid 1.1.22
@@ -266,7 +273,7 @@ Finer 进销存的社区版和商业版：
 #### 前端
 - 基础框架：[ant-design-vue](https://github.com/vueComponent/ant-design-vue) - Ant Design Of Vue 实现
 - JavaScript框架：Vue2
-- node 12.13
+- node 12
 - yarn
 - @vue/cli 3.2.1
 - [vue-cropper](https://github.com/xyxiao001/vue-cropper) - 头像裁剪组件
@@ -283,7 +290,7 @@ Finer 进销存的社区版和商业版：
 ----
 ### 前端环境
 #### 安装node.js
-如果未安装Node.js 12.13，请安装它。
+安装node.js 12
 ```bash
 # 验证
 # 出现相应npm版本即可
@@ -302,16 +309,14 @@ yarn -v
 
 #### 配置镜像
 ```bash
-npm config set registry https://registry.npm.taobao.org --global
-npm config set disturl https://npm.taobao.org/dist --global
+npm config set registry https://registry.npmmirror.com --global
+npm config set disturl https://registry.npmmirror.com/dist --global
 
-yarn config set registry https://registry.npm.taobao.org --global
-yarn config set disturl https://npm.taobao.org/dist --global
+yarn config set registry https://registry.npmmirror.com --global
+yarn config set disturl https://registry.npmmirror.com/dist --global
 ```
 
-### JAVA开发环境
-- node-v12.16.0-x64.msi
-- yarn-1.21.1.msi
+### 后端环境
 - ideaIU-2019.2.3.exe
 - jdk-8u191-windows-x64.exe
 - apache-maven-3.5.4.zip
@@ -341,12 +346,6 @@ yarn run build
 ```bash
 yarn run lint
 ```
-
-其他说明
-----
-jeecg-Boot技术官网： http://www.jeecg.com
-
-jeecg-Boot开发文档： http://doc.jeecg.com
 
 捐赠
 ----

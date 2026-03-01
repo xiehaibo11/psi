@@ -24,10 +24,6 @@
     name: 'BasCustomerModal',
     components: {BasCustomerForm},
     mixins: [DrawerMixin],
-
-    data () {
-      return { width:800}
-    },
   }
 </script>
 

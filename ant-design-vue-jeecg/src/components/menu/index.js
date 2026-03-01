@@ -1,10 +1,12 @@
 import Menu from 'ant-design-vue/es/menu'
 import Icon from 'ant-design-vue/es/icon'
+import {mixinDevice} from '@/utils/mixin.js' // 20240323 cfm add
 
 const { Item, SubMenu } = Menu
 
 export default {
   name: 'SMenu',
+  mixins: [mixinDevice],// 20240323 cfm add
   props: {
     menu: {
       type: Array,
@@ -130,7 +132,9 @@ export default {
 
     // render
     renderItem (menu) {
-      if (!menu.hidden) {
+      // 20240323 cfm modi
+      // if (!menu.hidden) {
+      if (!menu.hidden && (menu.forDesktop && this.isDesktop() || menu.forMobile && this.isMobile())) {
         return menu.children && !menu.alwaysShow ? this.renderSubMenu(menu) : this.renderMenuItem(menu)
       }
       return null
@@ -195,8 +199,12 @@ export default {
     const props = {
       mode: mode,
       theme: theme,
-      openKeys: this.openKeys
+      //20250409 cfm del
+      // openKeys: this.openKeys
     }
+    //20250409 cfm add
+    if (mode !== 'horizontal') props.openKeys = this.openKeys;
+
     const on = {
       select: obj => {
         this.selectedKeys = obj.selectedKeys

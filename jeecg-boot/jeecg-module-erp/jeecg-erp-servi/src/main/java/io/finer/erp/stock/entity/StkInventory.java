@@ -36,7 +36,7 @@ public class StkInventory implements Serializable {
     private java.lang.String id;
 	/**仓库*/
 	@Excel(name = "仓库", width = 15, dictTable = "bas_warehouse", dicText = "name", dicCode = "id")
-	@Dict(dictTable = "bas_warehouse", dicText = "name", dicCode = "id")
+	@Dict(dictTable = "bas_warehouse", dicText = "aux_name", dicCode = "id")
     @ApiModelProperty(value = "仓库")
     private java.lang.String warehouseId;
 	/**物料*/

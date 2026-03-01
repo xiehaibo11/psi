@@ -2,6 +2,7 @@ package org.jeecg.modules.oss.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.system.query.QueryGenerator;
@@ -45,8 +46,8 @@ public class OssFileController {
 	}
 
 	@ResponseBody
+	@RequiresPermissions("system:ossFile:upload") //20240806 cfm add
 	@PostMapping("/upload")
-	//@RequiresRoles("admin")
 	public Result upload(@RequestParam("file") MultipartFile multipartFile) {
 		Result result = new Result();
 		try {
@@ -61,6 +62,7 @@ public class OssFileController {
 	}
 
 	@ResponseBody
+	@RequiresPermissions("system:ossFile:delete") //20240806 cfm add
 	@DeleteMapping("/delete")
 	public Result delete(@RequestParam(name = "id") String id) {
 		Result result = new Result();

@@ -19,7 +19,7 @@
           </a-col>
           <a-col :xl="5" :lg="6" :md="7" :sm="24">
             <a-form-item label="供应商">
-              <j-search-select-tag v-model="queryParam.supplier_id" :async="true" dict="bas_supplier,aux_name,id" placeholder="请选择"/>
+              <j-search-select-tag v-model="queryParam.supplier_id" dict="bas_supplier,aux_name,id" placeholder="请选择"/>
             </a-form-item>
           </a-col>
 
@@ -61,6 +61,7 @@
         class="j-table-force-nowrap"
         @change="handleTableChange">
       </a-table>
+      <p style="float: right">提示：【月度结账】后才能查看【应付月汇总】数据！</p>
     </div>
 
   </a-card>
@@ -70,12 +71,13 @@
   import '@/assets/less/TableExpand.less'
   import { JeecgListMixin } from '@/mixins/JeecgListMixin'
   import { ListMixin } from '../../common/mixins/ListMixin'
+  import { CgreportMixin } from '../../common/mixins/CgreportMixin'
   import JYearPicker from '../../common/components/JYearPicker'
   import XEUtils from "xe-utils";
 
   export default {
     name: "FinPayableMonthSum",
-    mixins: [JeecgListMixin, ListMixin],
+    mixins: [JeecgListMixin, ListMixin, CgreportMixin],
     components: {JYearPicker},
 
     data () {
@@ -148,11 +150,8 @@
           {
           },
         ],
-        url: {
-          list: "/wrapper/cgreport/getData/1578658883720790018",
-          exportXlsUrl: "/online/cgreport/api/exportManySheetXls/1578658883720790018",
-        },
 
+        cgreportId: '1578658883720790018',
         disableMixinCreated: true
       }
     },
@@ -173,7 +172,7 @@
       this.queryParam.year = y.toString();
       this.queryParam.month = m.toString();
 
-      this.loadData();
+      this.initReport();
     },
 
   }

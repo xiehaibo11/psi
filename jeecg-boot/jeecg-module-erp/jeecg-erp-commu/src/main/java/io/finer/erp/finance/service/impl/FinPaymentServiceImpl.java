@@ -7,7 +7,6 @@ import io.finer.erp.finance.mapper.FinPaymentMapper;
 import io.finer.erp.finance.service.IFinPayableCheckService;
 import io.finer.erp.finance.service.IFinPaymentReqService;
 import io.finer.erp.finance.service.IFinPaymentService;
-import io.finer.erp.purchase.service.IPurOrderService;
 import org.apache.commons.lang3.StringUtils;
 import org.jeecg.common.exception.JeecgBootException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,9 +31,6 @@ public class FinPaymentServiceImpl
 		extends BillWithEntryServiceImpl<FinPaymentMapper, FinPayment, FinPaymentEntryMapper, FinPaymentEntry>
 		implements IFinPaymentService {
 
-	@Lazy
-	@Autowired
-	private IPurOrderService purOrderService;
 	@Autowired
 	private IFinPaymentReqService finPaymentReqService;
 
@@ -81,16 +77,6 @@ public class FinPaymentServiceImpl
 		//回写{如果明细源单为付款申请}：采购预付（有申请）、采购付款(有申请）
 		finPaymentReqService.paymentWriteBack(bill, entryList, reverse);
 
-		//回写{如果明细源单为采购订单}：采购预付（无申请）
-		if (bill.getPaymentType().startsWith("201")) { //201* 采购预付款
-			for(FinPaymentEntry entry: entryList) {
-				//如果源单不为PurOrder，不用获取purOrderService
-				if (!StringUtils.isEmpty(entry.getSrcBillType()) && entry.getSrcBillType().startsWith("PurOrder")) {
-					purOrderService.paymentWriteBackPrepaymentBal(entryList, reverse);
-					break;
-				}
-			}
-		}
 	}
 
 	@Override
@@ -169,19 +155,10 @@ public class FinPaymentServiceImpl
 			this.refreshExecuteStage(bill);
 		}
 
-		//向前回调：预付款核销，需回写采购订单的预付余额
+		//向前回调
 		if (checkEntryList1.size() > 0) {
 			//{采购预付款明细的源单为采购预付申请单}
 			finPaymentReqService.payableCheckWriteBackPrepaymentBal(checkEntryList1, reverse);
-
-			//{采购预付款明细的源单为采购订单}
-			for(FinPayableCheckEntry entry: checkEntryList1) {
-				//如果源单不为PurOrder，不用获取purOrderService
-				if (!StringUtils.isEmpty(entry.getSrcBillType()) && entry.getSrcBillType().startsWith("PurOrder")) {
-					purOrderService.payableCheckWriteBackPrepaymentBal(checkEntryList1, reverse);
-					break;
-				}
-			}
 		}
 	}
 }

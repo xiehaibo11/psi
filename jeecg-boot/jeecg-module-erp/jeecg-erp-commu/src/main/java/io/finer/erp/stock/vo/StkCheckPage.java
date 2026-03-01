@@ -2,6 +2,7 @@ package io.finer.erp.stock.vo;
 
 import io.finer.erp.common.vo.BillPage;
 import io.finer.erp.stock.entity.StkCheckEntry;
+import io.finer.erp.stock.entity.StkCheckSingle;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -41,4 +42,15 @@ public class StkCheckPage extends BillPage {
 	@ExcelCollection(name="明细")
 	@ApiModelProperty(value = "明细")
 	private List<StkCheckEntry> stkCheckEntryList;
+
+	//20231030 cfm add
+	/**是否有个体明细*/
+	@Excel(name = "是否有个体明细", width = 15, dicCode = "yn")
+	@Dict(dicCode = "yn")
+	@ApiModelProperty(value = "是否有个体明细")
+	private java.lang.Integer hasSingle;
+
+	@ExcelCollection(name="个体")
+	@ApiModelProperty(value = "个体")
+	private List<StkCheckSingle> stkCheckSingleList;
 }

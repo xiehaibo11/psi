@@ -13,6 +13,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.aspect.annotation.AutoLog;
 import org.jeecg.common.exception.JeecgBootException;
@@ -82,7 +83,7 @@ public class FinPaymentController {
 		 QueryWrapper<FinPayment> queryWrapper = QueryGenerator.initQueryWrapper(finPayment, req.getParameterMap());
 		 queryWrapper.eq("is_effective", 1);
 		 queryWrapper.eq("is_voided", 0);
-		 queryWrapper.apply("amt - checked_amt > 0");
+		 queryWrapper.apply("amt - checked_amt != 0"); //20231217 cfm modi: > 0 改成 != 0
 		 Page<FinPayment> page = new Page<FinPayment>(pageNo, pageSize);
 		 IPage<FinPayment> pageList = finPaymentService.page(page, queryWrapper);
 		 return Result.OK(pageList);
@@ -127,6 +128,7 @@ public class FinPaymentController {
 	 */
 	@AutoLog(value = "付款单-新增")
 	@ApiOperation(value="付款单-新增", notes="付款单-新增")
+	@RequiresPermissions("finance:payment:add") //20240806 cfm add
 	@PostMapping(value = "/add/{action}")
 	public Result<?> add(@RequestBody FinPaymentPage finPaymentPage, @PathVariable String action) {
 		FinPayment bill = new FinPayment();
@@ -152,6 +154,7 @@ public class FinPaymentController {
 	 */
 	@AutoLog(value = "付款单-编辑")
 	@ApiOperation(value="付款单-编辑", notes="付款单-编辑")
+	@RequiresPermissions("finance:payment:edit") //20240806 cfm add
 	@PutMapping(value = "/edit/{action}")
 	public Result<?> edit(@RequestBody FinPaymentPage finPaymentPage, @PathVariable String action) {
 		FinPayment bill = new FinPayment();
@@ -177,6 +180,7 @@ public class FinPaymentController {
 	 */
 	@AutoLog(value = "付款单-通过id删除")
 	@ApiOperation(value="付款单-通过id删除", notes="付款单-通过id删除")
+	@RequiresPermissions("finance:payment:delete") //20240806 cfm add
 	@DeleteMapping(value = "/delete")
 	public Result<?> delete(@RequestParam(name="id",required=true) String id) {
 		try {
@@ -195,6 +199,7 @@ public class FinPaymentController {
 	 */
 	@AutoLog(value = "付款单-批量删除")
 	@ApiOperation(value="付款单-批量删除", notes="付款单-批量删除")
+	@RequiresPermissions("finance:payment:delete") //20240806 cfm add
 	@DeleteMapping(value = "/deleteBatch")
 	public Result<?> deleteBatch(@RequestParam(name="ids",required=true) String ids) {
 		try {
@@ -207,6 +212,7 @@ public class FinPaymentController {
 
 	 @AutoLog(value = "付款单-审核")
 	 @ApiOperation(value="付款单-审核", notes="付款单-审核")
+	 @RequiresPermissions("finance:payment:check") //20240806 cfm add
 	 @PutMapping(value = "/check")
 	 public Result<?> check(@RequestBody JSONObject json) {
 		 try {
@@ -233,6 +239,7 @@ public class FinPaymentController {
 
 	 @AutoLog(value = "付款单-结束审批")
 	 @ApiOperation(value="付款单-结束审批", notes="付款单-结束审批")
+	 @RequiresPermissions("finance:payment:bpm:end") //20240806 cfm add
 	 @PutMapping(value = "/bpm/end")
 	 public Result<?> bpmInstanceManualEnd(@RequestBody JSONObject json) {
 		 try {
@@ -247,6 +254,7 @@ public class FinPaymentController {
 
 	 @AutoLog(value = "付款单-执行")
 	 @ApiOperation(value="付款单-执行", notes="付款单-执行")
+	 @RequiresPermissions("finance:payment:execute") //20240806 cfm add
 	 @PutMapping(value = "/execute")
 	 public Result<?> execute(@RequestBody JSONObject json) {
 		 try {
@@ -259,6 +267,7 @@ public class FinPaymentController {
 
 	 @AutoLog(value = "付款单-关闭")
 	 @ApiOperation(value="付款单-关闭", notes="付款单-关闭")
+	 @RequiresPermissions("finance:payment:close") //20240806 cfm add
 	 @PutMapping(value = "/close")
 	 public Result<?> close(@RequestBody JSONObject json) {
 		 try {
@@ -271,6 +280,7 @@ public class FinPaymentController {
 
 	 @AutoLog(value = "付款单--反关闭")
 	 @ApiOperation(value="付款单--反关闭", notes="付款单--反关闭")
+	 @RequiresPermissions("finance:payment:unclose") //20240806 cfm add
 	 @PutMapping(value = "/unclose")
 	 public Result<?> unclose(@RequestBody JSONObject json) {
 		 try {
@@ -289,6 +299,7 @@ public class FinPaymentController {
 	  */
 	 @AutoLog(value = "付款单-批量关闭")
 	 @ApiOperation(value="付款单-批量关闭", notes="付款单-批量关闭")
+	 @RequiresPermissions("finance:payment:close") //20240806 cfm add
 	 @PutMapping(value = "/closeBatch")
 	 public Result<String> closeBatch(@RequestBody JSONObject json) {
 		 try {
@@ -307,6 +318,7 @@ public class FinPaymentController {
 	  */
 	 @AutoLog(value = "付款单-批量反关闭")
 	 @ApiOperation(value="付款单-批量反关闭", notes="付款单-批量反关闭")
+	 @RequiresPermissions("finance:payment:unclose") //20240806 cfm add
 	 @PutMapping(value = "/uncloseBatch")
 	 public Result<String> uncloseBatch(@RequestBody JSONObject json) {
 		 try {
@@ -319,6 +331,7 @@ public class FinPaymentController {
 
 	 @AutoLog(value = "付款单-作废")
 	 @ApiOperation(value="付款单-作废", notes="付款单-作废")
+	 @RequiresPermissions("finance:payment:void") //20240806 cfm add
 	 @PutMapping(value = "/void")
 	 public Result<?> voidBill(@RequestBody JSONObject json) {
 		 try {
@@ -336,6 +349,7 @@ public class FinPaymentController {
     * @param finPayment
     */
 	@AutoLog(value = "导出为excel")
+	@RequiresPermissions("finance:payment:export") //20240806 cfm add
     @RequestMapping(value =  {"/exportXls", "/exportXls/{paymentType}"})
     public ModelAndView exportXls(HttpServletRequest request, FinPayment finPayment) {
       // Step.1 组装查询条件查询数据
@@ -380,6 +394,7 @@ public class FinPaymentController {
     * @return
     */
 	@AutoLog(value = "通过excel导入数据")
+	@RequiresPermissions("finance:payment:import") //20240806 cfm add
     @RequestMapping(value = {"/importExcel", "/importExcel/{paymentType}"}, method = RequestMethod.POST)
     public Result<?> importExcel(HttpServletRequest request, @PathVariable(required = false) String paymentType) {
       MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;

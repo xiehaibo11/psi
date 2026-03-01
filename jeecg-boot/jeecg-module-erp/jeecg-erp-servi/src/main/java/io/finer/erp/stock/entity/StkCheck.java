@@ -35,4 +35,11 @@ public class StkCheck extends Bill {
     @Dict(dictTable = "sys_user", dicText = "realname", dicCode = "username")
     @ApiModelProperty(value = "盘点人")
     private java.lang.String checker;
+
+	//20231030 cfm add
+    /**是否有个体明细*/
+    @Excel(name = "是否有个体明细", width = 15, dicCode = "yn")
+    @Dict(dicCode = "yn")
+    @ApiModelProperty(value = "是否有个体明细")
+    private java.lang.Integer hasSingle;
 }

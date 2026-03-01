@@ -12,6 +12,7 @@ export const JVxeTableModelMixin = {
       labelCol: {
         xs: { span: 24 },
         sm: { span: 6 }
+
       },
       wrapperCol: {
         xs: { span: 24 },
@@ -96,8 +97,11 @@ export const JVxeTableModelMixin = {
             dataSource = result.records
           }
         }
-        tab.dataSource = dataSource
-        typeof success === 'function' ? success(res) : ''
+        //20230217 cfm modi for JVxeTable字典列有时不能翻译: 增加setTimeOut，以使字典就绪
+        setTimeout(() => {
+          tab.dataSource = dataSource
+          typeof success === 'function' ? success(res) : ''
+        }, 500)
       }).finally(() => {
         tab.loading = false
       })

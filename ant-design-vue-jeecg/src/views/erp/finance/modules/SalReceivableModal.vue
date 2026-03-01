@@ -5,23 +5,25 @@
     :visible="visible"
     :maskClosable="false"
     :keyboard="false"
-    draggable
     switchFullscreen
     :okButtonProps="{ class:{'jee-hidden': disableSubmit} }"
     @cancel="handleCancel">
 
     <template slot="footer">
-      <!--只有一个<a-button>不能替换“取消”和“确定”？-->
-      <a-button v-if="disableSubmit" key="print" @click="handlePrint" style="margin-right: 48px">打印</a-button>
-      <a-button v-if="action!=='detail'" key="cancel" @click="handleCancel">取消</a-button>
-      <a-button v-if="action==='detail'" key="cancel"  @click="handleCancel" type="primary">关闭</a-button>
+      <a-button v-if="disableSubmit" :disabled="isDisabledAuth('SalReceivable:print')" key="print" @click="handlePrint" style="margin-right: 48px">打印</a-button>
+      <a-button @click="handleCancel" :type="action==='detail'?'primary':''">{{action==='detail'?'关闭':'取消'}}</a-button>
+
+      <!-- 20240815 cfm add -->
+      <a-button v-if="action==='check'" key="check" @click="handleCheck" type="primary">审核</a-button>
+      <a-button v-if="action==='ebpm'" key="ebpm" @click="handleEbpm" type="primary">结束审批</a-button>
+      <a-button v-if="action==='execute'" key="execute" @click="handleExecute" type="primary">执行</a-button>
     </template>
     <sal-receivable-form ref="realForm" @ok="submitCallback" :disabled="disableSubmit"/>
   </j-modal>
 </template>
 
 <script>
-  import { BillModalMixin } from '../../common/mixins/BillModalMixin';
+  import { BillModalMixin } from '../../common/mixins/bill/BillModalMixin';
   import SalReceivableForm from "./SalReceivableForm";
 
   export default {
@@ -29,14 +31,5 @@
     mixins: [ BillModalMixin ],
     components: { SalReceivableForm },
 
-    data() {
-      return {
-        width:1300,
-      }
-    },
-
   }
 </script>
-
-<style scoped>
-</style>

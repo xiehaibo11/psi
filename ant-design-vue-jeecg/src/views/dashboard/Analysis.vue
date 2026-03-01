@@ -2,11 +2,16 @@
   <div>
     <a-row :gutter="[8, 8]">
       <a-col :xl="12" :lg="12" :md="24" :sm="24" :xs="24">
-        <a-card title="概况" :loading="summary.loading" :bordered="false" :body-style="{ padding: '6' }">
-          <template #extra><a @click="loadData(summary)"><a-icon type="sync" /></a></template>
+        <a-card title="业务概况" :loading="summary.loading" :bordered="false" >
+          <template #extra>
+            <a-button type="link" size="small" @click="loadReport(summary)" icon="reload"/>
+          </template>
           <a-row>
             <template v-for="rec in summary.dataSource">
-              <a-col :span="rec.width">
+              <a-col v-if="isMobile()" :span="24">
+                <head-info :title="rec.label" :content="formatAmt(rec.value)" :center="true" style="margin-bottom: 16px"/>
+              </a-col>
+              <a-col v-else :span="rec.width">
                 <head-info :title="rec.label" :content="formatAmt(rec.value)" :center="true" />
               </a-col>
             </template>
@@ -14,8 +19,10 @@
         </a-card>
       </a-col>
       <a-col :xl="6" :lg="6" :md="12" :sm="24" :xs="24">
-        <a-card title="客户" :loading="customer.loading" :bordered="false" :body-style="{ padding: '6' }">
-          <template #extra><a @click="loadData(customer)"><a-icon type="sync" /></a></template>
+        <a-card title="客户" :loading="customer.loading" :bordered="false" >
+          <template #extra>
+            <a-button type="link" size="small" @click="loadReport(customer)" icon="reload"/>
+          </template>
           <a-row>
             <template v-for="rec in customer.dataSource">
               <a-col :span="rec.width">
@@ -26,8 +33,10 @@
         </a-card>
       </a-col>
       <a-col :xl="6" :lg="6" :md="12" :sm="24" :xs="24">
-        <a-card title="供应商" :loading="supplier.loading" :bordered="false" :body-style="{ padding: '6' }">
-          <template #extra><a @click="loadData(supplier)"><a-icon type="sync" /></a></template>
+        <a-card title="供应商" :loading="supplier.loading" :bordered="false" >
+          <template #extra>
+            <a-button type="link" size="small" @click="loadReport(supplier)" icon="reload"/>
+          </template>
           <a-row>
             <template v-for="rec in supplier.dataSource">
               <a-col :span="rec.width">
@@ -43,8 +52,10 @@
       <a-col :xl="12" :lg="24" :md="24" :sm="24" :xs="24">
         <a-row :gutter="[8, 8]">
           <a-col span="24">
-            <a-card title="销售" :loading="sale.loading" :bordered="false" :body-style="{ padding: '0' }">
-              <template #extra><a @click="loadData(sale)"><a-icon type="sync" /></a></template>
+            <a-card title="销售" :loading="sale.loading" :bordered="false" :body-style="{padding: 0}">
+              <template #extra>
+                <a-button type="link" size="small" @click="loadReport(sale)" icon="reload"/>
+              </template>
               <a-row>
                 <template v-for="rec in sale.dataSource">
                   <a-col :xl="12" :lg="12" :md="12" :sm="24" :xs="24">
@@ -70,8 +81,10 @@
           </a-col>
 
           <a-col span="24">
-            <a-card title="采购" :loading="purchase.loading" :bordered="false" :body-style="{ padding: '0' }">
-              <template #extra><a @click="loadData(sale)"><a-icon type="sync" /></a></template>
+            <a-card title="采购" :loading="purchase.loading" :bordered="false" :body-style="{padding: 0}">
+              <template #extra>
+                <a-button type="link" size="small" @click="loadReport(purchase)" icon="reload"/>
+              </template>
               <a-row>
                 <template v-for="rec in purchase.dataSource">
                   <a-col :xl="12" :lg="12" :md="12" :sm="24" :xs="24">
@@ -102,26 +115,34 @@
         <a-row :gutter="[8, 8]">
           <a-col :span="24">
             <a-card title="销售金额" :loading="saleAmt.loading" :bordered="false" :body-style="{padding: '0'}">
-              <template #extra><a @click="loadData(saleAmt)"><a-icon type="sync" /></a></template>
-              <bar :dataSource="saleAmt.dataSource" :height="136" style="padding: 0 8px 0 8px"/>
+              <template #extra>
+                <a-button type="link" size="small" @click="loadReport(saleAmt)" icon="reload"/>
+              </template>
+              <bar :dataSource="saleAmt.dataSource" :height="124" style="padding: 0 8px 0 8px"/>
             </a-card>
           </a-col>
           <a-col :span="24">
             <a-card title="毛利润" :loading="saleProfit.loading" :bordered="false" :body-style="{padding: '0'}">
-              <template #extra><a @click="loadData(saleProfit)"><a-icon type="sync" /></a></template>
-              <bar :dataSource="saleProfit.dataSource" :height="134" style="padding: 0 8px 0 8px"/>
+              <template #extra>
+                <a-button type="link" size="small" @click="loadReport(saleProfit)" icon="reload"/>
+              </template>
+              <bar :dataSource="saleProfit.dataSource" :height="124" style="padding: 0 8px 0 8px"/>
             </a-card>
           </a-col>
           <a-col :span="24">
             <a-card title="采购金额" :loading="purchaseAmt.loading" :bordered="false" :body-style="{padding: '0'}">
-              <template #extra><a @click="loadData(purchaseAmt)"><a-icon type="sync" /></a></template>
-              <bar :dataSource="purchaseAmt.dataSource":height="134" style="padding: 0 8px 0 8px"/>
+              <template #extra>
+                <a-button type="link" size="small" @click="loadReport(purchaseAmt)" icon="reload"/>
+              </template>
+              <bar :dataSource="purchaseAmt.dataSource":height="124" style="padding: 0 8px 0 8px"/>
             </a-card>
           </a-col>
           <a-col :span="24">
-            <a-card title="库存结存金额" :loading="stockBalCost.loading" :bordered="false" :body-style="{padding: '0'}">
-              <template #extra><a @click="loadData(stockBalCost)"><a-icon type="sync" /></a></template>
-              <bar :dataSource="stockBalCost.dataSource" :height="136" style="padding: 0 8px 0 8px"/>
+            <a-card title="库存月度结存金额" :loading="stockBalCost.loading" :bordered="false" :body-style="{padding: '0'}">
+              <template #extra>
+                <a-button type="link" size="small" @click="loadReport(stockBalCost)" icon="reload"/>
+              </template>
+              <bar :dataSource="stockBalCost.dataSource" :height="124" style="padding: 0 8px 0 8px"/>
             </a-card>
           </a-col>
         </a-row>
@@ -130,12 +151,12 @@
       <a-col :xl="6" :lg="12" :md="12" :sm="24" :xs="24">
         <a-row :gutter="[8, 8]">
           <a-col :span="24">
-            <a-card title="处理中主要单据" :loading="doingBill.loading" :bordered="false" :body-style="{ padding: '0' }">
-              <template #extra><a @click="loadData(doingBill)"><a-icon type="sync" /></a></template>
+            <a-card title="处理中主要单据" :loading="doingBill.loading" :bordered="false" :body-style="{padding: 0}" style="min-height: 824px">
+              <template #extra>
+                <a-button type="link" size="small" @click="loadReport(doingBill)" icon="reload"/>
+              </template>
               <a-table
-                ref="table"
-                size="middle"
-                style="height:832px"
+                size="small"
                 :bordered="false"
                 rowKey="name"
                 :scroll="{x: true}"
@@ -148,79 +169,119 @@
         </a-row>
       </a-col>
     </a-row>
-
-   </div>
+  </div>
 </template>
 
 <script>
   import Bar from '@/components/chart/Bar'
   import HeadInfo from '@/components/tools/HeadInfo'
-  import Radar from '@/components/chart/Radar'
-  import '@/assets/less/TableExpand.less'
+  import { getAction} from '@/api/manage'
+  import { mixinDevice } from '@/utils/mixin.js'
   import XEUtils from "xe-utils";
-
-  const barData = []
-  for (let i = 0; i < 12; i += 1) {
-    barData.push({
-      x: `${i + 1}月`,
-      y: Math.floor(Math.random() * 1000) + 200
-    })
-  }
 
   export default {
     name: "Analysis",
-    components: { HeadInfo, Radar,Bar },
+    mixins: [ mixinDevice ],
+    components: {HeadInfo, Bar},
+
     data() {
       return {
+        //20260203 cfm modi：下面各部分的 rowCount 改为 ipagination
         summary: {
-          url: '/wrapper/cgreport/getData/1579848144423751681',
+          cgreportId: '1579848144423751681',
           loading: false,
+          queryParam: {},
+          ipagination: { current: 1, pageSize: 3, total: 0 },
+          isorter: { column: null, order: null },
+          dictOptions: {},
           dataSource: [],
         },
+
         customer: {
-          url: '/wrapper/cgreport/getData/1580740609854935042',
+          cgreportId: '1580740609854935042',
           loading: false,
+          queryParam: {},
+          ipagination: { current: 1, pageSize: 4, total: 0 },
+          isorter: { column: null, order: null },
+          dictOptions: {},
           dataSource: [],
         },
+
         supplier: {
-          url: '/wrapper/cgreport/getData/1580740795561938946',
+          cgreportId: '1580740795561938946',
           loading: false,
+          queryParam: {},
+          ipagination: { current: 1, pageSize: 4, total: 0 },
+          isorter: { column: null, order: null },
+          dictOptions: {},
           dataSource: [],
         },
+
         sale: {
-          url: '/wrapper/cgreport/getData/1579758928603910145',
+          cgreportId: '1579758928603910145',
           loading: false,
+          queryParam: {},
+          ipagination: { current: 1, pageSize: 8, total: 0 },
+          isorter: { column: null, order: null },
+          dictOptions: {},
           dataSource: [],
         },
+
         purchase: {
-          url: '/wrapper/cgreport/getData/1579760837406494722',
+          cgreportId: '1579760837406494722',
           loading: false,
+          queryParam: {},
+          ipagination: { current: 1, pageSize: 8, total: 0 },
+          isorter: { column: null, order: null },
+          dictOptions: {},
           dataSource: [],
         },
+
         saleAmt: {
-          url: '/wrapper/cgreport/getData/1580915783778701314',
+          cgreportId: '1580915783778701314',
           loading: false,
+          queryParam: {},
+          ipagination: { current: 1, pageSize: 12, total: 0 },
+          isorter: { column: null, order: null },
+          dictOptions: {},
           dataSource: [],
         },
+
         saleProfit: {
-          url: '/wrapper/cgreport/getData/1580918054310645761',
+          cgreportId: '1580918054310645761',
           loading: false,
+          queryParam: {},
+          ipagination: { current: 1, pageSize: 12, total: 0 },
+          isorter: { column: null, order: null },
+          dictOptions: {},
           dataSource: [],
         },
+
         purchaseAmt: {
-          url: '/wrapper/cgreport/getData/1580918550912045057',
+          cgreportId: '1580918550912045057',
           loading: false,
+          ipagination: { current: 1, pageSize: 12, total: 0 },
+          isorter: { column: null, order: null },
+          dictOptions: {},
           dataSource: [],
         },
+
         stockBalCost: {
-          url: '/wrapper/cgreport/getData/1580923428333948929',
+          cgreportId: '1580923428333948929',
           loading: false,
+          ipagination: { current: 1, pageSize: 12, total: 0 },
+          isorter: { column: null, order: null },
+          dictOptions: {},
           dataSource: [],
         },
 
         doingBill: {
-          url: '/wrapper/cgreport/getData/1582194686237454338?pageSize=100',
+          cgreportId: '1582194686237454338',
           loading: false,
+          ipagination: { current: 1, pageSize: 100, total: 0 },
+          isorter: { column: null, order: null },
+
+          dictOptions: {},
           dataSource: [{class:'销售订单'},{class:'采购订单'},{class:'出库单'},{class:'入库单'}],
           columns: [
             {
@@ -250,24 +311,44 @@
     },
 
     created() {
-      this.loadData(this.summary);
-      this.loadData(this.customer);
-      this.loadData(this.supplier);
-      this.loadData(this.sale);
-      this.loadData(this.purchase);
-      this.loadData(this.saleAmt);
-      this.loadData(this.saleProfit);
-      this.loadData(this.purchaseAmt);
-      this.loadData(this.stockBalCost);
-      this.loadData(this.doingBill);
+      this.loadReport(this.summary);
+      this.loadReport(this.customer);
+      this.loadReport(this.supplier);
+      this.loadReport(this.sale);
+      this.loadReport(this.purchase);
+      this.loadReport(this.saleAmt);
+      this.loadReport(this.saleProfit);
+      this.loadReport(this.purchaseAmt);
+      this.loadReport(this.stockBalCost);
+      this.loadReport(this.doingBill);
     },
 
     methods: {
-      loadData(data) {
-        data.loading = true;
-        this.$http.get(data.url)
-          .then(res => data.dataSource =  res.result.records)
-          .finally(() => data.loading = false);
+      //20260203 cfm modi
+      loadReport(def, success) {
+        let param = Object.assign({}, def.queryParam, def.isorter);
+        param.pageNo = def.ipagination.current;
+        param.pageSize = def.ipagination.pageSize;
+
+        def.loading = true;
+        getAction('/online/cgreport/api/getColumnsAndData/' + def.cgreportId, param).then(res => {
+          if (!res.success) return;
+
+          if (!!def.columns) {
+            let { columns, dictOptions } = res.result;
+            def.dictOptions = dictOptions || {};
+            for(let i = 0; i < columns.length; i++){
+              if(columns[i].customRender){
+                let fieldName = columns[i].customRender;
+                let column = def.columns.find(c => c.dataIndex === fieldName);
+                if (!!column) column.customRender = (t => t ? filterMultiDictText(def.dictOptions[fieldName], t + '') : t);
+              }
+            }
+          }
+          def.dataSource =  res.result.data.records;
+
+          typeof success === 'function' ? success() : ''
+        }).finally(() => def.loading = false);
       },
 
       formatAmt(amt) {
@@ -282,4 +363,7 @@
 </script>
 
 <style lang="less" scoped>
+  /deep/ .ant-card-head {
+    height: 52px;
+  }
 </style>

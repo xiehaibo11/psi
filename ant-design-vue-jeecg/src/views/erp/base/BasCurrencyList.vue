@@ -31,10 +31,10 @@
 
     <!-- 操作按钮区域 -->
     <div class="table-operator">
-      <a-button type="link" @click="myHandleAdd" icon="plus">新增</a-button>
-      <a-button type="link" icon="download" @click="handleExportXls('物料')">导出</a-button>
+      <a-button :disabled="isDisabledAuth('BasCurrency:add')" @click="myHandleAdd" type="link" icon="plus">新增</a-button>
+      <a-button :disabled="isDisabledAuth('BasCurrency:add')" type="link" icon="download" @click="handleExportXls('物料')">导出</a-button>
       <a-upload name="file" :showUploadList="false" :multiple="false" :headers="tokenHeader" :action="importExcelUrl" @change="handleImportExcel">
-        <a-button type="link" icon="import">导入</a-button>
+        <a-button :disabled="isDisabledAuth('BasCurrency:add')" type="link" icon="import">导入</a-button>
       </a-upload>
 
       <i class="anticon anticon-info-circle ant-alert-icon"></i> 已选择 <a style="font-weight: 600">{{ selectedRowKeys.length }}</a>项
@@ -60,13 +60,13 @@
         <a slot="code" @click="myHandleDetail(record)" slot-scope="text, record">{{text}}</a>
 
         <span slot="action" slot-scope="text, record">
-          <a @click="myHandleEdit(record)">编辑</a>
+          <a :disabled="isDisabledAuth('BasCurrency:edit')" @click="myHandleEdit(record)">编辑</a>
           <a-divider type="vertical" />
           <a-dropdown>
             <a class="ant-dropdown-link">更多 <a-icon type="down" /></a>
             <a-menu slot="overlay">
-              <a-menu-item>
-                <a-popconfirm title="确定删除吗?" @confirm="() => handleDelete(record.id)">删除</a-popconfirm>
+              <a-menu-item :disabled="isDisabledAuth('BasCurrency:delete')" key="1">
+                <a-popconfirm :disabled="isDisabledAuth('BasCurrency:delete')" title="确定删除吗?" @confirm="() => handleDelete(record.id)">删除</a-popconfirm>
               </a-menu-item>
             </a-menu>
           </a-dropdown>
@@ -98,6 +98,7 @@
             title: '#',
             dataIndex: '',
             key:'rowIndex',
+            fixed:"left",
             width:60,
             align:"center",
             customRender: (t,r,index)=>parseInt(index)+1,
@@ -169,7 +170,7 @@
           delete: "/base/basCurrency/delete",
           deleteBatch: "/base/basCurrency/deleteBatch",
           exportXlsUrl: "/base/basCurrency/exportXls",
-          importExcelUrl: "bas/basCurrency/importExcel",
+          importExcelUrl: "base/basCurrency/importExcel",
         },
         dictOptions:{},
       }

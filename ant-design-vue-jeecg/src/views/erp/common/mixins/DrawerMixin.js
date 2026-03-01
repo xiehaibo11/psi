@@ -4,7 +4,9 @@ export const DrawerMixin = {
       action: '',
       title:'',
       visible: false,
-      disableSubmit: false
+      disableSubmit: false,
+
+      width: Math.min(600, window.innerWidth)
     };
   },
 

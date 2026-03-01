@@ -16,6 +16,11 @@
               <j-date placeholder="请选择结束" class="query-group-cust" v-model="queryParam.billDate_end"></j-date>
             </a-form-item>
           </a-col>
+          <a-col :xl="4" :lg="6" :md="7" :sm="24">
+            <a-form-item label="已作废">
+              <j-dict-select-tag v-model="queryParam.isVoided" dictCode="yn"/>
+            </a-form-item>
+          </a-col>
           <template v-if="toggleSearchStatus">
             <a-col :xl="6" :lg="7" :md="8" :sm="24">
               <a-form-item label="单据主题">
@@ -41,7 +46,7 @@
             </a-col>
             <a-col :xl="6" :lg="7" :md="8" :sm="24">
               <a-form-item label="客户">
-                <j-search-select-tag v-model="queryParam.customerId" :async="true" dict="bas_customer,aux_name,id" placeholder="请选择"/>
+                <j-search-select-tag v-model="queryParam.customerId" dict="bas_customer,aux_name,id" placeholder="请选择"/>
               </a-form-item>
             </a-col>
             <a-col :xl="4" :lg="6" :md="7" :sm="24">
@@ -57,11 +62,6 @@
             <a-col :xl="4" :lg="6" :md="7" :sm="24">
               <a-form-item label="已关闭">
                 <j-dict-select-tag v-model="queryParam.isClosed" dictCode="yn"/>
-              </a-form-item>
-            </a-col>
-            <a-col :xl="4" :lg="6" :md="7" :sm="24">
-              <a-form-item label="已作废">
-                <j-dict-select-tag v-model="queryParam.isVoided" dictCode="yn"/>
               </a-form-item>
             </a-col>
           </template>
@@ -84,19 +84,19 @@
 
     <!-- 操作按钮区域 -->
     <div class="table-operator">
-      <a-button @click="myHandleAdd" type="link" icon="plus">新增</a-button>
-      <a-button type="link" icon="download" @click="handleExportXls('销售发票登记')">导出</a-button>
+      <a-button :disabled="isDisabledAuth('SalInvoice:edit')" @click="myHandleAdd" type="link" icon="plus">新增</a-button>
+      <a-button :disabled="isDisabledAuth('SalInvoice:edit')" type="link" icon="download" @click="handleExportXls('销售发票登记')">导出</a-button>
       <a-upload name="file" :showUploadList="false" :multiple="false" :headers="tokenHeader" :action="importExcelUrl" @change="handleImportExcel">
-        <a-button type="link" icon="import">导入</a-button>
+        <a-button :disabled="isDisabledAuth('SalInvoice:edit')" type="link" icon="import">导入</a-button>
       </a-upload>
 
       <a-dropdown v-if="selectedRowKeys.length > 0">
         <a-menu slot="overlay">
-          <a-menu-item :disabled="!isBatchEnabled('delete')" key="1" @click="batchDel">删除</a-menu-item>
-          <a-menu-item :disabled="!isBatchEnabled('close')" key="2" @click="batchClose">关闭</a-menu-item>
-          <a-menu-item :disabled="!isBatchEnabled('unclose')" key="3" @click="batchUnclose">反关闭</a-menu-item>
+          <a-menu-item :disabled="isDisabledAuth('SalInvoice:edit') || !isBatchEnabled('delete')" key="1" @click="batchDel">删除</a-menu-item>
+          <a-menu-item :disabled="isDisabledAuth('SalInvoice:execute') || !isBatchEnabled('close')" key="2" @click="batchClose">关闭</a-menu-item>
+          <a-menu-item :disabled="isDisabledAuth('SalInvoice:execute') || !isBatchEnabled('unclose')" key="3" @click="batchUnclose">反关闭</a-menu-item>
         </a-menu>
-        orderedQty<a-button type="link" style="margin-left: 8px">批量操作<a-icon type="down" /></a-button>
+        <a-button type="link" style="margin-left: 8px">批量操作<a-icon type="down" /></a-button>
       </a-dropdown>
       <i class="anticon anticon-info-circle ant-alert-icon"></i> 已选择 <a style="font-weight: 600">{{ selectedRowKeys.length }}</a>项
       <a v-if="selectedRowKeys.length > 0" style="margin-left: 12px" @click="onClearSelected">清空</a>
@@ -123,25 +123,25 @@
         <a slot="billNo" @click="myHandleDetail(record)" slot-scope="text, record">{{text}}</a>
 
         <span slot="action" slot-scope="text, record">
-          <a :disabled="!record.actions.edit" @click="myHandleEdit(record)">编辑</a>
+          <a :disabled="!record.actions.edit || isDisabledAuth('SalInvoice:edit')" @click="myHandleEdit(record)">编辑</a>
           <a-divider type="vertical" />
           <a-dropdown>
             <a class="ant-dropdown-link">更多 <a-icon type="down" /></a>
             <a-menu slot="overlay">
-              <a-menu-item :disabled="!record.actions.delete" key="1" >
-                <a-popconfirm title="确定删除吗?" @confirm="() => handleDelete(record.id)">删除</a-popconfirm>
+              <a-menu-item :disabled="isDisabledAuth('SalInvoice:edit') || !record.actions.delete" key="1" >
+                <a-popconfirm :disabled="isDisabledAuth('SalInvoice:edit') || !record.actions.delete" title="确定删除吗?" @confirm="() => handleDelete(record.id)">删除</a-popconfirm>
               </a-menu-item>
-              <a-menu-item v-if="'check' in record.actions" :disabled="!record.actions.check" key="2" @click="handleCheck(record)">审核</a-menu-item>
-              <a-menu-item v-if="'ebpm' in record.actions" :disabled="!record.actions.ebpm" key="3" @click="handleEbpm(record)">结束审批</a-menu-item>
-              <a-menu-item v-if="'execute' in record.actions" :disabled="!record.actions.execute" key="4" @click="handleExecute(record)">执行</a-menu-item>
-              <a-menu-item v-if="'close' in record.actions" :disabled="!record.actions.close" key="5">
+              <a-menu-item v-if="'check' in record.actions" :disabled="!record.actions.check || isDisabledAuth('SalInvoice:check')" key="2" @click="handleCheck(record)">审核</a-menu-item>
+              <a-menu-item v-if="'ebpm' in record.actions" :disabled="!record.actions.ebpm || isDisabledAuth('SalInvoice:ebpm')" key="3" @click="handleEbpm(record)">结束审批</a-menu-item>
+              <a-menu-item v-if="'execute' in record.actions" :disabled="!record.actions.execute || isDisabledAuth('SalInvoice:execute')" key="4" @click="handleExecute(record)">执行</a-menu-item>
+              <a-menu-item v-if="'close' in record.actions" :disabled="!record.actions.close|| isDisabledAuth('SalInvoice:execute')" key="5">
                 <a-popconfirm title="确定关闭吗?" @confirm="()=> handleClose(record.id)">关闭</a-popconfirm>
               </a-menu-item>
-              <a-menu-item v-if="'unclose' in record.actions" :disabled="!record.actions.unclose" key="6" >
+              <a-menu-item v-if="'unclose' in record.actions" :disabled="!record.actions.unclose || isDisabledAuth('SalInvoice:execute')" key="6" >
                 <a-popconfirm title="确定反关闭吗?" @confirm="() => handleUnclose(record.id)">反关闭</a-popconfirm>
               </a-menu-item>
-              <a-menu-item v-if="'void' in record.actions" :disabled="!record.actions.void" key="7" @click="handleVoid(record)">作废</a-menu-item>
-              <a-menu-item key="9" @click="handlePrint(record.id)">打印</a-menu-item>
+              <a-menu-item v-if="'void' in record.actions" :disabled="!record.actions.void || isDisabledAuth('SalInvoice:void')" key="7" @click="handleVoid(record)">作废</a-menu-item>
+              <a-menu-item :disabled="isDisabledAuth('SalInvoice:print')" key="9" @click="handlePrint(record.id)">打印</a-menu-item>
             </a-menu>
           </a-dropdown>
         </span>
@@ -158,7 +158,7 @@
   import { JeecgListMixin } from '@/mixins/JeecgListMixin'
   import SalInvoiceModal from './modules/SalInvoiceModal'
   import TableColumnsSetter from '../common/components/TableColumnsSetter'
-  import { BillListMixin } from '../common/mixins/BillListMixin'
+  import { BillListMixin } from '../common/mixins/bill/BillListMixin'
   import XEUtils from "xe-utils";
 
   export default {
@@ -203,13 +203,6 @@
             sorter: true
           },
           {
-            title:'单据主题',
-            align:"left",
-            dataIndex: 'subject',
-            ellipsis: true,
-            sorter: true
-          },
-          {
             title:'客户',
             align:"left",
             dataIndex: 'customerId_dictText',
@@ -230,26 +223,24 @@
             dataIndex: 'invoiceNo',
             sorter: true
           },
-          {
-            title: '开票日期',
-            width: 100,
-            align: "center",
-            dataIndex: 'invoiceDate',
-            customRender: t => !t ? "" : (t.length > 10 ? t.substr(0, 10) : t),
+           {
+            title:'单据主题',
+            align:"left",
+            dataIndex: 'subject',
+            ellipsis: true,
             sorter: true
-          },
-          {
-            title:'金额',
-            width:120,
-            align:"right",
-            dataIndex: 'amt',
-            customRender: t => XEUtils.commafy(t,{digits: 2})
           },
           {
             title:'单据阶段',
             width:75,
             align:"center",
             dataIndex: 'billStage_dictText'
+          },
+          {
+              title:'核批结果',
+              width:75,
+              align:"center",
+              dataIndex: 'approvalResultType_dictText'
           },
           {
             title:'已生效',
@@ -268,6 +259,21 @@
             width:60,
             align:"center",
             dataIndex: 'isVoided_dictText'
+          },
+          {
+            title: '开票日期',
+            width: 100,
+            align: "center",
+            dataIndex: 'invoiceDate',
+            customRender: t => !t ? "" : (t.length > 10 ? t.substr(0, 10) : t),
+            sorter: true
+          },
+          {
+            title:'金额',
+            width:120,
+            align:"right",
+            dataIndex: 'amt',
+            customRender: t => XEUtils.commafy(t,{digits: 2})
           },
           {
             title:'自动单据',

@@ -27,6 +27,7 @@ import org.jeecg.modules.system.service.ISysUserService;
 import org.jeecg.modules.system.service.impl.ThirdAppDingtalkServiceImpl;
 import org.jeecg.modules.system.service.impl.ThirdAppWechatEnterpriseServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -54,6 +55,7 @@ public class ThirdLoginController {
 	private BaseCommonService baseCommonService;
 	@Autowired
     private RedisUtil redisUtil;
+	@Lazy //20230913 cfm add
 	@Autowired
 	private AuthRequestFactory factory;
 

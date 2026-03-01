@@ -6,9 +6,9 @@
           <login-account ref="alogin" @validateFail="validateFail" @success="requestSuccess" @fail="requestFailed"></login-account>
         </a-tab-pane>
 
-        <a-tab-pane key="tab2" tab="手机号登录">
-          <login-phone ref="plogin" @validateFail="validateFail" @success="requestSuccess" @fail="requestFailed"></login-phone>
-        </a-tab-pane>
+<!--        <a-tab-pane key="tab2" tab="手机号登录">-->
+<!--          <login-phone ref="plogin" @validateFail="validateFail" @success="requestSuccess" @fail="requestFailed"></login-phone>-->
+<!--        </a-tab-pane>-->
       </a-tabs>
 <!--20221019 cfm del-->
 <!--      <a-form-model-item>-->
@@ -30,7 +30,8 @@
 
     <two-step-captcha v-if="requiredTwoStepCaptcha" :visible="stepCaptchaVisible" @success="stepCaptchaSuccess" @cancel="stepCaptchaCancel"></two-step-captcha>
     <login-select-tenant ref="loginSelect" @success="loginSelectOk"></login-select-tenant>
-<!--20221019 cfm del    <third-login ref="thirdLogin"></third-login>-->
+    <!--20221019 cfm del    <third-login ref="thirdLogin"></third-login>-->
+
   </div>
 </template>
 
@@ -42,17 +43,20 @@ import LoginSelectTenant from './LoginSelectTenant'
 import TwoStepCaptcha from '@/components/tools/TwoStepCaptcha'
 import { getEncryptedString } from '@/utils/encryption/aesEncrypt'
 import { timeFix } from '@/utils/util'
-
 import LoginAccount from './LoginAccount'
 import LoginPhone from './LoginPhone'
 
+//20240327 cfm add
+import { mixinDevice } from '@/utils/mixin.js'
+
 export default {
+    mixins: [mixinDevice],//20240327 cfm add
     components: {
       LoginSelectTenant,
       TwoStepCaptcha,
       ThirdLogin,
       LoginAccount,
-      LoginPhone
+      LoginPhone,
     },
     data () {
       return {

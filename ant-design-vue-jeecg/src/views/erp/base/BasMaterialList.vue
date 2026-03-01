@@ -29,6 +29,11 @@
           </a-col>
           <template v-if="toggleSearchStatus">
             <a-col :xl="6" :lg="7" :md="8" :sm="24">
+              <a-col :xl="6" :lg="7" :md="8" :sm="24">
+                <a-form-item label="条码">
+                  <a-input placeholder="请输入" v-model="queryParam.barcode"/>
+                </a-form-item>
+              </a-col>
               <a-form-item label="税控编码">
                 <a-input placeholder="请输入" v-model="queryParam.taxCode"/>
               </a-form-item>
@@ -51,10 +56,10 @@
 
     <!-- 操作按钮区域 -->
     <div class="table-operator">
-      <a-button type="link" @click="myHandleAdd" icon="plus">新增</a-button>
-      <a-button type="link" icon="download" @click="handleExportXls('物料')">导出</a-button>
+      <a-button :disabled="isDisabledAuth('BasMaterial:add')" @click="myHandleAdd" type="link" icon="plus">新增</a-button>
+      <a-button :disabled="isDisabledAuth('BasMaterial:add')" type="link" icon="download" @click="handleExportXls('物料')">导出</a-button>
       <a-upload name="file" :showUploadList="false" :multiple="false" :headers="tokenHeader" :action="importExcelUrl" @change="handleImportExcel">
-        <a-button type="link" icon="import">导入</a-button>
+        <a-button :disabled="isDisabledAuth('BasMaterial:add')" type="link" icon="import">导入</a-button>
       </a-upload>
 
       <i class="anticon anticon-info-circle ant-alert-icon"></i> 已选择 <a style="font-weight: 600">{{ selectedRowKeys.length }}</a>项
@@ -82,22 +87,28 @@
 
         <a slot="code" @click="myHandleDetail(record)" slot-scope="text, record">{{text}}</a>
 
+        <!-- 20250408 cfm add -->
+        <template slot="image" slot-scope="text, record, index">
+          <div style="height:48px; width:48px">
+            <img style="height: 100%; " :src="getImage(record.image)" :preview="record.id">
+          </div>
+        </template>
+
         <span slot="action" slot-scope="text, record">
-          <a @click="myHandleEdit(record)">编辑</a>
+          <a :disabled="isDisabledAuth('BasMaterial:edit')" @click="myHandleEdit(record)">编辑</a>
           <a-divider type="vertical" />
           <a-dropdown>
             <a class="ant-dropdown-link">更多 <a-icon type="down" /></a>
             <a-menu slot="overlay">
-              <a-menu-item>
-                <a-popconfirm title="确定删除吗?" @confirm="() => handleDelete(record.id)">
-                  <a>删除</a>
-                </a-popconfirm>
+              <a-menu-item :disabled="isDisabledAuth('BasMaterial:delete')" key="1">
+                <a-popconfirm :disabled="isDisabledAuth('BasMaterial:delete')" title="确定删除吗?" @confirm="() => handleDelete(record.id)">删除</a-popconfirm>
               </a-menu-item>
             </a-menu>
           </a-dropdown>
         </span>
 
       </a-table>
+      <p style="float: right; color: red">注意：物料增删改后，需要点击【浏览器刷新】页面或重新登录才能在单据中看到最新的！</p>
     </div>
 
     <basMaterial-modal ref="modalForm" @ok="modalFormOk"></basMaterial-modal>
@@ -111,6 +122,7 @@
   import BasMaterialModal from './modules/BasMaterialModal'
   import TableColumnsSetter from "../common/components/TableColumnsSetter";
   import XEUtils from "xe-utils";
+  import {getFileAccessHttpUrl} from '@/api/manage'; //20250408 cfm add
 
   export default {
     name: "BasMaterialList",
@@ -120,6 +132,8 @@
     data () {
       return {
         description: '物料',
+        previewVisible: false,
+
         // 表头
         columns: [
           {
@@ -134,6 +148,7 @@
           {
             title:'编码',
             fixed:"left",
+            width:160,
             align:"left",
             dataIndex: 'code',
             scopedSlots: { customRender: 'code' },
@@ -141,7 +156,6 @@
           },
           {
             title:'名称',
-            fixed:"left",
             align:"left",
             dataIndex: 'name',
             sorter: true
@@ -150,6 +164,12 @@
             title:'助记名',
             align:"left",
             dataIndex: 'auxName',
+            sorter: true
+          },
+          {
+            title:'条码',
+            align:"left",
+            dataIndex: 'barcode',
             sorter: true
           },
           {
@@ -164,10 +184,17 @@
             dataIndex: 'model'
           },
           {
-            title:'计量单位',
+            title:'主单位',
             width:80,
             align:"center",
             dataIndex: 'unitId_dictText'
+          },
+          {//20250408 cfm add
+            title: '图片',
+            align: "center",
+            width: 80,
+            dataIndex: 'image',
+            scopedSlots: {customRender: "image"}
           },
           {
             title:'销售价格',
@@ -178,7 +205,6 @@
           },
           {
             title:'税控编码',
-            width:160,
             align:"center",
             dataIndex: 'taxCode'
           },
@@ -221,8 +247,6 @@
             dataIndex: 'updateBy_dictText'
           },
           {
-          },
-          {
             title: '操作',
             dataIndex: 'action',
             fixed: "right",
@@ -236,15 +260,21 @@
           delete: "/base/basMaterial/delete",
           deleteBatch: "/base/basMaterial/deleteBatch",
           exportXlsUrl: "/base/basMaterial/exportXls",
-          importExcelUrl: "bas/basMaterial/importExcel",
+          importExcelUrl: "base/basMaterial/importExcel",
         },
         dictOptions:{},
       }
     },
 
      methods: {
-      initDictConfig(){
-      },
+       initDictConfig(){
+       },
+
+       //20250408 cfm add
+       getImage: function (image) {
+         if (!image || image.length === 0) return;
+         return getFileAccessHttpUrl(image.split(',')[0]);
+       },
 
     }
   }

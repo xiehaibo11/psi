@@ -503,6 +503,7 @@ public class LoginController {
 		try {
 			//生成验证码
 			String code = RandomUtil.randomString(BASE_CHECK_CODES,4);
+			// code = "xxxx";//20200510 cfm add: 为方便测试，验证码设为定值
 
 			//存到redis中
 			String lowerCaseCode = code.toLowerCase();

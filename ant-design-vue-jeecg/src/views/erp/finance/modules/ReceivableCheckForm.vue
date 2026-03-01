@@ -2,22 +2,35 @@
   <a-spin :spinning="confirmLoading">
     <!-- 主表单区域 -->
     <a-form-model ref="form" :model="model" :rules="validatorRules">
-        <bill-header ref="billHeader" :model="model" :disabled="disabled" :moreStatus.sync="moreStatus"/>
+        <bill-header ref="billHeader" :model="model" :disabled="disabled" :moreStatus.sync="moreStatus" :moreStatus2.sync="moreStatus2"/>
         <a-row>
-          <a-col :span="8" >
-            <a-form-model-item label="单据主题" :labelCol="labelCol3" :wrapperCol="wrapperCol3" prop="subject">
-              <a-input v-model="model.subject" placeholder="请输入" :readOnly="disabled"/>
-            </a-form-model-item>
-          </a-col>
-          <a-col :span="8">
+          <a-col :xl="8" :lg="12" :md="24">
             <a-form-model-item label="客户" :labelCol="labelCol3" :wrapperCol="wrapperCol3" prop="customerId">
               <a-tooltip :title="!disabled && entryCount1+entryCount2>0 ? '有核销明细时不能改变！':''" placement="bottom">
-                <j-search-select-tag v-model="model.customerId" :async="true" dict="bas_customer,aux_name,id"
+                <j-search-select-tag v-model="model.customerId" dict="bas_customer,aux_name,id"
                                      :disabled="disabled || entryCount1+entryCount2>0" @change="onCustomerChange" placeholder="请选择"/>
               </a-tooltip>
             </a-form-model-item>
           </a-col>
         </a-row>
+
+      <a-row>
+        <a-col :xl="8" :lg="12" :md="24" v-show="moreStatus2 || !!model.subject && model.subject.length > 0">
+          <a-form-model-item label="单据主题" :labelCol="labelCol3" :wrapperCol="wrapperCol3" prop="subject">
+            <a-input v-model="model.subject" placeholder="请输入" :readOnly="disabled"/>
+          </a-form-model-item>
+        </a-col>
+        <a-col :xl="8" :lg="12" :md="24" v-show="moreStatus2 || !!model.remark && model.remark.length > 0">
+          <a-form-model-item label="备注" :labelCol="labelCol3" :wrapperCol="wrapperCol3" prop="remark">
+            <a-textarea v-model="model.remark" :readOnly="disabled" rows="1" autoSize/>
+          </a-form-model-item>
+        </a-col>
+        <a-col :xl="8" :lg="12" :md="24" v-show="moreStatus2 || !!model.attachment && model.attachment.length > 0">
+          <a-form-model-item label="附件" :labelCol="labelCol3" :wrapperCol="wrapperCol3" prop="attachment">
+            <j-upload v-model="model.attachment" :disabled="disabled" bizPath="erp"/>
+          </a-form-model-item>
+        </a-col>
+      </a-row>
 
       <!-- 子表区域 -->
       <a-divider v-if="!disabled" style="margin:12px 0 2px 0;"/>
@@ -111,8 +124,8 @@
         <a-alert v-if="totalAmt1!==totalAmt2" message="上下核销金额合计不相等！" type="warning" banner />
       </template>
 
-      <a-divider style="margin:36px 0 0 0;"/>
-      <bill-footer ref="billFooter" :model="model" :disabled="disabled" :action="action"/>
+      <a-divider v-if="action==='check' || action==='ebpm'" style="margin:36px 0 0 0;"/>
+      <bill-approval v-if="action==='check' || action==='ebpm'" :model="model" :disabled="disabled" style="margin-top: 16px"/>
     </a-form-model>
   </a-spin>
 </template>
@@ -120,20 +133,21 @@
 <script>
   import { getRefPromise } from '@/components/jeecg/JVxeTable/utils/vxeUtils.js'
   import { JVxeTableModelMixin } from '@/mixins/JVxeTableModelMixin'
-  import { BillFormMixin, BillFormGridMixin} from '../../common/mixins/BillFormMixin'
-  import { BillVxeTableMixin } from '../../common/mixins/BillVxeTableMixin'
+  import {BillFormMixin} from '../../common/mixins/bill/BillFormMixin'
+  import {BillFormGridMixin} from '../../common/mixins/bill/BillFormGridMixin'
+  import {DetailMixin} from '../../common/mixins/bill/DetailMixin'
   import BillHeader from "../../common/components/BillHeader";
-  import BillFooter from "../../common/components/BillFooter";
-  import { getAction } from '@api/manage'
+  import BillApproval from "../../common/components/BillApproval"
   import splitPane from 'vue-splitpane';
   import RpCheckEntryTable from "./RpCheck/RpCheckEntryTable";
   import RpCheckReceivableList from "./RpCheck/RpCheckReceivableList";
   import RpCheckReceiptList from "./RpCheck/RpCheckReceiptList";
+  import { getAction } from '@api/manage'
 
   export default {
     name: 'ReceivableCheckForm',
-    mixins: [JVxeTableModelMixin, BillFormMixin, BillFormGridMixin, BillVxeTableMixin],
-    components: {BillHeader, BillFooter, RpCheckReceivableList,  RpCheckReceiptList,  RpCheckEntryTable, splitPane},
+    mixins: [JVxeTableModelMixin, BillFormMixin, BillFormGridMixin, DetailMixin],
+    components: {BillHeader, BillApproval, RpCheckReceivableList,  RpCheckReceiptList,  RpCheckEntryTable, splitPane},
 
     data() {
       return {
@@ -175,19 +189,46 @@
           execute: "/finance/finReceivableCheck/execute",
           void: "/finance/finReceivableCheck/void",
           finRpCheckEntry: {
-          list: '/finance/finReceivableCheck/queryEntryByMainId',
+            list: '/finance/finReceivableCheck/queryEntryByMainId',
           },
+          queryById: "/finance/finReceivableCheck/queryById", //20251101 cfm add for 内置BPM
         },
       }
     },
 
     watch: {
-      totalAmt1() {
-        this.$emit('update:canSubmit', this.canSubmit);
+      // begin-20240822 cfm modi
+      // totalAmt1() {
+      //   this.$emit('update:canSubmit', this.canSubmit);
+      // },
+      // totalAmt2() {
+      //   this.$emit('update:canSubmit', this.canSubmit);
+      // }
+      totalAmt1: {
+        immediate: true,
+        handler() {
+          this.$emit('update:canSubmit', this.canSubmit);
+        }
       },
-      totalAmt2() {
-        this.$emit('update:canSubmit', this.canSubmit);
-      }
+      totalAmt2: {
+        immediate: true,
+        handler() {
+          this.$emit('update:canSubmit', this.canSubmit);
+        }
+      },
+      entryCount1: {
+        immediate: true,
+        handler() {
+          this.$emit('update:canSubmit', this.canSubmit);
+        }
+      },
+      entryCount2: {
+        immediate: true,
+        handler() {
+          this.$emit('update:canSubmit', this.canSubmit);
+        }
+      },
+      // end-20240822 cfm modi
     },
 
     computed: {
@@ -259,6 +300,7 @@
           let params = { id: that.model.id };
           table1.loading = true;
           table2.loading = true;
+          that.$emit("update:loading", true);
           getAction(url, params).then(res => {
             let rows1 = [], rows2 = [];
             for (let row of res.result || []) {
@@ -274,6 +316,7 @@
           }).finally(() => {
             table1.loading = false;
             table2.loading = false;
+            that.$emit("update:loading", false);
           });
         }
       },
@@ -292,6 +335,7 @@
           let params = {customerId: val};
           this.$refs.rpCheckReceivableList.queryParam = params;
           this.$refs.rpCheckReceivableList.loadData(1);
+          this.$refs.rpCheckReceiptList.queryParam = params; //20241015 cfm add
           this.$refs.rpCheckReceiptList.loadData(1);
         }
       },
@@ -305,7 +349,7 @@
           if (maxEntryNo < row.entryNo)  maxEntryNo = row.entryNo;
         }
         if (maxEntryNo >= 199) {
-          this.$message.warning("应收核销明细最多99条！");
+          this.$warning({title: "应收核销单", content: "应收核销明细最多99条！"});
           return;
         }
 
@@ -376,7 +420,7 @@
 
       handleMySubmit() {
         if (!this.canSubmit)
-          this.$message.warn("无核销或上下合计不相等，不能提交！");
+          this.$warning({title: "应收核销提交", content: "无核销或上下合计不相等，不能提交！"});
         else
           this.handleSubmit();
       },

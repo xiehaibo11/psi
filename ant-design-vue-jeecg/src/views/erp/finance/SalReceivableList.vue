@@ -9,11 +9,16 @@
               <a-input placeholder="请输入" v-model="queryParam.billNo"/>
             </a-form-item>
           </a-col>
-          <a-col :xl="10" :lg="11" :md="12" :sm="24">
+          <a-col :xl="8" :lg="9" :md="10" :sm="24">
             <a-form-item label="单据日期">
               <j-date placeholder="请选择开始日期" class="query-group-cust" v-model="queryParam.billDate_begin"></j-date>
               <span class="query-group-split-cust"></span>
               <j-date placeholder="请选择结束日期" class="query-group-cust" v-model="queryParam.billDate_end"></j-date>
+            </a-form-item>
+          </a-col>
+          <a-col :xl="4" :lg="6" :md="7" :sm="24">
+            <a-form-item label="已作废">
+              <j-dict-select-tag v-model="queryParam.isVoided" dictCode="yn"/>
             </a-form-item>
           </a-col>
           <template v-if="toggleSearchStatus">
@@ -24,7 +29,7 @@
             </a-col>
             <a-col :xl="6" :lg="7" :md="8" :sm="24">
               <a-form-item label="客户">
-                <j-search-select-tag v-model="queryParam.customerId" :async="true" dict="bas_customer,aux_name,id" placeholder="请选择"/>
+                <j-search-select-tag v-model="queryParam.customerId" dict="bas_customer,aux_name,id" placeholder="请选择"/>
               </a-form-item>
             </a-col>
             <a-col :xl="4" :lg="6" :md="7" :sm="24">
@@ -40,11 +45,6 @@
             <a-col :xl="4" :lg="6" :md="7" :sm="24">
               <a-form-item label="已关闭">
                 <j-dict-select-tag v-model="queryParam.isClosed" dictCode="yn"/>
-              </a-form-item>
-            </a-col>
-            <a-col :xl="4" :lg="6" :md="7" :sm="24">
-              <a-form-item label="已作废">
-                <j-dict-select-tag v-model="queryParam.isVoided" dictCode="yn"/>
               </a-form-item>
             </a-col>
           </template>
@@ -66,7 +66,19 @@
 
     <!-- 操作按钮区域 -->
     <div class="table-operator">
-      <a-button type="link" icon="download" @click="handleExportXls('销售应收单')">导出</a-button>
+      <a-button :disabled="isDisabledAuth('SalReceivable:edit')" type="link" icon="download" @click="handleExportXls('销售应收单')">导出</a-button>
+
+      <!-- 20240815 cfm add -->
+      <a-dropdown v-if="selectedRowKeys.length > 0">
+        <a-menu slot="overlay">
+          <a-menu-item :disabled="isDisabledAuth('SalReceivable:execute') || !isBatchEnabled('close')" key="2" @click="batchClose">关闭</a-menu-item>
+          <a-menu-item :disabled="isDisabledAuth('SalReceivable:execute') || !isBatchEnabled('unclose')" key="3" @click="batchUnclose">反关闭</a-menu-item>
+        </a-menu>
+        <a-button type="link" style="margin-left: 8px">批量操作<a-icon type="down" /></a-button>
+      </a-dropdown>
+      <i class="anticon anticon-info-circle ant-alert-icon"></i> 已选择 <a style="font-weight: 600">{{ selectedRowKeys.length }}</a>项
+      <a v-if="selectedRowKeys.length > 0" style="margin-left: 12px" @click="onClearSelected">清空</a>
+
       <table-columns-setter v-model="columns" style="float: right;"/>
     </div>
 
@@ -82,10 +94,33 @@
         :dataSource="dataSource"
         :pagination="ipagination"
         :loading="loading"
+        :rowSelection="{fixed:true,selectedRowKeys: selectedRowKeys, columnWidth: 40, onChange: onSelectChange}"
         :components="drag(columns)"
         @change="handleTableChange">
 
         <a slot="billNo" @click="myHandleDetail(record)" slot-scope="text, record">{{text}}</a>
+
+        <!-- 20240815 cfm add -->
+        <span slot="action" slot-scope="text, record">
+          <a :disabled="true" @click="myHandleEdit(record)">编辑</a>
+          <a-divider type="vertical" />
+          <a-dropdown>
+            <a class="ant-dropdown-link">更多 <a-icon type="down" /></a>
+            <a-menu slot="overlay">
+              <a-menu-item v-if="'check' in record.actions" :disabled="!record.actions.check || isDisabledAuth('SalReceivable:check')" key="2" @click="handleCheck(record)">审核</a-menu-item>
+              <a-menu-item v-if="'ebpm' in record.actions" :disabled="!record.actions.ebpm || isDisabledAuth('SalReceivable:ebpm')" key="3" @click="handleEbpm(record)">结束审批</a-menu-item>
+              <a-menu-item v-if="'execute' in record.actions" :disabled="!record.actions.execute || isDisabledAuth('SalReceivable:execute')" key="4" @click="handleExecute(record)">执行</a-menu-item>
+              <a-menu-item v-if="'close' in record.actions" :disabled="!record.actions.close|| isDisabledAuth('SalReceivable:execute')" key="5">
+                <a-popconfirm title="确定关闭吗?" @confirm="()=> handleClose(record.id)">关闭</a-popconfirm>
+              </a-menu-item>
+              <a-menu-item v-if="'unclose' in record.actions" :disabled="!record.actions.unclose || isDisabledAuth('SalReceivable:execute')" key="6" >
+                <a-popconfirm title="确定反关闭吗?" @confirm="() => handleUnclose(record.id)">反关闭</a-popconfirm>
+              </a-menu-item>
+              <a-menu-item :disabled="isDisabledAuth('SalReceivable:print')" key="9" @click="handlePrint(record.id)">打印</a-menu-item>
+            </a-menu>
+          </a-dropdown>
+        </span>
+
       </a-table>
     </div>
 
@@ -94,11 +129,10 @@
 </template>
 
 <script>
-
   import { JeecgListMixin } from '@/mixins/JeecgListMixin'
   import SalReceivableModal from './modules/SalReceivableModal'
   import TableColumnsSetter from '../common/components/TableColumnsSetter'
-  import { BillListMixin } from '../common/mixins/BillListMixin'
+  import { BillListMixin } from '../common/mixins/bill/BillListMixin'
   import XEUtils from "xe-utils";
 
   export default {
@@ -143,13 +177,6 @@
             sorter: true
           },
           {
-            title:'单据主题',
-            align:"left",
-            dataIndex: 'subject',
-            ellipsis: true,
-            sorter: true
-          },
-          {
             title:'源单号',
             width:160,
             align:"center",
@@ -179,24 +206,23 @@
             sorter: true
           },
           {
-            title:'金额',
-            width:120,
-            align:"right",
-            dataIndex: 'amt',
-            customRender: t => XEUtils.commafy(t,{digits: 2})
+            title:'单据主题',
+            align:"left",
+            dataIndex: 'subject',
+            ellipsis: true,
+            sorter: true
           },
           {
-            title:'已核销金额',
-            width:120,
-            align:"right",
-            dataIndex: 'checkedAmt',
-            customRender: t => XEUtils.commafy(t,{digits: 2})
-          },
-          {
-            title: '单据阶段',
-            width: 75,
-            align: "center",
+            title:'单据阶段',
+            width:75,
+            align:"center",
             dataIndex: 'billStage_dictText'
+          },
+          {
+              title:'核批结果',
+              width:75,
+              align:"center",
+              dataIndex: 'approvalResultType_dictText'
           },
           {
             title:'已生效',
@@ -215,6 +241,20 @@
             width:60,
             align:"center",
             dataIndex: 'isVoided_dictText'
+          },
+          {
+            title:'金额',
+            width:120,
+            align:"right",
+            dataIndex: 'amt',
+            customRender: t => XEUtils.commafy(t,{digits: 2})
+          },
+          {
+              title:'已核销金额',
+              width:120,
+              align:"right",
+              dataIndex: 'checkedAmt',
+              customRender: t => XEUtils.commafy(t,{digits: 2})
           },
           {
             title:'自动单据',
@@ -279,9 +319,25 @@
             align: "center",
             dataIndex: 'updateBy_dictText'
           },
+          //20240815 cfm add
+          {
+            title: '操作',
+            dataIndex: 'action',
+            fixed:"right",
+            width:120,
+            align:"center",
+            scopedSlots: { customRender: 'action' },
+          }
         ],
         url: {
           list: "/finance/finReceivable/list/101",
+
+          //20240815 cfm add
+          close: "/finance/finReceivable/close",
+          closeBatch: "/finance/finReceivable/closeBatch",
+          unclose: "/finance/finReceivable/unclose",
+          uncloseBatch: "/finance/finReceivable/uncloseBatch",
+
           exportXlsUrl: "/finance/finReceivable/exportXls/101"
         },
         dictOptions:{},

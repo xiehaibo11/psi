@@ -22,11 +22,11 @@
 <script>
   import { JeecgListMixin } from '@/mixins/JeecgListMixin'
   import XEUtils from "xe-utils";
-  import ATableDragResize from '../../../common/mixins/ATableDragResize'
+  import ListColumnResizeMixin from '../../../common/mixins/ListColumnResizeMixin'
 
   export default {
     name: "RpCheckReceiptList",
-    mixins:[JeecgListMixin, ATableDragResize],
+    mixins:[JeecgListMixin, ListColumnResizeMixin],
     components: {},
     props: {
       //对应的核销明细组件

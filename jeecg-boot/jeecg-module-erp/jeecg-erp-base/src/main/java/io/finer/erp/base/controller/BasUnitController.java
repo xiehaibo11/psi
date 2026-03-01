@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.system.query.QueryGenerator;
 import org.jeecg.common.util.oConvertUtils;
@@ -36,6 +38,15 @@ import org.jeecg.common.aspect.annotation.AutoLog;
 public class BasUnitController extends JeecgController<BasUnit, IBasUnitService>{
 	@Autowired
 	private IBasUnitService basUnitService;
+
+	//20230217 add
+	@GetMapping(value = "/list/enabled")
+	public Result<?> queryEnabledList(BasUnit BasUnit, HttpServletRequest req) {
+		QueryWrapper<BasUnit> queryWrapper = QueryGenerator.initQueryWrapper(BasUnit, req.getParameterMap());
+		queryWrapper.eq("is_enabled", 1);
+		List<BasUnit> list = basUnitService.list(queryWrapper);
+		return Result.OK(list);
+	}
 
 	/**
 	 * 分页列表查询
@@ -142,6 +153,7 @@ public class BasUnitController extends JeecgController<BasUnit, IBasUnitService>
 	 */
 	@AutoLog(value = "计量单位-添加")
 	@ApiOperation(value="计量单位-添加", notes="计量单位-添加")
+	@RequiresPermissions("base:unit:add") //20240806 cfm add
 	@PostMapping(value = "/add")
 	public Result<String> add(@RequestBody BasUnit basUnit) {
 		basUnitService.addBasUnit(basUnit);
@@ -156,6 +168,7 @@ public class BasUnitController extends JeecgController<BasUnit, IBasUnitService>
 	 */
 	@AutoLog(value = "计量单位-编辑")
 	@ApiOperation(value="计量单位-编辑", notes="计量单位-编辑")
+	@RequiresPermissions("base:unit:edit") //20240806 cfm add
 	@RequestMapping(value = "/edit", method = {RequestMethod.PUT,RequestMethod.POST})
 	public Result<String> edit(@RequestBody BasUnit basUnit) {
 		basUnitService.updateBasUnit(basUnit);
@@ -170,6 +183,7 @@ public class BasUnitController extends JeecgController<BasUnit, IBasUnitService>
 	 */
 	@AutoLog(value = "计量单位-通过id删除")
 	@ApiOperation(value="计量单位-通过id删除", notes="计量单位-通过id删除")
+	@RequiresPermissions("base:unit:delete") //20240806 cfm add
 	@DeleteMapping(value = "/delete")
 	public Result<String> delete(@RequestParam(name="id",required=true) String id) {
 		basUnitService.deleteBasUnit(id);
@@ -184,6 +198,7 @@ public class BasUnitController extends JeecgController<BasUnit, IBasUnitService>
 	 */
 	@AutoLog(value = "计量单位-批量删除")
 	@ApiOperation(value="计量单位-批量删除", notes="计量单位-批量删除")
+	@RequiresPermissions("base:unit:delete") //20240806 cfm add
 	@DeleteMapping(value = "/deleteBatch")
 	public Result<String> deleteBatch(@RequestParam(name="ids",required=true) String ids) {
 		this.basUnitService.removeByIds(Arrays.asList(ids.split(",")));
@@ -210,6 +225,7 @@ public class BasUnitController extends JeecgController<BasUnit, IBasUnitService>
 	 * @return
 	 */
 	@AutoLog(value = "通过excel导入数据")
+	@RequiresPermissions("base:unit:import") //20240806 cfm add
     @RequestMapping(value = "/importExcel", method = RequestMethod.POST)
 	public Result<?> importExcel(HttpServletRequest request, HttpServletResponse response) {
 		return super.importExcel(request, response, BasUnit.class);

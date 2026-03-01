@@ -1,4 +1,3 @@
-import xss from "xss"
 <template>
   <j-modal
     :title="title"
@@ -7,7 +6,7 @@ import xss from "xss"
     :bodyStyle ="bodyStyle"
     :switchFullscreen="switchFullscreen"
     @cancel="handleCancel"
-   >
+  >
     <template slot="footer">
       <a-button key="back" @click="handleCancel">关闭</a-button>
       <a-button v-if="record.openType==='url'" type="primary" @click="toHandle">去处理</a-button>
@@ -26,8 +25,10 @@ import xss from "xss"
 <script>
   import {getUserList} from '@/api/api'
   import xss from 'xss'
+  import {mixinDevice} from '@/utils/mixin' //20240721 cfm add
   export default {
     name: "SysAnnouncementModal",
+    mixins: [mixinDevice],//20240721 cfm add
     components: {
     },
     data () {
@@ -59,6 +60,7 @@ import xss from "xss"
       }
     },
     created () {
+      if (this.isMobile()) this.handleClickToggleFullScreen(); //20240721 cfm add
     },
     methods: {
       detail (record) {
@@ -66,7 +68,7 @@ import xss from "xss"
         if(record.sender){
           getUserList({"username":record.sender}).then((res) =>{
             if(res.success && res.result.records.length>0){
-                record.sender = res.result.records[0].realname
+              record.sender = res.result.records[0].realname
             }
           })
         }

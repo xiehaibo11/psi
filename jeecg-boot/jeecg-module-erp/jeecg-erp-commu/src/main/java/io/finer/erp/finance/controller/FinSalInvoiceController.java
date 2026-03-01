@@ -13,6 +13,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.aspect.annotation.AutoLog;
 import org.jeecg.common.exception.JeecgBootException;
@@ -113,6 +114,7 @@ public class FinSalInvoiceController {
     */
    @AutoLog(value = "销售发票登记-新增")
    @ApiOperation(value="销售发票登记-新增", notes="销售发票登记-新增")
+   @RequiresPermissions("finance:sale:invoice:add") //20240806 cfm add
    @PostMapping(value = "/add/{action}")
    public Result<?> add(@RequestBody FinSalInvoicePage finSalInvoicePage, @PathVariable String action) {
        FinSalInvoice bill = new FinSalInvoice();
@@ -138,6 +140,7 @@ public class FinSalInvoiceController {
     */
    @AutoLog(value = "销售发票登记-编辑")
    @ApiOperation(value="销售发票登记-编辑", notes="销售发票登记-编辑")
+   @RequiresPermissions("finance:sale:invoice:edit") //20240806 cfm add
    @PutMapping(value = "/edit/{action}")
    public Result<?> edit(@RequestBody FinSalInvoicePage finSalInvoicePage, @PathVariable String action) {
        FinSalInvoice bill = new FinSalInvoice();
@@ -163,6 +166,7 @@ public class FinSalInvoiceController {
     */
    @AutoLog(value = "销售发票登记-通过id删除")
    @ApiOperation(value="销售发票登记-通过id删除", notes="销售发票登记-通过id删除")
+   @RequiresPermissions("finance:sale:invoice:delete") //20240806 cfm add
    @DeleteMapping(value = "/delete")
    public Result<?> delete(@RequestParam(name="id",required=true) String id) {
        try {
@@ -181,6 +185,7 @@ public class FinSalInvoiceController {
     */
    @AutoLog(value = "销售发票登记-批量删除")
    @ApiOperation(value="销售发票登记-批量删除", notes="销售发票登记-批量删除")
+   @RequiresPermissions("finance:sale:invoice:delete") //20240806 cfm add
    @DeleteMapping(value = "/deleteBatch")
    public Result<?> deleteBatch(@RequestParam(name="ids",required=true) String ids) {
        try {
@@ -193,6 +198,7 @@ public class FinSalInvoiceController {
 
     @AutoLog(value = "销售发票登记-审核")
     @ApiOperation(value="销售发票登记-审核", notes="销售发票登记-审核")
+    @RequiresPermissions("finance:sale:invoice:check") //20240806 cfm add
     @PutMapping(value = "/check")
     public Result<?> check(@RequestBody JSONObject json) {
         try {
@@ -219,6 +225,7 @@ public class FinSalInvoiceController {
 
     @AutoLog(value = "销售发票登记-结束审批")
     @ApiOperation(value="销售发票登记-结束审批", notes="销售发票登记-结束审批")
+    @RequiresPermissions("finance:sale:invoice:bpm:end") //20240806 cfm add
     @PutMapping(value = "/bpm/end")
     public Result<?> bpmInstanceManualEnd(@RequestBody JSONObject json) {
         try {
@@ -233,6 +240,7 @@ public class FinSalInvoiceController {
 
     @AutoLog(value = "销售发票登记-执行")
     @ApiOperation(value="销售发票登记-执行", notes="销售发票登记-执行")
+    @RequiresPermissions("finance:sale:invoice:execute") //20240806 cfm add
     @PutMapping(value = "/execute")
     public Result<?> execute(@RequestBody JSONObject json) {
         try {
@@ -245,6 +253,7 @@ public class FinSalInvoiceController {
 
     @AutoLog(value = "销售发票登记-关闭")
     @ApiOperation(value="销售发票登记-关闭", notes="销售发票登记-关闭")
+    @RequiresPermissions("finance:sale:invoice:close") //20240806 cfm add
     @PutMapping(value = "/close")
     public Result<?> close(@RequestBody JSONObject json) {
         try {
@@ -257,6 +266,7 @@ public class FinSalInvoiceController {
 
     @AutoLog(value = "销售发票登记--反关闭")
     @ApiOperation(value="销售发票登记--反关闭", notes="销售发票登记--反关闭")
+    @RequiresPermissions("finance:sale:invoice:unclose") //20240806 cfm add
     @PutMapping(value = "/unclose")
     public Result<?> unclose(@RequestBody JSONObject json) {
         try {
@@ -275,6 +285,7 @@ public class FinSalInvoiceController {
      */
     @AutoLog(value = "销售发票登记-批量关闭")
     @ApiOperation(value="销售发票登记-批量关闭", notes="销售发票登记-批量关闭")
+    @RequiresPermissions("finance:sale:invoice:close") //20240806 cfm add
     @PutMapping(value = "/closeBatch")
     public Result<String> closeBatch(@RequestBody JSONObject json) {
         try {
@@ -293,6 +304,7 @@ public class FinSalInvoiceController {
      */
     @AutoLog(value = "销售发票登记-批量反关闭")
     @ApiOperation(value="销售发票登记-批量反关闭", notes="销售发票登记-批量反关闭")
+    @RequiresPermissions("finance:sale:invoice:unclose") //20240806 cfm add
     @PutMapping(value = "/uncloseBatch")
     public Result<String> uncloseBatch(@RequestBody JSONObject json) {
         try {
@@ -305,6 +317,7 @@ public class FinSalInvoiceController {
 
     @AutoLog(value = "销售发票登记-作废")
     @ApiOperation(value="销售发票登记-作废", notes="销售发票登记-作废")
+    @RequiresPermissions("finance:sale:invoice:void") //20240806 cfm add
     @PutMapping(value = "/void")
     public Result<?> voidBill(@RequestBody JSONObject json) {
         try {
@@ -322,6 +335,7 @@ public class FinSalInvoiceController {
    * @param finSalInvoice
    */
    @AutoLog(value = "导出为excel")
+   @RequiresPermissions("finance:sale:invoice:export") //20240806 cfm add
    @RequestMapping(value = {"/exportXls", "/exportXls/{isRubric}/{isReturned}"})
    public ModelAndView exportXls(HttpServletRequest request, FinSalInvoice finSalInvoice) {
      // Step.1 组装查询条件查询数据
@@ -366,6 +380,7 @@ public class FinSalInvoiceController {
    * @return
    */
    @AutoLog(value = "通过excel导入数据")
+   @RequiresPermissions("finance:sale:invoice:import") //20240806 cfm add
    @RequestMapping(value = {"/importExcel", "/importExcel/{isRubric}/{isReturned}"}, method = RequestMethod.POST)
    public Result<?> importExcel(HttpServletRequest request,
                                 @PathVariable(required = false) Integer isRubric,

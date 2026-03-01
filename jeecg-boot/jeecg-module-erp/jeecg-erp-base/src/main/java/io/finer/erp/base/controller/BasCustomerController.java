@@ -3,6 +3,9 @@ package io.finer.erp.base.controller;
 import java.util.Arrays;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.system.query.QueryGenerator;
 import io.finer.erp.base.entity.BasCustomer;
@@ -46,6 +49,7 @@ public class BasCustomerController extends JeecgController<BasCustomer, IBasCust
 	 */
 	//@AutoLog(value = "客户-分页列表查询")
 	@ApiOperation(value="客户-分页列表查询", notes="客户-分页列表查询")
+	@RequiresPermissions("base:customer:list") //20240806 cfm add
 	@GetMapping(value = "/list")
 	public Result<IPage<BasCustomer>> queryPageList(BasCustomer basCustomer,
 								   @RequestParam(name="pageNo", defaultValue="1") Integer pageNo,
@@ -65,6 +69,7 @@ public class BasCustomerController extends JeecgController<BasCustomer, IBasCust
 	  */
 	 //@AutoLog(value = "客户-通过id查询")
 	 @ApiOperation(value="客户-通过id查询", notes="客户-通过id查询")
+	 @RequiresPermissions("base:customer:queryById") //20240806 cfm add
 	 @GetMapping(value = "/queryById")
 	 public Result<BasCustomer> queryById(@RequestParam(name="id",required=true) String id) {
 		 BasCustomer basCustomer = basCustomerService.getById(id);
@@ -82,6 +87,7 @@ public class BasCustomerController extends JeecgController<BasCustomer, IBasCust
 	 */
 	@AutoLog(value = "客户-添加")
 	@ApiOperation(value="客户-添加", notes="客户-添加")
+	@RequiresPermissions("base:customer:add") //20240806 cfm add
 	@PostMapping(value = "/add")
 	public Result<String> add(@RequestBody BasCustomer basCustomer) {
 		basCustomerService.save(basCustomer);
@@ -90,15 +96,17 @@ public class BasCustomerController extends JeecgController<BasCustomer, IBasCust
 
 	/**
 	 *  编辑
+	 *  注意：如果请求中creditQuota属性不存在或为null，数据库中将被设置为null
 	 *
 	 * @param basCustomer
 	 * @return
 	 */
 	@AutoLog(value = "客户-编辑")
 	@ApiOperation(value="客户-编辑", notes="客户-编辑")
+	@RequiresPermissions("base:customer:edit") //20240806 cfm add
 	@RequestMapping(value = "/edit", method = {RequestMethod.PUT,RequestMethod.POST})
 	public Result<String> edit(@RequestBody BasCustomer basCustomer) {
-		basCustomerService.updateById(basCustomer);
+		basCustomerService.edit(basCustomer); //20251030 cfm modi: updateById 改为 edit
 		return Result.OK("编辑成功!");
 	}
 
@@ -110,6 +118,7 @@ public class BasCustomerController extends JeecgController<BasCustomer, IBasCust
 	 */
 	@AutoLog(value = "客户-通过id删除")
 	@ApiOperation(value="客户-通过id删除", notes="客户-通过id删除")
+	@RequiresPermissions("base:customer:delete") //20240806 cfm add
 	@DeleteMapping(value = "/delete")
 	public Result<String> delete(@RequestParam(name="id",required=true) String id) {
 		basCustomerService.removeById(id);
@@ -124,6 +133,7 @@ public class BasCustomerController extends JeecgController<BasCustomer, IBasCust
 	 */
 	@AutoLog(value = "客户-批量删除")
 	@ApiOperation(value="客户-批量删除", notes="客户-批量删除")
+	@RequiresPermissions("base:customer:delete") //20240806 cfm add
 	@DeleteMapping(value = "/deleteBatch")
 	public Result<String> deleteBatch(@RequestParam(name="ids",required=true) String ids) {
 		this.basCustomerService.removeByIds(Arrays.asList(ids.split(",")));
@@ -137,6 +147,7 @@ public class BasCustomerController extends JeecgController<BasCustomer, IBasCust
     * @param basCustomer
     */
 	@AutoLog(value = "导出为excel")
+	@RequiresPermissions("base:customer:export") //20240806 cfm add
     @RequestMapping(value = "/exportXls")
     public ModelAndView exportXls(HttpServletRequest request, BasCustomer basCustomer) {
         return super.exportXls(request, basCustomer, BasCustomer.class, "客户");
@@ -150,6 +161,7 @@ public class BasCustomerController extends JeecgController<BasCustomer, IBasCust
     * @return
     */
 	@AutoLog(value = "通过excel导入数据")
+	@RequiresPermissions("base:customer:import") //20240806 cfm add
     @RequestMapping(value = "/importExcel", method = RequestMethod.POST)
     public Result<?> importExcel(HttpServletRequest request, HttpServletResponse response) {
         return super.importExcel(request, response, BasCustomer.class);

@@ -60,10 +60,10 @@
 
     <!-- 操作按钮区域 -->
     <div class="table-operator">
-      <a-button type="link" @click="myHandleAdd" icon="plus">新增</a-button>
-      <a-button type="link" icon="download" @click="handleExportXls('供应商')">导出</a-button>
+      <a-button :disabled="isDisabledAuth('BasSupplier:add')" @click="myHandleAdd" type="link" icon="plus">新增</a-button>
+      <a-button :disabled="isDisabledAuth('BasSupplier:add')" type="link" icon="download" @click="handleExportXls('供应商')">导出</a-button>
       <a-upload name="file" :showUploadList="false" :multiple="false" :headers="tokenHeader" :action="importExcelUrl" @change="handleImportExcel">
-        <a-button type="link" icon="import">导入</a-button>
+        <a-button :disabled="isDisabledAuth('BasSupplier:add')" type="link" icon="import">导入</a-button>
       </a-upload>
 
       <i class="anticon anticon-info-circle ant-alert-icon"></i> 已选择 <a style="font-weight: 600">{{ selectedRowKeys.length }}</a>项
@@ -96,13 +96,13 @@
         </template>
 
         <span slot="action" slot-scope="text, record">
-          <a @click="myHandleEdit(record)">编辑</a>
+          <a :disabled="isDisabledAuth('BasSupplier:edit')" @click="myHandleEdit(record)">编辑</a>
           <a-divider type="vertical" />
           <a-dropdown>
             <a class="ant-dropdown-link">更多<a-icon type="down"/></a>
             <a-menu slot="overlay">
-              <a-menu-item>
-                <a-popconfirm title="确定删除吗?" @confirm="() => handleDelete(record.id)">删除</a-popconfirm>
+              <a-menu-item :disabled="isDisabledAuth('BasSupplier:delete')" key="1">
+                <a-popconfirm :disabled="isDisabledAuth('BasSupplier:delete')" title="确定删除吗?" @confirm="() => handleDelete(record.id)">删除</a-popconfirm>
               </a-menu-item>
             </a-menu>
           </a-dropdown>
@@ -137,6 +137,7 @@
             title: '#',
             dataIndex: '',
             key:'rowIndex',
+            fixed:"left",
             width:60,
             align:"center",
             customRender: (t,r,index)=>parseInt(index)+1,
@@ -259,7 +260,7 @@
           delete: "/base/basSupplier/delete",
           deleteBatch: "/base/basSupplier/deleteBatch",
           exportXlsUrl: "/base/basSupplier/exportXls",
-          importExcelUrl: "bas/basSupplier/importExcel",
+          importExcelUrl: "base/basSupplier/importExcel",
 
         },
         dictOptions:{},
@@ -269,7 +270,7 @@
     },
     created() {
       this.pcaData = new Area()
-    this.getSuperFieldList();
+      this.getSuperFieldList();
     },
 
     methods: {

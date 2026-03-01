@@ -6,7 +6,7 @@
         <a-row :gutter="24">
           <a-col :xl="5" :lg="6" :md="7" :sm="24">
             <a-form-item label="供应商">
-              <j-search-select-tag v-model="queryParam.supplier_id" :async="true" dict="bas_supplier,aux_name,id" placeholder="请选择"/>
+              <j-search-select-tag v-model="queryParam.supplier_id" dict="bas_supplier,aux_name,id" placeholder="请选择"/>
             </a-form-item>
           </a-col>
           <a-col :xl="8" :lg="9" :md="10" :sm="24">
@@ -79,11 +79,12 @@
   import '@/assets/less/TableExpand.less'
   import { JeecgListMixin } from '@/mixins/JeecgListMixin'
   import { ListMixin } from '../../common/mixins/ListMixin'
+  import { CgreportMixin } from '../../common/mixins/CgreportMixin'
   import XEUtils from "xe-utils";
 
   export default {
     name: "FinPayableDetail",
-    mixins:[JeecgListMixin, ListMixin],
+    mixins:[JeecgListMixin, ListMixin, CgreportMixin],
 
     data () {
       return {
@@ -103,27 +104,27 @@
             title:'供应商',
             width:200,
             align:"left",
-            dataIndex: 'supplier_id_dictText',
+            dataIndex: 'supplier_id',
             ellipsis: true,
           },
           {
             title:'业务部门',
             width:120,
             align:"center",
-            dataIndex: 'op_dept_dictText',
+            dataIndex: 'op_dept',
             ellipsis: true,
           },
           {
             title: '业务员',
             width: 90,
             align: "center",
-            dataIndex: 'operator_dictText',
+            dataIndex: 'operator',
           },
           {
             title:'单据类型',
             width:120,
             align:"center",
-            dataIndex: 'bill_type_dictText',
+            dataIndex: 'bill_type',
           },
           {
             title:'单据编号',
@@ -156,11 +157,8 @@
           {
           },
         ],
-        url: {
-          list: "/wrapper/cgreport/getData/1578657557905489921",
-          exportXlsUrl: "/online/cgreport/api/exportManySheetXls/1578657557905489921",
-        },
 
+        cgreportId: '1578657557905489921',
         disableMixinCreated: true
       }
     },
@@ -168,7 +166,7 @@
     created() {
       this.isorter.column = 'effective_time';
       this.isorter.order = 'desc';
-      this.loadData();
+      this.initReport();
     },
   }
 </script>

@@ -18,8 +18,13 @@ const user = {
     // 系统安全模式
     sysSafeMode: null,
 
-    //201221108 cfm add
+    //20221108 cfm add
     bizPeriod: {},
+    //20221218 cfm add
+    bizOptions: {},
+    materialList: [],
+    //20230217 cfm add
+    unitList: [],
   },
 
   mutations: {
@@ -51,10 +56,21 @@ const user = {
       }
     },
 
-    //201221108 cfm add
+    //20221108 cfm add
     SET_BIZ_PERIOD: (state, bizPeriod) => {
       state.bizPeriod = bizPeriod;
-    }
+    },
+    //20221218 cfm add
+    SET_BIZ_OPTIONS: (state, bizOptions) => {
+      state.bizOptions = bizOptions;
+    },
+    SET_MATERIAL_LIST: (state, materialList) => {
+      state.materialList = materialList;
+    },
+    //20230217 cfm add
+    SET_UNIT_LIST: (state, unitList) => {
+      state.unitList = unitList;
+    },
   },
 
   actions: {
@@ -239,6 +255,57 @@ const user = {
         getAction("/base/basBizPeriod/currentPeriod").then(res => {
           if (res.success) {
             commit('SET_BIZ_PERIOD', res.result);
+            resolve(res);
+          }
+          else {
+            reject(res);
+          }
+        }).catch(error => {
+          reject(error);
+        })
+      })
+    },
+
+    //20221218 cfm add
+    getBizOptions({ commit }) {
+      return new Promise((resolve, reject) => {
+        getAction("/base/basBizOptions/query").then(res => {
+          if (res.success) {
+            commit('SET_BIZ_OPTIONS', res.result);
+            resolve(res);
+          }
+          else {
+            reject(res);
+          }
+        }).catch(error => {
+          reject(error);
+        })
+      })
+    },
+
+    //20221218 cfm add
+    getMaterialList({ commit }) {
+      return new Promise((resolve, reject) => {
+        getAction("/base/basMaterial/list/enabled").then(res => {
+          if (res.success) {
+            commit('SET_MATERIAL_LIST', res.result.records||res.result);
+            resolve(res);
+          }
+          else {
+            reject(res);
+          }
+        }).catch(error => {
+          reject(error);
+        })
+      })
+    },
+
+    //20230217 cfm add
+    getUnitList({ commit }) {
+      return new Promise((resolve, reject) => {
+        getAction("/base/basUnit/list/enabled").then(res => {
+          if (res.success) {
+            commit('SET_UNIT_LIST', res.result.records||res.result);
             resolve(res);
           }
           else {

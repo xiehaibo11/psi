@@ -6,7 +6,7 @@
         <a-row :gutter="24">
            <a-col :xl="5" :lg="6" :md="7" :sm="24">
             <a-form-item label="客户">
-              <j-search-select-tag v-model="queryParam.customer_id" :async="true" dict="bas_customer,aux_name,id" placeholder="请选择"/>
+              <j-search-select-tag v-model="queryParam.customer_id" dict="bas_customer,aux_name,id" placeholder="请选择"/>
             </a-form-item>
           </a-col>
           <template v-if="toggleSearchStatus">
@@ -56,11 +56,12 @@
   import '@/assets/less/TableExpand.less'
   import { JeecgListMixin } from '@/mixins/JeecgListMixin'
   import { ListMixin } from '../../common/mixins/ListMixin'
+  import { CgreportMixin } from '../../common/mixins/CgreportMixin'
   import XEUtils from "xe-utils";
 
   export default {
     name: "FinReceivableBal",
-    mixins:[JeecgListMixin, ListMixin],
+    mixins:[JeecgListMixin, ListMixin, CgreportMixin],
 
     data () {
       return {
@@ -93,16 +94,15 @@
           {
           },
         ],
-        url: {
-          list: "/wrapper/cgreport/getData/1579838441006305281",
-          exportXlsUrl: "/online/cgreport/api/exportManySheetXls/1579838441006305281",
-        },
 
+        cgreportId: '1579838441006305281',
         disableMixinCreated: true
       }
     },
 
     created() {
+      this.initReport();
+
       this.isorter.column = 'customer_name';
       this.isorter.order = 'asc';
       this.loadData();

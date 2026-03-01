@@ -3,42 +3,35 @@
     <div>
     <!-- 主表单区域 -->
       <a-form-model ref="form" :model="model" :rules="validatorRules">
-        <bill-header ref="billHeader" :model="model" :disabled="disabled" :moreStatus.sync="moreStatus"/>
+        <bill-header ref="billHeader" :model="model" :disabled="disabled" :moreStatus.sync="moreStatus" :moreStatus2.sync="moreStatus2"/>
 
         <a-row>
-          <a-col :span="8" >
-            <a-form-model-item label="单据主题" :labelCol="labelCol3" :wrapperCol="wrapperCol3" prop="subject">
-              <a-input v-model="model.subject" placeholder="请输入" :readOnly="disabled"/>
-            </a-form-model-item>
-          </a-col>
-          <a-col :span="8" >
-            <a-form-model-item label="业务员" :labelCol="labelCol3" :wrapperCol="wrapperCol3" prop="operator" ref="operatorFmi">
+          <a-col :xl="8" :lg="12" :md="24">
+            <a-form-model-item label="供应商" :labelCol="labelCol3" :wrapperCol="wrapperCol3" prop="supplierId">
               <a-tooltip :title="!disabled && entryTable.rowCount>0 ? '有明细时不能改变！' : ''" placement="bottom">
-                <j-select-user-by-dep v-model="model.operator" :multi="false" @change="onOperatorChange"
-                                      :disabled="disabled || entryTable.rowCount>0"/>
+                <j-search-select-tag v-model="model.supplierId" dict="bas_supplier,aux_name,id" :disabled="disabled || entryTable.rowCount>0"/>
               </a-tooltip>
             </a-form-model-item>
           </a-col>
-          <a-col :span="8" >
+          <a-col :xl="8" :lg="12" :md="24">
+            <a-form-model-item label="业务员" :labelCol="labelCol3" :wrapperCol="wrapperCol3" prop="operator" ref="operatorFmi">
+              <a-tooltip :title="!disabled && entryTable.rowCount>0 ? '有明细时不能改变！' : ''" placement="bottom">
+                <j-select-user-by-dep v-model="model.operator" :multi="false" @change="onOperatorChange" :disabled="disabled || entryTable.rowCount>0"/>
+              </a-tooltip>
+            </a-form-model-item>
+          </a-col>
+          <a-col :xl="8" :lg="12" :md="24" >
             <a-form-model-item label="业务部门" :labelCol="labelCol3" :wrapperCol="wrapperCol3" prop="opDept" ref="opDeptFmi">
               <j-dict-select-tag v-if="disabled"  v-model="model.opDept"
                                  dictCode="sys_depart,depart_name,org_code" :disabled="true" />
               <a-tooltip v-else :title="entryTable.rowCount>0 ? '有明细时不能改变！' : model.operator && model.operator.length>0 ? '' : '请先选择业务员！'" placement="bottom">
                 <j-dict-select-tag ref="opDept"  v-model="model.opDept" placeholder="请选择"
-                                   :dictCode="`sys_depart,depart_name,org_code,(id IN (SELECT dept_id FROM sys_user_dept WHERE username='${model.operator}'))` "
+                                   :dictCode="`sys_user_dept,depart_name,org_code,username='${model.operator}'`"
                                    :disabled="entryTable.rowCount>0"/>
               </a-tooltip>
             </a-form-model-item>
           </a-col>
-          <a-col :span="8" >
-            <a-form-model-item label="供应商" :labelCol="labelCol3" :wrapperCol="wrapperCol3" prop="supplierId">
-              <a-tooltip :title="!disabled && entryTable.rowCount>0 ? '有明细时不能改变！' : ''" placement="bottom">
-                <j-search-select-tag v-model="model.supplierId" :async="true" dict="bas_supplier,aux_name,id"
-                                     :disabled="disabled || entryTable.rowCount>0"/>
-              </a-tooltip>
-            </a-form-model-item>
-          </a-col>
-          <a-col :span="8" v-show="action==='detail'">
+          <a-col :xl="8" :lg="12" :md="24" v-show="action==='detail'">
             <a-form-model-item label="已付金额" :labelCol="labelCol3" :wrapperCol="wrapperCol3" prop="paidAmt">
               <a-input-number v-model="model.paidAmt" :disabled="true"
                               :formatter="value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
@@ -48,12 +41,31 @@
           </a-col>
         </a-row>
 
+        <a-row>
+          <a-col :xl="8" :lg="12" :md="24" v-show="moreStatus2 || !!model.subject && model.subject.length > 0">
+            <a-form-model-item label="单据主题" :labelCol="labelCol3" :wrapperCol="wrapperCol3" prop="subject">
+              <a-input v-model="model.subject" placeholder="请输入" :readOnly="disabled"/>
+            </a-form-model-item>
+          </a-col>
+          <a-col :xl="8" :lg="12" :md="24" v-show="moreStatus2 || !!model.remark && model.remark.length > 0">
+            <a-form-model-item label="备注" :labelCol="labelCol3" :wrapperCol="wrapperCol3" prop="remark">
+              <a-textarea v-model="model.remark" :readOnly="disabled" rows="1" autoSize/>
+            </a-form-model-item>
+          </a-col>
+          <a-col :xl="8" :lg="12" :md="24" v-show="moreStatus2 || !!model.attachment && model.attachment.length > 0">
+            <a-form-model-item label="附件" :labelCol="labelCol3" :wrapperCol="wrapperCol3" prop="attachment">
+              <j-upload v-model="model.attachment" :disabled="disabled" bizPath="erp"/>
+            </a-form-model-item>
+          </a-col>
+        </a-row>
+
         <!-- 子表单区域 -->
         <a-tabs v-model="activeKey" @change="handleChangeTabs">
-          <a-tab-pane tab="采购订单" :key="refKeys[1]" :forceRender="true">
+          <!--20251101 cfm modi for 内置BPM：各源单tab增加 v-if... -->
+          <a-tab-pane v-if="srcVisible" tab="采购订单" key="srcTable" :forceRender="true">
             <j-vxe-table
               keep-source
-              :ref="refKeys[1]"
+              ref="srcTable"
               :loading="srcTable.loading"
               :columns="srcTable.columns"
               :dataSource="srcTable.dataSource"
@@ -65,10 +77,10 @@
               :edit-config="{enabled: false, showIcon: false}"/>
           </a-tab-pane>
 
-          <a-tab-pane tab="明细" :key="refKeys[0]" :forceRender="true">
+          <a-tab-pane tab="明细" key="entryTable" :forceRender="true">
             <j-vxe-table
               keep-source
-              :ref="refKeys[0]"
+              ref="entryTable"
               :loading="entryTable.loading"
               :columns="entryTable.columns"
               :dataSource="entryTable.dataSource"
@@ -84,7 +96,7 @@
               @remove="event => {this.entryTable.rowCount = this.$refs.entryTable.getTableData().length; this.removeFreeSrcBills();}"
             >
               <template v-if="!disabled" v-slot:toolbarPrefix>
-                <a-tooltip :title="tipTitleOfAdd" placement="bottom">
+                <a-tooltip :title="addTip" placement="bottom">
                   <a-button @click="$refs.orderPopup.openModal()" icon="plus" type="primary" :disabled="addDisabled">采购订单</a-button>
                 </a-tooltip>
                 <j-popup v-show="false" ref="orderPopup" code="pur_order" :param="orderPopupParam"
@@ -96,32 +108,38 @@
           <template slot="tabBarExtraContent">
             <vxe-table-columns-setter v-show="activeKey==='entryTable'"
               :table-key="activeKey + (disabled ? '1':'0')"
-              :column-defs="entryTable.columns" :excluded-cols="disabled ? '':entryTable.editExcludeCols"
+              :column-defs="entryTable.columns" :excluded-cols="disabled ? '':entryTable.exKeysWhenEdit"
               style="float: right;"/>
           </template>
         </a-tabs>
 
-        <bill-footer ref="billFooter" :model="model" :disabled="disabled" :action="action"/>
+        <bill-approval v-if="action==='check' || action==='ebpm'" :model="model" :disabled="disabled" style="margin-top: 16px"/>
       </a-form-model>
     </div>
   </a-spin>
 </template>
 
 <script>
-  import { JVxeTableModelMixin } from '@/mixins/JVxeTableModelMixin'
-  import { JVXETypes } from '@/components/jeecg/JVxeTable'
-  import { getRefPromise,VALIDATE_FAILED} from '@/components/jeecg/JVxeTable/utils/vxeUtils.js'
-  import { BillFormMixin, BillFormGridMixin} from '../../common/mixins/BillFormMixin'
-  import { BillVxeTableMixin } from '../../common/mixins/BillVxeTableMixin'
-  import BillHeader from "../../common/components/BillHeader";
-  import BillFooter from "../../common/components/BillFooter";
-  import VxeTableColumnsSetter from "../../common/components/VxeTableColumnsSetter";
+  import {JVXETypes} from '@/components/jeecg/JVxeTable'
+  import {getRefPromise} from '@/components/jeecg/JVxeTable/utils/vxeUtils.js'
+  import {JVxeTableModelMixin} from '@/mixins/JVxeTableModelMixin'
+  import {BillFormMixin} from '../../common/mixins/bill/BillFormMixin'
+  import {BillFormGridMixin} from '../../common/mixins/bill/BillFormGridMixin'
+  import {DetailMixin} from '../../common/mixins/bill/DetailMixin'
+  import {DetailValueMixin} from '../../common/mixins/bill/DetailValueMixin'
+  import {DetailFormatMixin} from '../../common/mixins/bill/DetailFormatMixin'
+  import {DetailValidatorMixin} from '../../common/mixins/bill/DetailValidatorMixin'
+  import {DataMixin} from '../../common/mixins/DataMixin'
+  import BillHeader from "../../common/components/BillHeader"
+  import BillApproval from "../../common/components/BillApproval"
+  import VxeTableColumnsSetter from "../../common/components/VxeTableColumnsSetter"
   import XEUtils from "xe-utils";
+  import {stringIsEmpty} from "../../../erp/common/utils/util";
 
   export default {
     name: 'PurPrepayment2011ReqForm',
-    mixins: [JVxeTableModelMixin, BillFormMixin, BillFormGridMixin, BillVxeTableMixin],
-    components: {BillHeader, BillFooter, VxeTableColumnsSetter},
+    mixins: [JVxeTableModelMixin, BillFormMixin, BillFormGridMixin, DetailMixin, DetailValueMixin, DetailFormatMixin, DetailValidatorMixin, DataMixin],
+    components: {BillHeader, BillApproval, VxeTableColumnsSetter},
 
     data() {
       return {
@@ -147,17 +165,18 @@
 
         entryNoStep: 10,
         addDefaultRowNum: 0,
-        refKeys: ['entryTable', 'srcTable'],
-        tableKeys:['entryTable'],//用于校验和提交子表数据的方法getAllTable(),须与refkeys中位置相同
+        refKeys:  ['entryTable'],
+        tableKeys:['entryTable'],
         activeKey: 'entryTable',
 
         // 明细
         entryTable: {
           loading: false,
           rowCount: 0,
+          selectedRowCount:0,
           dataSource: [],
           url: {list: '/finance/finPaymentReq/queryEntryByMainId'},
-          editExcludeCols: 'paidAmt',
+          exKeysWhenEdit: 'paidAmt',
           columns: [
             {
               title: '#',
@@ -194,8 +213,7 @@
               formatter: this.formatAmt,
               placeholder: '请输入',
               defaultValue: '',
-              validateRules: [{ required: true, message: '${title}不能为空' },
-                {handler: this.rubricValidator}, {handler: this.amtValidator}],
+              validateRules: [{ required: true, message: '${title}不能为空' }, {handler: this.rubricValidator}, {handler: this.amtValidator}],
               statistics: ['sum'],
             },
             {
@@ -213,21 +231,21 @@
               title: '备注',
               key: 'remark',
               type: JVXETypes.input,
-              width:"160px",
+              width:"100px",
               defaultValue: '',
             },
             {
               title: '自定义1',
               key: 'custom1',
               type: JVXETypes.input,
-              width:"100px",
+              width:"80px",
               defaultValue: '',
             },
             {
               title: '自定义2',
               key: 'custom2',
               type: JVXETypes.input,
-              width:"100px",
+              width:"80px",
               defaultValue: '',
             },
           ]
@@ -257,22 +275,6 @@
               sortable: true,
             },
             {
-              title:'单据主题',
-              key: 'subject',
-              type: JVXETypes.input,
-              width:"200px",
-              align:"left",
-              sortable: true,
-            },
-            {
-              title: '源单号',
-              key: 'srcNo',
-              type: JVXETypes.input,
-              width:"160px",
-              align:"center",
-              sortable: true,
-            },
-            {
               title: '采购类型',
               key: 'purType',
               type: JVXETypes.select,
@@ -287,6 +289,7 @@
               key: 'opDept',
               type: JVXETypes.select,
               dictCode:"sys_depart,depart_name,org_code",
+              options:[],
               width:"120px",
               align:"center",
               sortable: true,
@@ -296,6 +299,7 @@
               key: 'operator',
               type: JVXETypes.select,
               dictCode:"sys_user,realname,username",
+              options:[],
               width:"90px",
               align:"center",
               sortable: true,
@@ -387,6 +391,14 @@
               sortable: true,
             },
             {
+              title:'单据主题',
+              key: 'subject',
+              type: JVXETypes.input,
+              width:"200px",
+              align:"left",
+              sortable: true,
+            },
+            {
               title: '备注',
               key: 'remark',
               type: JVXETypes.input,
@@ -403,28 +415,42 @@
           ebpm: "/finance/finPaymentReq/bpm/end",
           execute: "/finance/finPaymentReq/execute",
           void: "/finance/finPaymentReq/void",
+          queryById: "/finance/finPaymentReq/queryById", //20251101 cfm add for 内置BPM
         },
       }
     },
 
+    watch:{
+      'entryTable.dataSource'() {
+        this.entryTable.rowCount = this.entryTable.dataSource.length;
+      },
+
+      'entryTable.loading': {
+        immediate: true,
+        handler() {
+          this.$emit("update:loading", this.entryTable.loading);
+        }
+      },
+
+      'entryTable.rowCount': {
+        immediate: true,
+        handler() {
+          this.$emit("update:entryCount", this.entryTable.rowCount);
+        }
+      }
+    },
 
     computed: {
-      tipTitleOfAdd() {
-        if (!this.model.supplierId || this.model.supplierId.length === 0
-          || !this.model.operator || this.model.operator.length === 0
-          || !this.model.opDept || this.model.opDept.length === 0)
+      addTip() {
+        if (stringIsEmpty(this.model.supplierId) || stringIsEmpty(this.model.operator) || stringIsEmpty(this.model.opDept))
           return "请先选择业务员、业务部门和供应商！";
-
-        if (this.entryTable.rowCount > 0)  return "只能添加一个采购订单！";
-
+        if (this.entryTable.rowCount > 0) return "只能添加一个采购订单！";
         return "业务员、业务部门和供应商是弹窗查询参数";
       },
 
       addDisabled() {
-        return !this.model.supplierId || this.model.supplierId.length === 0
-          || !this.model.operator || this.model.operator.length === 0
-          || !this.model.opDept || this.model.opDept.length=== 0
-          || this.entryTable.rowCount > 0;
+        return stringIsEmpty(this.model.supplierId) || stringIsEmpty(this.model.operator) ||
+          stringIsEmpty(this.model.opDept) || this.entryTable.rowCount > 0;
       },
 
       orderPopupParam() {
@@ -437,10 +463,8 @@
     },
 
     created() {
-      if (!this.disabled)
-        this.hideColumns(this.entryTable.editExcludeCols);
-      else
-        this.restoreColumnsType(this.entryTable.editExcludeCols);
+      this.filterColumns();
+      this.initColumnsForMobile(); //20240718 cfm add
     },
 
     methods: {
@@ -453,8 +477,7 @@
       },
 
       editAfter() {
-        if (this.model.id)
-          this.requestSubDatas(this.entryTable, this.srcTable);
+        if (this.model.id) this.requestSubDatas(this.entryTable, this.srcTable);
       },
 
       getAllTable() {
@@ -471,7 +494,7 @@
       },
 
       onOrderPopupInput(val, row) {
-        if(!row.id || row.id.length===0) return;
+        if(stringIsEmpty(row.id)) return;
         const that = this;
         this.requestSrcDeltas(row.id, this.srcTable, null, success);
 
@@ -489,7 +512,7 @@
 
       amtValidator({cellValue, row, column}, callback, target) {
         let v = Number(cellValue);
-        if (isNaN(v) || !row.srcBillId || row.srcBillId.length === 0) {
+        if (isNaN(v) || stringIsEmpty(row.srcBillId)) {
           callback();
           return;
         }

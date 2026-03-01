@@ -19,6 +19,11 @@
             </a-form-model-item>
           </a-col>
           <a-col :span="24">
+            <a-form-model-item label="条码" :labelCol="labelCol" :wrapperCol="wrapperCol" prop="barcode">
+              <a-input v-model="model.barcode" placeholder="请输入" :disabled="disabled"/>
+            </a-form-model-item>
+          </a-col>
+          <a-col :span="24">
             <a-form-model-item label="分类" :labelCol="labelCol" :wrapperCol="wrapperCol" prop="categoryId">
               <j-tree-select
                 ref="treeSelect"
@@ -38,10 +43,19 @@
             </a-form-model-item>
           </a-col>
           <a-col :span="24">
-            <a-form-model-item label="计量单位" :labelCol="labelCol" :wrapperCol="wrapperCol" prop="unitId">
-              <j-dict-select-tag v-model="model.unitId" dictCode="bas_unit,name,id" placeholder="请选择" :disabled="disabled"/>
+            <a-form-model-item label="主单位" :labelCol="labelCol" :wrapperCol="wrapperCol" prop="unitId">
+              <j-dict-select-tag v-model="model.unitId" dictCode="bas_unit,name,id" placeholder="请选择"
+                                 :disabled="disabled || action !== 'add'"/> <!-- 20250410 cfm modi: 增加 action... -->
             </a-form-model-item>
           </a-col>
+
+          <!-- 20250408 cfm add -->
+          <a-col :span="24">
+            <a-form-model-item label="图片" :labelCol="labelCol" :wrapperCol="wrapperCol">
+              <j-image-upload  text="上传" v-model="model.image" :isMultiple="true" :disabled="disabled" bizPath="erp"/>
+            </a-form-model-item>
+          </a-col>
+
           <a-col :span="24">
             <a-form-model-item label="销售价格" :labelCol="labelCol" :wrapperCol="wrapperCol" prop="salePrice">
               <a-input-number
@@ -53,12 +67,12 @@
           </a-col>
           <a-col :span="24">
             <a-form-model-item label="税控编码" :labelCol="labelCol" :wrapperCol="wrapperCol" prop="taxCoce">
-              <a-input v-model="model.taxCoce" placeholder="请输入" :disabled="disabled"/>
+              <a-input v-model="model.taxCode" placeholder="请输入" :disabled="disabled"/>
             </a-form-model-item>
           </a-col>
           <a-col :span="24">
             <a-form-model-item label="启用" :labelCol="labelCol" :wrapperCol="wrapperCol" prop="isEnabled">
-              <j-dict-select-tag v-model="model.isEnabled" dictCode="yn" placeholder="请选择":disabled="disabled"/>
+              <j-dict-select-tag v-model="model.isEnabled" dictCode="yn" placeholder="请选择" :disabled="disabled"/>
             </a-form-model-item>
           </a-col>
           <a-col :span="24">

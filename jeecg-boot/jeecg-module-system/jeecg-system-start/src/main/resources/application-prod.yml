@@ -131,8 +131,8 @@ spring:
       datasource:
         master:
           url: jdbc:mysql://127.0.0.1:3306/psi?characterEncoding=UTF-8&useUnicode=true&useSSL=false&tinyInt1isBit=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
-          username: root
-          password: root
+          username: psi
+          password: psi
           driver-class-name: com.mysql.cj.jdbc.Driver
           # 多数据源配置
           #multi-datasource1:
@@ -167,14 +167,15 @@ mybatis-plus:
 minidao:
   base-package: org.jeecg.modules.jmreport.*
 jeecg:
-  # 是否启用安全模式
+  # 是否启用安全模式(开启后Online报表的数据源字段变为必填)
   safeMode: false
   # 签名密钥串(前后端要一致，正式发布请自行修改)
   signatureSecret: dd05f1c54d63749eda95f9fa6d49v442a
+
   # 签名拦截接口
   signUrls: /sys/dict/getDictItems/*,/sys/dict/loadDict/*,/sys/dict/loadDictOrderByValue/*,/sys/dict/loadDictItem/*,/sys/dict/loadTreeData,/sys/api/queryTableDictItemsByCode,/sys/api/queryFilterTableDictInfo,/sys/api/queryTableDictByKeys,/sys/api/translateDictFromTable,/sys/api/translateDictFromTableByKeys
   #local\minio\alioss
-  uploadType: alioss
+  uploadType: local
   # 前端访问地址
   domainUrl:
     pc: http://localhost:3100
@@ -185,8 +186,9 @@ jeecg:
     #webapp文件路径
     webapp: /opt/jeecg-boot/webapp
   shiro:
-    #20220325 cfm add: "/bpmi/dingtalk/callback,/jmreport/**"
-    excludeUrls: /bpmi/dingtalk/callback,/jmreport/**,/test/jeecgDemo/demo3,/test/jeecgDemo/redisDemo/**,/category/**,/visual/**,/map/**,/jmreport/bigscreen2/**
+    #20240418 cfm add: "/base/basBizOptions/query"
+    #20251211 cfm modi: "/base/basBizOptions/query" 改成 "/sys/option/options"
+    excludeUrls: /sys/option/options,/bpmi/dingtalk/callback
   #阿里云oss存储和大鱼短信秘钥配置
   oss:
     accessKey: ??
@@ -207,18 +209,19 @@ jeecg:
     minio_name: ??
     minio_pass: ??
     bucketName: otatest
-  #大屏报表参数设置
+  #积木报表参数设置
   jmreport:
-    mode: prod
-    #数据字典是否进行saas数据隔离，自己看自己的字典
-    saas: false
-    #是否需要校验token
-    is_verify_token: true
-    #必须校验方法
-    verify_methods: remove,delete,save,add,update
+    #多租户模式，默认值为空(created:按照创建人隔离、tenant:按照租户隔离) (v1.6.2+ 新增)
+    saasMode:
+    # 平台上线安全配置(v1.6.2+ 新增)
+    firewall:
+      # 数据源安全 (开启后，不允许使用平台数据源、SQL解析加签并且不允许查询数据库)
+      dataSourceSafe: true
+      # 低代码开发模式（dev:开发模式，prod:发布模式—关闭在线报表设计功能，分配角色admin、lowdeveloper可以放开限制）
+      lowCodeMode: prod
   #xxl-job配置
   xxljob:
-    enabled: false
+    enabled: true
     adminAddresses: http://127.0.0.1:9080/xxl-job-admin
     appname: ${spring.application.name}
     accessToken: ''
@@ -245,7 +248,7 @@ knife4j:
   #开启增强配置
   enable: true
   #开启生产环境屏蔽
-  production: false
+  production: true
   basic:
     enable: true
     username: jeecg
@@ -254,37 +257,33 @@ knife4j:
 justauth:
   enabled: true
   type:
-    GITHUB:
-      client-id: ??
-      client-secret: ??
-      redirect-uri: http://sso.test.com:8080/jeecg-boot/sys/thirdLogin/github/callback
-    WECHAT_ENTERPRISE:
-      client-id: ??
-      client-secret: ??
-      redirect-uri: http://sso.test.com:8080/jeecg-boot/sys/thirdLogin/wechat_enterprise/callback
-      agent-id: ??
+    #WECHAT_ENTERPRISE:
+    #  client-id: ??
+    #  client-secret: ??
+    #  redirect-uri: http://sso.test.com:8080/jeecg-boot/sys/thirdLogin/wechat_enterprise/callback
+    #  agent-id: ??
     DINGTALK:
-      client-id: dingmflizonkqwe8jyik
-      client-secret: k0Rp-y6XtUU_C_Lp6g4AlFK-SJ6FSRell1qd86vAaUa86w2hm7uCJr8KexrSfRUT
-      #redirect-uri: http://cfm999.natapp1.cc/jeecg-boot/sys/thirdLogin/dingtalk/callback
-      redirect-uri: http://cfm999.natapp1.cc/jeecg-boot/sys/oauth2/dingtalk/callback
-    WECHAT_OPEN:
-      client-id: ??
-      client-secret: ??
-      redirect-uri: http://sso.test.com:8080/jeecg-boot/sys/thirdLogin/wechat_open/callback
+      client-id: dingdjqtfqb5wdjab5gg
+      client-secret: 8aI4fpRZMBjsZKvkaaRVcB1vS3DHFt9RI-5vsQMqNAKxSO3EB2Wj8Mr8wy17SfmE
+      redirect-uri: http://8.141.93.26:8080/jeecg-boot/sys/oauth2/dingtalk/callback
+    #WECHAT_OPEN:
+    #  client-id: ??
+    #  client-secret: ??
+    #  redirect-uri: http://sso.test.com:8080/jeecg-boot/sys/thirdLogin/wechat_open/callback
     #20211030 cfm add: 微信公众平台
-    WECHAT_MP:
-      #appID
-      client-id: wxeb68e6ef6fe25caa
-      #Appsecret
-      client-secret: e9c6cc8e1f0e7b50b210a721cd6ac28e
-      redirect-uri: http://cfm999.natapp1.cc/jeecg-boot/sys/oauth2/wechat_mp/callback
+    #WECHAT_MP:
+    #  #appID
+    #  client-id: wx53d45c1556ad5ccb
+    #  #Appsecret
+    #  client-secret: 6e53e8fd0e53df51db63d2ad8047c7f0
+    #  redirect-uri: http://8.141.93.26:8080/jeecg-boot/sys/oauth2/wechat_mp/callback
   cache:
     type: default
     prefix: 'demo::'
     timeout: 1h
 
 #缺省的第三方BPM： 20211229 cfm add
+#20250915 cfm: v2.1+ 废弃 third-bpm.default
 third-bpm:
   default: DINGTALK
 
@@ -307,16 +306,16 @@ third-app:
     DINGTALK:
       enabled: true
       # appKey
-      client-id: dingmflizonkqwe8jyik
+      client-id: dingdjqtfqb5wdjab5gg
       # appSecret
-      client-secret: k0Rp-y6XtUU_C_Lp6g4AlFK-SJ6FSRell1qd86vAaUa86w2hm7uCJr8KexrSfRUT
-      agent-id: 1396418445
+      client-secret: 8aI4fpRZMBjsZKvkaaRVcB1vS3DHFt9RI-5vsQMqNAKxSO3EB2Wj8Mr8wy17SfmE
+      agent-id: 2944610177
       # aes_key //20221021 cfm add: 钉钉企业内部应用事件订阅加密 aes_key
       agent-app-secret: jqIFoCJGi1L9ni5Ab4bdgYgrXe036OzqOiblEaCUS13
       # token //20221021 cfm add： 钉钉企业内部应用事件订阅签名 token
       token: 12345
     WECHAT_MP:
-      enabled: true
+      enabled: false
       # appKey
       client-id: ??
       # appSecret

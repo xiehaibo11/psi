@@ -110,7 +110,7 @@ spring:
         # 初始化大小，最小，最大
         initial-size: 5
         min-idle: 5
-        maxActive: 20
+        maxActive: 1000
         # 配置获取连接等待超时的时间
         maxWait: 60000
         # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
@@ -130,7 +130,7 @@ spring:
         connectionProperties: druid.stat.mergeSql\=true;druid.stat.slowSqlMillis\=5000
       datasource:
         master:
-          url: jdbc:mysql://127.0.0.1:3306/psi?characterEncoding=UTF-8&useUnicode=true&useSSL=false&tinyInt1isBit=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+          url: jdbc:mysql://127.0.0.1:3306/psi-commu?characterEncoding=UTF-8&useUnicode=true&useSSL=false&tinyInt1isBit=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
           username: root
           password: root
           driver-class-name: com.mysql.cj.jdbc.Driver
@@ -140,12 +140,14 @@ spring:
           #username: root
           #password: root
           #driver-class-name: com.mysql.cj.jdbc.Driver
+
   #redis 配置
   redis:
     database: 0
     host: 127.0.0.1
     port: 6379
     password: ''
+
 #mybatis plus 设置
 mybatis-plus:
   #20200328 cfm modi
@@ -186,7 +188,9 @@ jeecg:
     webapp: /opt/webapp
   shiro:
     #20220325 cfm add: "/bpmi/dingtalk/callback,/jmreport/**"
-    excludeUrls: /bpmi/dingtalk/callback,/jmreport/**,/test/jeecgDemo/demo3,/test/jeecgDemo/redisDemo/**,/category/**,/visual/**,/map/**,/jmreport/bigscreen2/**
+    #20240418 cfm add: "/base/basBizOptions/query"
+    #20251211 cfm modi: "/base/basBizOptions/query" 改成 "/sys/option/options"
+    excludeUrls: /sys/option/options,/bpmi/dingtalk/callback,/jmreport/**,/test/jeecgDemo/demo3,/test/jeecgDemo/redisDemo/**,/category/**,/visual/**,/map/**,/jmreport/bigscreen2/**
   #阿里云oss存储和大鱼短信秘钥配置
   oss:
     accessKey: ??
@@ -206,15 +210,16 @@ jeecg:
     minio_name: ??
     minio_pass: ??
     bucketName: otatest
-  #大屏报表参数设置
+  #积木报表参数设置
   jmreport:
-    mode: dev
-    #数据字典是否进行saas数据隔离，自己看自己的字典
-    saas: false
-    #是否需要校验token
-    is_verify_token: true
-    #必须校验方法
-    verify_methods: remove,delete,save,add,update
+    #多租户模式，默认值为空(created:按照创建人隔离、tenant:按照租户隔离) (v1.6.2+ 新增)
+    saasMode:
+    # 平台上线安全配置(v1.6.2+ 新增)
+    firewall:
+      # 数据源安全 (开启后，不允许使用平台数据源、SQL解析加签并且不允许查询数据库)
+      dataSourceSafe: false
+      # 低代码开发模式（dev:开发模式，prod:发布模式—关闭在线报表设计功能，分配角色admin、lowdeveloper可以放开限制）
+      lowCodeMode: dev
   #xxl-job配置
   xxljob:
     enabled: false
@@ -253,37 +258,33 @@ knife4j:
 justauth:
   enabled: true
   type:
-    GITHUB:
-      client-id: ??
-      client-secret: ??
-      redirect-uri: http://sso.test.com:8080/jeecg-boot/sys/thirdLogin/github/callback
-    WECHAT_ENTERPRISE:
-      client-id: ??
-      client-secret: ??
-      redirect-uri: http://sso.test.com:8080/jeecg-boot/sys/thirdLogin/wechat_enterprise/callback
-      agent-id: ??
+    #WECHAT_ENTERPRISE:
+    #  client-id: ??
+    #  client-secret: ??
+    #  redirect-uri: http://sso.test.com:8080/jeecg-boot/sys/thirdLogin/wechat_enterprise/callback
+    #  agent-id: ??
     DINGTALK:
-      client-id: dingmflizonkqwe8jyik
-      client-secret: k0Rp-y6XtUU_C_Lp6g4AlFK-SJ6FSRell1qd86vAaUa86w2hm7uCJr8KexrSfRUT
-      #redirect-uri: http://cfm999.natapp1.cc/jeecg-boot/sys/thirdLogin/dingtalk/callback
-      redirect-uri: http://cfm999.natapp1.cc/jeecg-boot/sys/oauth2/dingtalk/callback
-    WECHAT_OPEN:
-      client-id: ??
-      client-secret: ??
-      redirect-uri: http://sso.test.com:8080/jeecg-boot/sys/thirdLogin/wechat_open/callback
+      client-id: dingqolvmay7bzb4ta1a
+      client-secret: l-0zfllMVeriIsh-Yk1xzGs4IMZ_qQpLdR_eyTnPVtPRJvwZw1dnnVCwn0VM2riS
+      redirect-uri: http://192.168.202.1:8080/jeecg-boot/sys/oauth2/dingtalk/callback
+    #WECHAT_OPEN:
+    #  client-id: ??
+    #  client-secret: ??
+    #  redirect-uri: http://sso.test.com:8080/jeecg-boot/sys/thirdLogin/wechat_open/callback
     #20211030 cfm add: 微信公众平台
-    WECHAT_MP:
-      #appID
-      client-id: wxeb68e6ef6fe25caa
-      #Appsecret
-      client-secret: e9c6cc8e1f0e7b50b210a721cd6ac28e
-      redirect-uri: http://cfm999.natapp1.cc/jeecg-boot/sys/oauth2/wechat_mp/callback
+    #WECHAT_MP:
+    #  #appID
+    #  client-id: wx53d45c1556ad5ccb
+    #  #Appsecret
+    #  client-secret: 6e53e8fd0e53df51db63d2ad8047c7f0
+    #  redirect-uri: http://8.141.93.26:8080/jeecg-boot/sys/oauth2/wechat_mp/callback
   cache:
     type: default
     prefix: 'demo::'
     timeout: 1h
 
-#缺省的第三方BPM： 20211229 cfm add
+#缺省的第三方BPM： 20211229 cfm add;
+#20250915 cfm: v2.1+ 废弃 third-bpm.default
 third-bpm:
   default: DINGTALK
 
@@ -306,10 +307,10 @@ third-app:
     DINGTALK:
       enabled: true
       # appKey
-      client-id: dingmflizonkqwe8jyik
+      client-id: dingqolvmay7bzb4ta1a
       # appSecret
-      client-secret: k0Rp-y6XtUU_C_Lp6g4AlFK-SJ6FSRell1qd86vAaUa86w2hm7uCJr8KexrSfRUT
-      agent-id: 1396418445
+      client-secret: l-0zfllMVeriIsh-Yk1xzGs4IMZ_qQpLdR_eyTnPVtPRJvwZw1dnnVCwn0VM2riS
+      agent-id: 2922084535
       # aes_key //20221021 cfm add: 钉钉企业内部应用事件订阅加密 aes_key
       agent-app-secret: jqIFoCJGi1L9ni5Ab4bdgYgrXe036OzqOiblEaCUS13
       # token //20221021 cfm add： 钉钉企业内部应用事件订阅签名 token
@@ -325,3 +326,26 @@ third-app:
       agent-app-secret: ??
       #token //20221021 cfm add： 微信公众平台服务器配置 Token
       token: 123
+
+data-backup:
+  db:
+    # 备份文件存储目录-Windows
+    archive-path: 'd:\opt\archive\db'
+    # 备份文件名：须有不为log的扩展名，%s为时间yyyyMMdd_HHmmss占位符
+    archive-name: 'db%s.sql'
+    # 保留备份数
+    max-archives: 7
+    # 备份命令 - Windows
+    backup: '"D:\Program Files\mysql-5.7\bin\mysqldump" --host=127.0.0.1 --user=root --password=root --databases psi2 --result-file=%s --opt -R --flush-privileges --default-character-set=utf8mb4'
+    # 恢复命令 - Windows
+    restore: '"D:\Program Files\mysql-5.7\bin\mysql" --default-character-set=utf8mb4 -h127.0.0.1 -uroot -proot < D:\opt\archive\db\db20230223232835.sql'
+  # 仅支持 uploadType=local
+  upload:
+    # Windows
+    archive-path: 'd:\opt\archive\upload'
+    archive-name: 'upload%s.rar'
+    max-archives: 7
+    # Windows
+    backup: '"C:\Program Files\WinRAR/Rar.exe" a -ep1 -r %s d:\opt\upFiles'
+    # Windows
+    restore: '"C:\Program Files\WinRAR\Rar.exe" x -o+ %s d:\opt'

@@ -161,6 +161,16 @@ public class SysPermission implements Serializable {
     private boolean internalOrExternal;
 	/*update_end author:wuxianquan date:20190908 for:实体增加字段 */
 
+	//20240323 cfm add
+	/**
+	 * 是否用于PC端: 0否,1是（默认值1）
+	 */
+	private boolean forDesktop;
+	/**
+	 * 是否用于移动端: 0否,1是（默认值1）
+	 */
+	private boolean forMobile;
+
     public SysPermission() {
     	
     }
@@ -181,6 +191,9 @@ public class SysPermission implements Serializable {
         	this.keepAlive=true;
         	this.leaf=true;
         	this.hidden=false;
+			//20240323 cfm add
+        	this.forDesktop=true;
+        	this.forMobile=true;
     	}
     	
     }

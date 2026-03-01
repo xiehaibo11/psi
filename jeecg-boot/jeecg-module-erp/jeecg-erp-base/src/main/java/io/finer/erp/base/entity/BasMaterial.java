@@ -101,7 +101,25 @@ public class BasMaterial implements Serializable {
     @ApiModelProperty(value = "版本")
     private java.lang.Integer version;
 
-    @TableField(exist = false)
-    private List<BasUnit> validUnitList;//controller中设置
+    //20230217 del
+    //@TableField(exist = false)
+    //private List<BasUnit> validUnitList;//controller中设置
+
+    /*20230910 cfm add*/
+    /**商品条码*/
+    @Excel(name = "商品条码", width = 15)
+    @ApiModelProperty(value = "商品条码")
+    private java.lang.String barcode;
+    /**是否启用序列号*/
+    @Excel(name = "是否启用序列号", width = 15, dicCode = "yn")
+    @Dict(dicCode = "yn")
+    @ApiModelProperty(value = "是否启用序列号")
+    private java.lang.Integer isSn;
+
+    //20250408 cfm add
+    /**图片*/
+    @Excel(name = "图片", width = 15)
+    @ApiModelProperty(value = "图片")
+    private String image;
 }
 

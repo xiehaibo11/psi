@@ -67,7 +67,9 @@
           </a-col>
           <a-col :span="24">
             <a-form-model-item label="已关闭" :labelCol="labelCol" :wrapperCol="wrapperCol" prop="isClosed">
-              <j-dict-select-tag v-model="model.isClosed" dictCode="yn" placeholder="请选择" :disabled="disabled" />
+              <j-dict-select-tag v-model="model.isClosed" dictCode="yn" placeholder="请选择"
+                                 :disabled="disabled || model.batchNo === '0'" />
+              <p>提示：不分批次（批次号为0）时，不能关闭！</p>
             </a-form-model-item>
           </a-col>
         </a-row>

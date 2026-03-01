@@ -2,12 +2,12 @@
     <div>
       <a-form-model ref="form" :model="model" :rules="validatorRules">
         <a-form-model-item required prop="username">
-          <a-input v-model="model.username" size="large" placeholder="请输入帐户名 / admin">
+          <a-input v-model="model.username" size="large" placeholder="请输入帐户名">
             <a-icon slot="prefix" type="user" :style="{ color: 'rgba(0,0,0,.25)' }"/>
           </a-input>
         </a-form-model-item>
         <a-form-model-item required prop="password">
-          <a-input v-model="model.password" size="large" type="password" autocomplete="false" placeholder="请输入密码 / 123456">
+          <a-input v-model="model.password" size="large" type="password" autocomplete="false" placeholder="请输入密码">
             <a-icon slot="prefix" type="lock" :style="{ color: 'rgba(0,0,0,.25)' }"/>
           </a-input>
         </a-form-model-item>
@@ -43,8 +43,8 @@
         currdatetime: '',
         loginType: 0,
         model:{
-          username: 'admin',
-          password: '123456',
+          username: '',
+          password: '',
           inputCode: ''
         },
         validatorRules:{
@@ -70,7 +70,7 @@
       /**刷新验证码*/
       handleChangeCheckCode(){
         this.currdatetime = new Date().getTime();
-        this.model.inputCode = ''
+        //this.model.inputCode = 'xxxx'//20200510 cfm: 为方便测试，不输入验证码可 ''-->'xxxx'
         getAction(`/sys/randomImage/${this.currdatetime}`).then(res=>{
           if(res.success){
             this.randCodeImage = res.result
@@ -135,6 +135,7 @@
             console.log("登录参数", loginParams)
             this.Login(loginParams).then((res) => {
               this.$emit('success', res.result)
+                console.log(res.result)
             }).catch((err) => {
               //update-begin-author: taoyan date:20220425 for: 登录页面，当输入验证码错误时，验证码图片要刷新一下，而不是保持旧的验证码图片不变 #41
               if(err && err.code===412){

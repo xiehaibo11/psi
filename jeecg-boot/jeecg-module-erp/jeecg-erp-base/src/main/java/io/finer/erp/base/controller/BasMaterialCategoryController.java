@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.system.query.QueryGenerator;
 import org.jeecg.common.util.oConvertUtils;
@@ -142,6 +144,7 @@ public class BasMaterialCategoryController extends JeecgController<BasMaterialCa
 	 */
 	@AutoLog(value = "物料分类-添加")
 	@ApiOperation(value="物料分类-添加", notes="物料分类-添加")
+	@RequiresPermissions("base:material.category:add") //20240806 cfm add
 	@PostMapping(value = "/add")
 	public Result<String> add(@RequestBody BasMaterialCategory basMaterialCategory) {
 		basMaterialCategoryService.addBasMaterialCategory(basMaterialCategory);
@@ -156,6 +159,7 @@ public class BasMaterialCategoryController extends JeecgController<BasMaterialCa
 	 */
 	@AutoLog(value = "物料分类-编辑")
 	@ApiOperation(value="物料分类-编辑", notes="物料分类-编辑")
+	@RequiresPermissions("base:material.category:edit") //20240806 cfm add
 	@RequestMapping(value = "/edit", method = {RequestMethod.PUT,RequestMethod.POST})
 	public Result<String> edit(@RequestBody BasMaterialCategory basMaterialCategory) {
 		basMaterialCategoryService.updateBasMaterialCategory(basMaterialCategory);
@@ -170,6 +174,7 @@ public class BasMaterialCategoryController extends JeecgController<BasMaterialCa
 	 */
 	@AutoLog(value = "物料分类-通过id删除")
 	@ApiOperation(value="物料分类-通过id删除", notes="物料分类-通过id删除")
+	@RequiresPermissions("base:material.category:delete") //20240806 cfm add
 	@DeleteMapping(value = "/delete")
 	public Result<String> delete(@RequestParam(name="id",required=true) String id) {
 		basMaterialCategoryService.deleteBasMaterialCategory(id);
@@ -184,6 +189,7 @@ public class BasMaterialCategoryController extends JeecgController<BasMaterialCa
 	 */
 	@AutoLog(value = "物料分类-批量删除")
 	@ApiOperation(value="物料分类-批量删除", notes="物料分类-批量删除")
+	@RequiresPermissions("base:material.category:delete") //20240806 cfm add
 	@DeleteMapping(value = "/deleteBatch")
 	public Result<String> deleteBatch(@RequestParam(name="ids",required=true) String ids) {
 		this.basMaterialCategoryService.removeByIds(Arrays.asList(ids.split(",")));
@@ -210,6 +216,7 @@ public class BasMaterialCategoryController extends JeecgController<BasMaterialCa
 	 * @return
 	 */
 	@AutoLog(value = "通过excel导入数据")
+	@RequiresPermissions("base:material.category:import") //20240806 cfm add
     @RequestMapping(value = "/importExcel", method = RequestMethod.POST)
 	public Result<?> importExcel(HttpServletRequest request, HttpServletResponse response) {
 		return super.importExcel(request, response, BasMaterialCategory.class);

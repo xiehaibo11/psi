@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.aspect.annotation.AutoLog;
 import org.jeecg.common.system.base.controller.JeecgController;
@@ -64,6 +65,7 @@ public class SysFormFileController extends JeecgController<SysFormFile, ISysForm
      */
     @AutoLog(value = "表单评论文件-添加")
     @ApiOperation(value = "表单评论文件-添加", notes = "表单评论文件-添加")
+    @RequiresPermissions("system:formFile:add") //20240806 cfm add
     @PostMapping(value = "/add")
     public Result<?> add(@RequestBody SysFormFile sysFormFile) {
         sysFormFileService.save(sysFormFile);
@@ -78,6 +80,7 @@ public class SysFormFileController extends JeecgController<SysFormFile, ISysForm
      */
     @AutoLog(value = "表单评论文件-编辑")
     @ApiOperation(value = "表单评论文件-编辑", notes = "表单评论文件-编辑")
+    @RequiresPermissions("system:formFile:edit") //20240806 cfm add
     @RequestMapping(value = "/edit", method = {RequestMethod.PUT, RequestMethod.POST})
     public Result<?> edit(@RequestBody SysFormFile sysFormFile) {
         sysFormFileService.updateById(sysFormFile);
@@ -92,6 +95,7 @@ public class SysFormFileController extends JeecgController<SysFormFile, ISysForm
      */
     @AutoLog(value = "表单评论文件-通过id删除")
     @ApiOperation(value = "表单评论文件-通过id删除", notes = "表单评论文件-通过id删除")
+    @RequiresPermissions("system:formFile:delete") //20240806 cfm add
     @DeleteMapping(value = "/delete")
     public Result<?> delete(@RequestParam(name = "id", required = true) String id) {
         sysFormFileService.removeById(id);
@@ -106,6 +110,7 @@ public class SysFormFileController extends JeecgController<SysFormFile, ISysForm
      */
     @AutoLog(value = "表单评论文件-批量删除")
     @ApiOperation(value = "表单评论文件-批量删除", notes = "表单评论文件-批量删除")
+    @RequiresPermissions("system:formFile:delete") //20240806 cfm add
     @DeleteMapping(value = "/deleteBatch")
     public Result<?> deleteBatch(@RequestParam(name = "ids", required = true) String ids) {
         this.sysFormFileService.removeByIds(Arrays.asList(ids.split(",")));
@@ -144,6 +149,7 @@ public class SysFormFileController extends JeecgController<SysFormFile, ISysForm
      * @param response
      * @return
      */
+    @RequiresPermissions("system:formFile:import") //20240806 cfm add
     @RequestMapping(value = "/importExcel", method = RequestMethod.POST)
     public Result<?> importExcel(HttpServletRequest request, HttpServletResponse response) {
         return super.importExcel(request, response, SysFormFile.class);

@@ -5,6 +5,12 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+  <!--20240229 cfm add: 解决版本更新时浏览器缓存问题 -->
+  <meta http-equiv="pragram" content="no-cache">
+  <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="expires" content="0">
+
   <title>Finer 进销存</title>
   <link rel="icon" href="<%= BASE_URL %>logo.png">
   <script src="<%= BASE_URL %>cdn/babel-polyfill/polyfill_7_2_5.js"></script>
@@ -255,6 +261,31 @@
   </div>
 </div>
 
+<script>
+  // var _hmt = _hmt || [];
+  // (function() {
+  //   var hm = document.createElement("script");
+  //   hm.src = "https://hm.baidu.com/hm.js?0febd9e3cacb3f627ddac64d52caac39";
+  //   var s = document.getElementsByTagName("script")[0];
+  //   s.parentNode.insertBefore(hm, s);
+  // })();
+
+  //20240423 cfm add: 打包的App点击返回键直接退出处理
+  document.addEventListener('plusready', () => {
+    let first = null;
+    plus.key.addEventListener('backbutton', () => { //监听返回键
+      if (!first) {
+        first = new Date().getTime();
+        plus.nativeUI.toast("双击退出", {duration:'short'});
+        setTimeout(() => { first = null }, 1000);
+      } else {
+        if (new Date().getTime() - first < 1000) { //1s点击了两次
+          plus.runtime.quit(); //退出App
+        }
+      }
+    }, false);
+  });
+</script>
 </body>
 
 </html>

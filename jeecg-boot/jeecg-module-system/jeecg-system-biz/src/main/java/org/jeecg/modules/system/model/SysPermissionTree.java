@@ -136,6 +136,15 @@ public class SysPermissionTree implements Serializable {
 	private boolean internalOrExternal;
 	/*update_end author:wuxianquan date:20190908 for:model增加字段 */
 
+	//20240323 cfm add
+	/**
+	 * 是否用于PC端: 0否,1是（默认值1）
+	 */
+	private boolean forDesktop;
+	/**
+	 * 是否用于移动端: 0否,1是（默认值1）
+	 */
+	private boolean forMobile;
 
 	public SysPermissionTree() {
 	}
@@ -173,6 +182,10 @@ public class SysPermissionTree implements Serializable {
 			this.children = new ArrayList<SysPermissionTree>();
 		}
 		this.status = permission.getStatus();
+
+		//20240323 cfm add
+		this.forDesktop = permission.isForDesktop();
+		this.forMobile = permission.isForMobile();
 	}
 
 	public String getTitle() {
@@ -409,4 +422,18 @@ public class SysPermissionTree implements Serializable {
 		this.internalOrExternal = internalOrExternal;
 	}
 	/*update_end author:wuxianquan date:20190908 for:get set 方法 */
+
+	//20240323 cfm add
+	public boolean isForDesktop() {
+		return forDesktop;
+	}
+	public void setForDesktop(boolean forDesktop) {
+		this.forDesktop = forDesktop;
+	}
+	public boolean isForMobile() {
+		return forMobile;
+	}
+	public void setForMobile(boolean forMobile) {
+		this.forMobile = forMobile;
+	}
 }

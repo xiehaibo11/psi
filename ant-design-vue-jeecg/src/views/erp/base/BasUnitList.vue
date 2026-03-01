@@ -26,11 +26,8 @@
 
     <!-- 操作按钮区域 -->
     <div class="table-operator">
-      <a-button type="link" @click="myHandleAdd" icon="plus">新增</a-button>
-      <a-button type="link" icon="download" @click="handleExportXls('计量单位')">导出</a-button>
-      <a-upload name="file" :showUploadList="false" :multiple="false" :headers="tokenHeader" :action="importExcelUrl" @change="handleImportExcel">
-        <a-button type="link" icon="import">导入</a-button>
-      </a-upload>
+      <a-button :disabled="isDisabledAuth('BasUnit:add')" @click="myHandleAdd" type="link" icon="plus">新增</a-button>
+      <a-button :disabled="isDisabledAuth('BasUnit:add')" type="link" icon="download" @click="handleExportXls('计量单位')">导出</a-button>
 
       <i class="anticon anticon-info-circle ant-alert-icon"></i> 已选择 <a style="font-weight: 600">{{ selectedRowKeys.length }}</a>项
       <a v-if="selectedRowKeys.length > 0" style="margin-left: 12px" @click="onClearSelected">清空</a>
@@ -59,22 +56,21 @@
         <a slot="symbol" @click="myHandleDetail(record)" slot-scope="text, record">{{text}}</a>
 
         <span slot="action" slot-scope="text, record">
-          <a @click="myHandleEdit(record)">编辑</a>
+          <a :disabled="isDisabledAuth('BasUnit:edit')" @click="myHandleEdit(record)">编辑</a>
           <a-divider type="vertical" />
           <a-dropdown>
             <a class="ant-dropdown-link">更多 <a-icon type="down" /></a>
             <a-menu slot="overlay">
-              <a-menu-item :disabled="record.pid!=='0'" key='1' @click="handleAddChild(record)">添加下级</a-menu-item>
-              <a-menu-item  key='2' >
-                <a-popconfirm title="确定删除吗?" @confirm="() => handleDeleteNode(record.id)" placement="topLeft">
-                  <a>删除</a>
-                </a-popconfirm>
+              <a-menu-item :disabled="record.pid!=='0' || isDisabledAuth('BasUnit:add')" key="1" @click="handleAddChild(record)">添加下级</a-menu-item>
+              <a-menu-item :disabled="isDisabledAuth('BasUnit:delete')" key='2'>
+                <a-popconfirm :disabled="isDisabledAuth('BasUnit:delete')" title="确定删除吗?" @confirm="() => handleDeleteNode(record.id)" placement="topLeft">删除</a-popconfirm>
               </a-menu-item>
             </a-menu>
           </a-dropdown>
         </span>
 
       </a-table>
+      <p style="float: right">换算系数示例：基准单位千克为1，则吨为1000，克为0.001</p>
     </div>
 
     <basUnit-modal ref="modalForm" @ok="modalFormOk"></basUnit-modal>
@@ -169,7 +165,7 @@
           delete: "/base/basUnit/delete",
           deleteBatch: "/base/basUnit/deleteBatch",
           exportXlsUrl: "/base/basUnit/exportXls",
-          importExcelUrl: "bas/basUnit/importExcel",
+          importExcelUrl: "base/basUnit/importExcel",
         },
         expandedRowKeys:[],
         hasChildrenField:"hasChild",

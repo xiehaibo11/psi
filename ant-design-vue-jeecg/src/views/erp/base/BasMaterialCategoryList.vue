@@ -31,11 +31,8 @@
 
     <!-- 操作按钮区域 -->
     <div class="table-operator">
-      <a-button type="link" @click="myHandleAdd" icon="plus">新增</a-button>
-      <a-button type="link" icon="download" @click="handleExportXls('物料分类')">导出</a-button>
-      <a-upload name="file" :showUploadList="false" :multiple="false" :headers="tokenHeader" :action="importExcelUrl" @change="handleImportExcel">
-        <a-button type="link" icon="import">导入</a-button>
-      </a-upload>
+      <a-button :disabled="isDisabledAuth('BasMaterialCategory:add')" @click="myHandleAdd" type="link" icon="plus">新增</a-button>
+      <a-button :disabled="isDisabledAuth('BasMaterialCategory:add')" type="link" icon="download" @click="handleExportXls('物料分类')">导出</a-button>
 
       <i class="anticon anticon-info-circle ant-alert-icon"></i> 已选择 <a style="font-weight: 600">{{ selectedRowKeys.length }}</a>项
       <a v-if="selectedRowKeys.length > 0" style="margin-left: 12px" @click="onClearSelected">清空</a>
@@ -63,18 +60,14 @@
         <a slot="code" @click="myHandleDetail(record)" slot-scope="text, record">{{text}}</a>
 
         <span slot="action" slot-scope="text, record">
-          <a @click="myHandleEdit(record)">编辑</a>
+          <a :disabled="isDisabledAuth('BasMaterialCategory:edit')" @click="myHandleEdit(record)">编辑</a>
           <a-divider type="vertical" />
           <a-dropdown>
             <a class="ant-dropdown-link">更多 <a-icon type="down" /></a>
             <a-menu slot="overlay">
-              <a-menu-item>
-                <a @click="handleAddChild(record)">添加下级</a>
-              </a-menu-item>
-              <a-menu-item>
-                <a-popconfirm title="确定删除吗?" @confirm="() => handleDeleteNode(record.id)" placement="topLeft">
-                  <a>删除</a>
-                </a-popconfirm>
+              <a-menu-item :disabled="isDisabledAuth('BasMaterialCategory:add')" @click="handleAddChild(record)" key="1">添加下级</a-menu-item>
+              <a-menu-item :disabled="isDisabledAuth('BasMaterialCategory:delete')" key="2">
+                <a-popconfirm :disabled="isDisabledAuth('BasMaterialCategory:delete')" title="确定删除吗?" @confirm="() => handleDeleteNode(record.id)" placement="topLeft">删除</a-popconfirm>
               </a-menu-item>
             </a-menu>
           </a-dropdown>
@@ -175,7 +168,7 @@
           delete: "/base/basMaterialCategory/delete",
           deleteBatch: "/base/basMaterialCategory/deleteBatch",
           exportXlsUrl: "/base/basMaterialCategory/exportXls",
-          importExcelUrl: "bas/basMaterialCategory/importExcel",
+          importExcelUrl: "base/basMaterialCategory/importExcel",
         },
         expandedRowKeys:[],
         hasChildrenField:"hasChild",

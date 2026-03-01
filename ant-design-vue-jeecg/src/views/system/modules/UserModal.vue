@@ -92,7 +92,7 @@
         </a-form-model-item>
 
         <a-form-model-item label="头像" :labelCol="labelCol" :wrapperCol="wrapperCol">
-          <j-image-upload class="avatar-uploader" text="上传" v-model="model.avatar" ></j-image-upload>
+          <j-image-upload class="avatar-uploader" text="上传" v-model="model.avatar" bizPath="system"></j-image-upload>
         </a-form-model-item>
 
         <a-form-model-item label="生日" :labelCol="labelCol" :wrapperCol="wrapperCol">
@@ -119,9 +119,11 @@
           <a-input placeholder="请输入座机" v-model="model.telephone" />
         </a-form-model-item>
 
+        <!-- 20251222 cfm del
         <a-form-model-item label="工作流引擎" :labelCol="labelCol" :wrapperCol="wrapperCol">
           <j-dict-select-tag  v-model="model.activitiSync"  placeholder="请选择是否同步工作流引擎" :type="'radio'" dictCode="activiti_sync"/>
         </a-form-model-item>
+        -->
 
       </a-form-model>
     </a-spin>

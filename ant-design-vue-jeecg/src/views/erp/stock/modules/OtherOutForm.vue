@@ -3,10 +3,9 @@
     <!-- 主表单区域 -->
     <div>
       <a-form-model ref="form" :model="model" :rules="validatorRules">
-        <bill-header ref="billHeader" :model="model" :disabled="disabled" :moreStatus.sync="moreStatus"/>
-
+        <bill-header ref="billHeader" :model="model" :disabled="disabled" :moreStatus.sync="moreStatus" :moreStatus2.sync="moreStatus2" />
         <a-row v-show="moreStatus">
-          <a-col :span="8">
+          <a-col :xl="8" :lg="12" :md="24">
             <a-form-model-item label="有应收" :labelCol="labelCol3" :wrapperCol="wrapperCol3" prop="hasRp">
               <j-dict-select-tag v-model="model.hasRp" dictCode="yn" :disabled="true"/>
             </a-form-model-item>
@@ -14,30 +13,43 @@
         </a-row>
 
         <a-row>
-          <a-col :span="8" >
+          <a-col :xl="8" :lg="12" :md="24">
+            <a-form-model-item label="客户" :labelCol="labelCol3" :wrapperCol="wrapperCol3" prop="customerId">
+              <j-search-select-tag v-model="model.customerId" dict="bas_customer,aux_name,id" placeholder="请选择"
+                                   :disabled="disabled" @change="val => {if (!val) this.model.customerId=''}"/> <!-- 20251030 cfm modi: 增加@change -->
+            </a-form-model-item>
+          </a-col>
+          <a-col :xl="8" :lg="12" :md="24">
+            <a-form-model-item label="库管员" :labelCol="labelCol3" :wrapperCol="wrapperCol3" prop="handler">
+              <j-select-user-by-dep v-model="model.handler" :multi="false" :disabled="disabled"/>
+            </a-form-model-item>
+          </a-col>
+        </a-row>
+
+        <a-row>
+          <a-col :xl="8" :lg="12" :md="24" v-show="moreStatus2 || !!model.subject && model.subject.length > 0">
             <a-form-model-item label="单据主题" :labelCol="labelCol3" :wrapperCol="wrapperCol3" prop="subject">
               <a-input v-model="model.subject" placeholder="请输入" :readOnly="disabled"/>
             </a-form-model-item>
           </a-col>
-          <a-col :span="8">
-            <a-form-model-item label="客户" :labelCol="labelCol3" :wrapperCol="wrapperCol3" prop="customerId">
-              <j-search-select-tag v-model="model.customerId" :async="true" dict="bas_customer,aux_name,id"
-                                   placeholder="请选择" :disabled="disabled"/>
+          <a-col :xl="8" :lg="12" :md="24" v-show="moreStatus2 || !!model.remark && model.remark.length > 0">
+            <a-form-model-item label="备注" :labelCol="labelCol3" :wrapperCol="wrapperCol3" prop="remark">
+              <a-textarea v-model="model.remark" :readOnly="disabled" rows="1" autoSize/>
             </a-form-model-item>
           </a-col>
-          <a-col :span="8">
-            <a-form-model-item label="出库经办" :labelCol="labelCol3" :wrapperCol="wrapperCol3" prop="handler">
-              <j-select-user-by-dep v-model="model.handler" :multi="false" :disabled="disabled"/>
+          <a-col :xl="8" :lg="12" :md="24" v-show="moreStatus2 || !!model.attachment && model.attachment.length > 0">
+            <a-form-model-item label="附件" :labelCol="labelCol3" :wrapperCol="wrapperCol3" prop="attachment">
+              <j-upload v-model="model.attachment" :disabled="disabled" bizPath="erp"/>
             </a-form-model-item>
           </a-col>
         </a-row>
 
         <!-- 子表单区域 -->
         <a-tabs v-model="activeKey" @change="handleChangeTabs">
-          <a-tab-pane tab="明细" :key="refKeys[0]" :forceRender="true">
+          <a-tab-pane tab="明细" key="entryTable" :forceRender="true">
             <j-vxe-table
               keep-source
-              :ref="refKeys[0]"
+              ref="entryTable"
               :loading="entryTable.loading"
               :columns="entryTable.columns"
               :dataSource="entryTable.dataSource"
@@ -48,24 +60,34 @@
               :toolbar="!disabled"
               :resizable="true"
               :edit-config="{trigger: 'click', mode: 'row', showIcon: false}"
-              @edit-actived="({row}) => setMaterialUnitOptions(row, $refs.entryTable)"
-              @added="onEntryAdded"
+              @edit-actived="({row}) => {setMaterialUnitOptions(row); if (this.bizOptions().batchMode==='0') setWarehouseOptions(row);}"
+              @added="event => {this.entryTable.rowCount++; this.onEntryAdded(event);}"
+              @selectRowChange="({selectedRows}) => {this.entryTable.selectedRowCount = selectedRows.length;}"
+              @remove="event => this.entryTable.rowCount = this.$refs.entryTable.getTableData().length"
               @valueChange="onEntryValueChange">
-              <template v-if="!disabled" v-slot:toolbarSuffix>
-                <p style="float: right;">提示：“物料、仓库”是“批次”查询的参数！</p>
+
+              <template v-if="!disabled" v-slot:materialPopup="props">
+                <vxe-column-popup :props="props" @valuesChange="onMaterialValuesChange"/>
               </template>
-            </j-vxe-table>>
+
+              <!-- 20241106 cfm modi: isMobile() 改为 !isMobile() -->
+              <template v-if="!disabled && !isMobile()" v-slot:toolbarSuffix>
+                <p v-if="bizOptions().batchMode==='0'" style="float: right;">提示：明细录入时，先顺序录入物料、仓库！ 仓库只能选择有库存的！</p>
+                <p v-else style="float: right;">提示：明细录入时，“物料、仓库”是“批次”查询的参数！</p>
+              </template>
+            </j-vxe-table>
+
           </a-tab-pane>
 
           <template slot="tabBarExtraContent">
             <vxe-table-columns-setter
               :table-key="activeKey + (disabled ? '1':'0')"
-              :column-defs="entryTable.columns" :excluded-cols="disabled ? entryTable.notEditExcludeCols:''"
+              :column-defs="entryTable.columns" :excluded-cols="disabled ? entryTable.exKeysWhenDetail:''"
               style="float: right;"/>
           </template>
         </a-tabs>
 
-        <bill-footer ref="billFooter" :model="model" :disabled="disabled" :action="action"/>
+        <bill-approval v-if="action==='check' || action==='ebpm'" :model="model" :disabled="disabled" style="margin-top: 16px"/>
       </a-form-model>
     </div>
 
@@ -73,20 +95,27 @@
 </template>
 
 <script>
-
-  import { JVxeTableModelMixin } from '@/mixins/JVxeTableModelMixin'
-  import { JVXETypes } from '@/components/jeecg/JVxeTable'
-  import { getRefPromise,VALIDATE_FAILED} from '@/components/jeecg/JVxeTable/utils/vxeUtils.js'
-  import { BillFormMixin, BillFormGridMixin} from '../../common/mixins/BillFormMixin'
-  import { BillVxeTableMixin } from '../../common/mixins/BillVxeTableMixin'
-  import BillHeader from "../../common/components/BillHeader";
-  import BillFooter from "../../common/components/BillFooter";
-  import VxeTableColumnsSetter from "../../common/components/VxeTableColumnsSetter";
+  import {JVXETypes} from '@/components/jeecg/JVxeTable'
+  import {getRefPromise} from '@/components/jeecg/JVxeTable/utils/vxeUtils.js'
+  import {JVxeTableModelMixin} from '@/mixins/JVxeTableModelMixin'
+  import {BillFormMixin} from '../../common/mixins/bill/BillFormMixin'
+  import {BillFormGridMixin} from '../../common/mixins/bill/BillFormGridMixin'
+  import {DetailMixin} from '../../common/mixins/bill/DetailMixin'
+  import {DetailValueMixin} from '../../common/mixins/bill/DetailValueMixin'
+  import {DetailFormatMixin} from '../../common/mixins/bill/DetailFormatMixin'
+  import {DetailValidatorMixin} from '../../common/mixins/bill/DetailValidatorMixin'
+  import {DataMixin} from '../../common/mixins/DataMixin'
+  import {mixinDevice} from '@/utils/mixin'
+  import BillHeader from "../../common/components/BillHeader"
+  import BillApproval from "../../common/components/BillApproval"
+  import VxeTableColumnsSetter from "../../common/components/VxeTableColumnsSetter"
+  import VxeColumnPopup from "../../common/components/VxeColumnPopup"
+  import {stringIsEmpty} from "../../common/utils/util";
 
   export default {
     name: 'OtherOutForm',
-    mixins: [JVxeTableModelMixin, BillFormMixin, BillFormGridMixin, BillVxeTableMixin],
-    components: {BillHeader, BillFooter, VxeTableColumnsSetter},
+    mixins: [JVxeTableModelMixin, BillFormMixin, BillFormGridMixin, DetailMixin, DetailValueMixin, DetailFormatMixin, DetailValidatorMixin, DataMixin, mixinDevice],
+    components: {BillHeader, BillApproval, VxeTableColumnsSetter, VxeColumnPopup},
 
     data() {
       return {
@@ -101,30 +130,61 @@
           stockIoType: '299', //其他出库
           hasRp: 0,
           hasSwell: 0,
+          hasSingle: 0,
         },
 
         validatorRules: {},
 
         entryNoStep: 10,
-        addDefaultRowNum: 1,
-        refKeys: ['entryTable', ],
+        addDefaultRowNum: 0,
         tableKeys:['entryTable', ],
+        refKeys: ['entryTable', ],
         activeKey: 'entryTable',
+
         // 明细
         entryTable: {
           loading: false,
           dataSource: [],
-          url: {
-            list: '/stock/stkIo/queryEntryByMainId',
-            editingList: '/stock/stkIo/queryEditingEntryByMainId'
-          },
-          notEditExcludeCols: 'inventoryUnitId,inventoryQty,inventoryCost',
+          rowCount: 0,
+          selectedRowCount: 0,
+          url: {list: '/stock/stkIo/queryEntryByMainId', editingList: '/stock/stkIo/queryEditingEntryByMainId'},
+          exKeysWhenDetail: 'materialPopup,inventoryUnitId,inventoryQty,inventoryCost',
           columns: [
+            {
+              title: '出入方向',
+              key: 'stockIoDirection',
+              type: JVXETypes.hidden,
+              defaultValue: '2',
+            },
+            {
+              title: '单位',
+              key: 'unitId',
+              type: JVXETypes.select,
+              dictCode:"bas_unit,name,id",
+              options:[],
+              width:"85px",
+              align:"center",
+              placeholder: '请输入',
+              defaultValue:'',
+              validateRules: [{ required: true, message: '${title}不能为空' }],
+            },
+            {
+              title: '出库数量',
+              key: 'qty',
+              type: JVXETypes.inputNumber,
+              width:"120px",
+              align:"right",
+              formatter: this.formatQty,
+              placeholder: '请输入',
+              defaultValue:0,
+              validateRules: [{ required: true, message: '${title}不能为空' }, {handler: this.rubricValidator}, {handler: this.outQtyValidator}],
+              statistics: ['sum'],
+            },
             {
               title: '#',
               key: 'entryNo',
               type: JVXETypes.inputNumber,
-              width:"70px",
+              width:"60px",
               align:"center",
               fixed: 'left',
               sortable: true,
@@ -134,7 +194,7 @@
                 { required: true, message: '${title}不能为空' },
                 { pattern: /^[1-9]\d*$/, message: '${title}须为正整数' },
                 { unique: true, message: '${title}不能重复' },
-               ],
+              ],
             },
             {
               title: '物料',
@@ -148,18 +208,26 @@
               validateRules: [{ required: true, message: '${title}不能为空' }],
             },
             {
+              title: '',
+              key: 'materialPopup',
+              type: JVXETypes.slot,
+              slotName:"materialPopup",
+              width:"40px",
+              fixed: 'left',
+              popupCode: 'bas_material',
+              orgFields: "id",
+              destFields: "materialId",
+              paramFields: "",
+              param: {},
+            },
+            {
               title: '规格型号',
               key: 'materialModel',
               type: JVXETypes.input,
-              width:"200px",
+              width:"160px",
+              fixed: 'left',
               defaultValue:'',
               disabled: true,
-            },
-            {
-              title: '出入方向',
-              key: 'stockIoDirection',
-              type: JVXETypes.hidden,
-              defaultValue: '2',
             },
             {
               title: '仓库',
@@ -167,7 +235,8 @@
               type: JVXETypes.selectSearch,
               options:[],
               dictCode:"bas_warehouse,aux_name,id",
-              width:"200px",
+              width:"180px",
+              fixed: 'left',
               placeholder: '请输入',
               defaultValue:'',
               validateRules: [{ required: true, message: '${title}不能为空' }],
@@ -177,20 +246,33 @@
               key: 'batchNo',
               type: JVXETypes.popup,
               popupCode: 'stk_inventory_batch',
-              orgFields: "material_id,warehouse_id,batch_no,unit_id,qty,cost",
-              destFields: "materialId,warehouseId,batchNo,inventoryUnitId,inventoryQty,inventoryCost",
+              orgFields: "material_id,barcode,material_model,warehouse_id,batch_no,unit_id,qty,cost",
+              destFields: "materialId,barcode,materialModel,warehouseId,batchNo,inventoryUnitId,inventoryQty,inventoryCost",
               paramFields: "materialId,warehouseId",
               field: 'batchNo',
-              width:"230px",
+              width:"160px",
+              fixed: 'left',
               placeholder: '请选择',
               defaultValue:'',
               validateRules: [{ required: true, message: '${title}不能为空' }],
+            },
+            {
+              title: '出库金额',
+              key: 'cost',
+              type: JVXETypes.inputNumber,
+              width:"120px",
+              align:"right",
+              formatter: this.formatAmt,
+              defaultValue: 0,
+              validateRules: [{ required: true, message: '${title}不能为空' }, {handler: this.rubricValidator}, {handler: this.outCostValidator}],
+              statistics: ['sum'],
             },
             {
               title: '库存单位',
               key: 'inventoryUnitId',
               type: JVXETypes.select,
               dictCode:"bas_unit,name,id",
+              options:[],
               disabled:true,
               width:"90px",
               align:"center",
@@ -216,63 +298,37 @@
               statistics: ['sum'],
             },
             {
-              title: '出库单位',
-              key: 'unitId',
-              type: JVXETypes.selectSearch,
-              dictCode:"bas_unit,name,id",
-              width:"100px",
-              align:"center",
-              placeholder: '请输入',
-              defaultValue:'',
-              validateRules: [{ required: true, message: '${title}不能为空' }],
-            },
-            {
-              title: '出库数量',
-              key: 'qty',
-              type: JVXETypes.inputNumber,
-              width:"120px",
-              align:"right",
-              formatter: this.formatQty,
-              placeholder: '请输入',
-              defaultValue:'',
-              validateRules: [{ required: true, message: '${title}不能为空' }, {handler: this.rubricValidator},
-                {handler: this.stkOutQtyValidator}],
-              statistics: ['sum'],
-            },
-            {
-              title: '出库金额',
-              key: 'cost',
-              type: JVXETypes.inputNumber,
-              width:"120px",
-              align:"right",
-              formatter: this.formatAmt,
-              defaultValue: '',
-              validateRules: [{ required: true, message: '${title}不能为空' }, {handler: this.rubricValidator}],
-              statistics: ['sum'],
+              title: '条码',
+              key: 'barcode',
+              type: JVXETypes.input,
+              width:"150px",
+              sortable: true,
+              disabled:true,
             },
             {
               title: '备注',
               key: 'remark',
               type: JVXETypes.input,
-              width:"160px",
+              width:"100px",
               defaultValue:'',
             },
             {
               title: '自定义1',
               key: 'custom1',
               type: JVXETypes.input,
-              width:"100px",
+              width:"80px",
               defaultValue:'',
             },
             {
               title: '自定义2',
               key: 'custom2',
               type: JVXETypes.input,
-              width:"100px",
+              width:"80px",
               defaultValue:'',
             },
           ]
         },
+
         url: {
           add: "/stock/stkIo/add",
           edit: "/stock/stkIo/edit",
@@ -280,19 +336,40 @@
           ebpm: "/stock/stkIo/bpm/end",
           execute: "/stock/stkIo/execute",
           void: "/stock/stkIo/void",
-         },
+          queryById: "/stock/stkIo/queryById", //20251101 cfm add for 内置BPM
+        },
 
-        hasSwell: 1,
       }
     },
 
-    created() {
-      if (this.disabled)
-        this.hideColumns(this.entryTable.notEditExcludeCols);
-      else {
-        this.restoreColumnsType(this.entryTable.notEditExcludeCols);
-        this.initMaterialRelated();
+    watch:{
+      'entryTable.dataSource'() {
+        this.entryTable.rowCount = this.entryTable.dataSource.length;
+      },
+
+      'entryTable.loading': {
+        immediate: true,
+        handler() {
+          this.$emit("update:loading", this.entryTable.loading);
+        }
+      },
+
+      'entryTable.rowCount': {
+        immediate: true,
+        handler() {
+          this.$emit("update:entryCount", this.entryTable.rowCount);
+        }
       }
+    },
+
+    computed: {
+    },
+
+    created() {
+      this.isCalcOutCost = true; //如果要自动计算出库成本，可修改为true
+      this.initBatchNoColumn();
+      this.filterColumns();
+      this.initColumnsForMobile();
     },
 
     methods: {
@@ -310,11 +387,9 @@
       },
 
       editAfter() {
-        if (this.model.id) {
-          let params = { id: this.model.id }
-          let url = this.disabled ? this.entryTable.url.list : this.entryTable.url.editingList;
-          this.requestSubTableData(url, params, this.entryTable)
-        }
+        if (!this.model.id) return;
+        let url = this.disabled ? this.entryTable.url.list : this.entryTable.url.editingList;
+        this.requestSubTableData(url, {id: this.model.id}, this.entryTable)
       },
 
       classifyIntoFormData(allValues) {
@@ -326,38 +401,45 @@
       },
 
       onEntryValueChange(event) {
-        // ·JVXETypes.popup只有当前列会触发valueChange，destFields中其他列不会
-        // ·event中的row已为新值（包括popup的destFields各列）
         const { type, value, oldValue, row, column, target, isSetValues } = event;
         // 库存批次batchNo相同，但inventoryId可能不同（不同仓库、不同物料可能同batchNo）
         if (value === oldValue && column.property !== 'batchNo' || isSetValues) return;
 
-        const emptyKeys = 'batchNo,inventoryUnitId,inventoryQty,inventoryCost';
+        let emptyKeys = 'inventoryUnitId,inventoryQty,inventoryCost,unitId,qty';
+        if (this.bizOptions().batchMode !== '0') emptyKeys += ',batchNo';
         let values = {};
         switch (column.property) {
           case 'materialId':
-            this.handleMaterialChange(row, target, emptyKeys);
+            this.onMaterialValuesChange({values: {materialId: value}, oldValues: {materialId: oldValue}, row: row, target: target});
             break;
           case 'warehouseId':
             this.emptyColumns(row, emptyKeys, target);
+            if (this.bizOptions().batchMode === '0') this.handleWarehouseChange(row);
             break;
           case 'batchNo':
-            if (!row.batchNo || row.batchNo.length === 0) {
+            if (stringIsEmpty(row.batchNo)) {
               this.emptyColumns(row, emptyKeys, target);
               break;
             }
 
-            if (!row.unitId || row.unitId.length === 0) {
+            this.setMaterialUnitOptions(row);//batchNo通过popup选择，会导致materialId改变，需要重新设置单位的下拉选项
+            if (stringIsEmpty(row.unitId)) {
               values.unitId = row.inventoryUnitId;
+              if (this.isCalcOutCost) values.cost = this.calcOutCost(row, {unitId: values.unitId});
+              target.setValues([{rowKey: row.id, values: values}]);
+            }
+            else if (this.isCalcOutCost) {
+              values.cost = this.calcOutCost(row);
+              //batchNo改变带出的inventoryUnitId变化，可能会导致与unitId不能转
+              if (values.cost === null) values.unitId = ''; //注意：不能!values.cost，因为!0 = true
               target.setValues([{rowKey: row.id, values: values}]);
             }
             break;
           case 'unitId':
-            if (!oldValue || oldValue.length === 0 || !value || value.length === 0) break;
-
+            if (stringIsEmpty(oldValue)) break;
+            // unitId下列代码限制由非空变为空：因为value空，得到的rate为空，将恢复原值
             const rate = this.getUnitRate(row.materialId, oldValue, value);
-            if (!rate)
-              //unitId新值不合法：与原值不能转换，恢复原值
+            if (!rate) //unitId新值不合法：与原值不能转换，恢复原值
               target.setValues([{rowKey: row.id, values: {unitId: oldValue} }]);
             else {
               values = {};
@@ -365,7 +447,25 @@
               target.setValues([{rowKey: row.id, values: values}]);
             }
             break;
-         }
+          case 'qty':
+            if (this.isCalcOutCost) {
+              values = {};
+              values.cost = this.calcOutCost(row);
+              target.setValues([{rowKey: row.id, values: values}]);
+            }
+            break;
+        }
+      },
+
+      onMaterialValuesChange(event) {
+        const {values, oldValues, row, target} = event;
+        if (values.materialId === oldValues.materialId) return;
+
+        let emptyKeys = 'warehouseId,inventoryUnitId,inventoryQty,inventoryCost,unitId,qty';
+        if (this.bizOptions().batchMode !== '0') emptyKeys += ',batchNo';
+
+        this.handleMaterialChange(row, target, emptyKeys);
+        if (this.bizOptions().batchMode==='0') this.setWarehouseOptions(row);
       },
 
     }

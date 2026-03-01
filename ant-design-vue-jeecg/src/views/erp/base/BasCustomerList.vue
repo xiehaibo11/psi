@@ -60,10 +60,10 @@
 
     <!-- 操作按钮区域 -->
     <div class="table-operator">
-      <a-button type="link" @click="myHandleAdd" icon="plus">新增</a-button>
-      <a-button type="link" icon="download" @click="handleExportXls('客户')">导出</a-button>
+      <a-button :disabled="isDisabledAuth('BasCustomer:add')" @click="myHandleAdd" type="link" icon="plus">新增</a-button>
+      <a-button :disabled="isDisabledAuth('BasCustomer:add')" type="link" icon="download" @click="handleExportXls('客户')">导出</a-button>
       <a-upload name="file" :showUploadList="false" :multiple="false" :headers="tokenHeader" :action="importExcelUrl" @change="handleImportExcel">
-        <a-button type="link" icon="import">导入</a-button>
+        <a-button :disabled="isDisabledAuth('BasCustomer:add')" type="link" icon="import">导入</a-button>
       </a-upload>
 
       <i class="anticon anticon-info-circle ant-alert-icon"></i> 已选择 <a style="font-weight: 600">{{ selectedRowKeys.length }}</a>项
@@ -77,7 +77,7 @@
       <a-table
         ref="table"
         size="middle"
-        :scroll="{x:true}"
+        :scroll="{x:2400}"
         bordered
         rowKey="id"
         :columns="columns"
@@ -96,13 +96,13 @@
         </template>
 
         <span slot="action" slot-scope="text, record">
-          <a @click="myHandleEdit(record)">编辑</a>
+          <a :disabled="isDisabledAuth('BasCustomer:edit')" @click="myHandleEdit(record)">编辑</a>
           <a-divider type="vertical" />
           <a-dropdown>
             <a class="ant-dropdown-link">更多<a-icon type="down"/></a>
             <a-menu slot="overlay">
-              <a-menu-item>
-                <a-popconfirm title="确定删除吗?" @confirm="() => handleDelete(record.id)">删除</a-popconfirm>
+              <a-menu-item :disabled="isDisabledAuth('BasCustomer:delete')" key="1">
+                <a-popconfirm :disabled="isDisabledAuth('BasCustomer:delete')" title="确定删除吗?" @confirm="() => handleDelete(record.id)">删除</a-popconfirm>
               </a-menu-item>
             </a-menu>
           </a-dropdown>
@@ -138,6 +138,7 @@
             title: '#',
             dataIndex: '',
             key:'rowIndex',
+            fixed:"left",
             width:60,
             align:"center",
             customRender: (t,r,index)=>parseInt(index)+1,
@@ -184,6 +185,7 @@
             title:'欠款额度',
             width:100,
             align:"right",
+            dataIndex: 'creditQuota', //20240404 cfm add
             customRender: t => XEUtils.commafy(t,{digits: 2})
           },
           {
@@ -226,7 +228,6 @@
             title:'备注',
             align:"left",
             ellipsis: true,
-            ellipsis: true,
             dataIndex: 'remark'
           },
           {
@@ -262,7 +263,7 @@
           delete: "/base/basCustomer/delete",
           deleteBatch: "/base/basCustomer/deleteBatch",
           exportXlsUrl: "/base/basCustomer/exportXls",
-          importExcelUrl: "bas/basCustomer/importExcel",
+          importExcelUrl: "base/basCustomer/importExcel",
 
         },
         dictOptions:{},

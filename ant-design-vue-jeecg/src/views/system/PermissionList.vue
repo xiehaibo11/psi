@@ -11,6 +11,7 @@
         type="primary"
         icon="delete">批量删除
       </a-button>
+      <div style="float: right; color: red">注意：菜单或授权变动，点击【浏览器刷新】才能生效；后端接口权限变动，退出重新登录才能生效！</div> <!-- 20251030 cfm add -->
     </div>
 
     <!-- table区域-begin -->
@@ -69,7 +70,6 @@
           <j-ellipsis :value="text"/>
         </span>
       </a-table>
-
     </div>
     <!-- table区域-end -->
 

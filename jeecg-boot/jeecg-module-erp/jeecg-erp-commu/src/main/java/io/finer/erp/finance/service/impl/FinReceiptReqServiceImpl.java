@@ -133,7 +133,7 @@ public class FinReceiptReqServiceImpl
 			this.refreshExecuteStage(bill);
 		}
 
-		if (writterEntryList1.size() > 0) {
+		if (!reverse && writterEntryList1.size() > 0) { //20241223 cfm modi: 增加 !reverse &&
 			finReceivableCheckService.createBill(writter, writterEntryList1);
 		}
 	}

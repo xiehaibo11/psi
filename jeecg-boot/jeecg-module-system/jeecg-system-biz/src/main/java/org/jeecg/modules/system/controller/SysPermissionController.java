@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.constant.CommonConstant;
@@ -356,7 +357,7 @@ public class SysPermissionController {
 	 * @param permission
 	 * @return
 	 */
-	//@RequiresRoles({ "admin" })
+	@RequiresPermissions("system:permission:add") //20240806 cfm add
 	@RequestMapping(value = "/add", method = RequestMethod.POST)
 	public Result<SysPermission> add(@RequestBody SysPermission permission) {
 		Result<SysPermission> result = new Result<SysPermission>();
@@ -376,7 +377,7 @@ public class SysPermissionController {
 	 * @param permission
 	 * @return
 	 */
-	//@RequiresRoles({ "admin" })
+	@RequiresPermissions("system:permission:edit") //20240806 cfm add
 	@RequestMapping(value = "/edit", method = { RequestMethod.PUT, RequestMethod.POST })
 	public Result<SysPermission> edit(@RequestBody SysPermission permission) {
 		Result<SysPermission> result = new Result<>();
@@ -418,7 +419,7 @@ public class SysPermissionController {
 	 * @param id
 	 * @return
 	 */
-	//@RequiresRoles({ "admin" })
+	@RequiresPermissions("system:permission:delete") //20240806 cfm add
 	@RequestMapping(value = "/delete", method = RequestMethod.DELETE)
 	public Result<SysPermission> delete(@RequestParam(name = "id", required = true) String id) {
 		Result<SysPermission> result = new Result<>();
@@ -437,7 +438,7 @@ public class SysPermissionController {
 	 * @param ids
 	 * @return
 	 */
-	//@RequiresRoles({ "admin" })
+	@RequiresPermissions("system:permission:delete") //20240806 cfm add
 	@RequestMapping(value = "/deleteBatch", method = RequestMethod.DELETE)
 	public Result<SysPermission> deleteBatch(@RequestParam(name = "ids", required = true) String ids) {
 		Result<SysPermission> result = new Result<>();
@@ -544,8 +545,8 @@ public class SysPermissionController {
 	 *
 	 * @return
 	 */
+	@RequiresPermissions("system:permission:saveRole") //20240806 cfm add
 	@RequestMapping(value = "/saveRolePermission", method = RequestMethod.POST)
-	//@RequiresRoles({ "admin" })
 	public Result<String> saveRolePermission(@RequestBody JSONObject json) {
 		long start = System.currentTimeMillis();
 		Result<String> result = new Result<>();
@@ -755,6 +756,10 @@ public class SysPermissionController {
 				json.put("name", urlToRouteName(permission.getUrl()));
 			}
 
+			//20240323 cfm add
+			json.put("forDesktop", permission.isForDesktop());
+			json.put("forMobile", permission.isForMobile());
+
 			JSONObject meta = new JSONObject();
 			// 是否隐藏路由，默认都是显示的
 			if (permission.isHidden()) {
@@ -873,7 +878,7 @@ public class SysPermissionController {
 	 * @param sysPermissionDataRule
 	 * @return
 	 */
-	//@RequiresRoles({ "admin" })
+	@RequiresPermissions("system:permission:addRule") //20240806 cfm add
 	@RequestMapping(value = "/addPermissionRule", method = RequestMethod.POST)
 	public Result<SysPermissionDataRule> addPermissionRule(@RequestBody SysPermissionDataRule sysPermissionDataRule) {
 		Result<SysPermissionDataRule> result = new Result<SysPermissionDataRule>();
@@ -888,7 +893,7 @@ public class SysPermissionController {
 		return result;
 	}
 
-	//@RequiresRoles({ "admin" })
+	@RequiresPermissions("system:permission:editRule") //20240806 cfm add
 	@RequestMapping(value = "/editPermissionRule", method = { RequestMethod.PUT, RequestMethod.POST })
 	public Result<SysPermissionDataRule> editPermissionRule(@RequestBody SysPermissionDataRule sysPermissionDataRule) {
 		Result<SysPermissionDataRule> result = new Result<SysPermissionDataRule>();
@@ -908,7 +913,7 @@ public class SysPermissionController {
 	 * @param id
 	 * @return
 	 */
-	//@RequiresRoles({ "admin" })
+	@RequiresPermissions("system:permission:deleteRule") //20240806 cfm add
 	@RequestMapping(value = "/deletePermissionRule", method = RequestMethod.DELETE)
 	public Result<SysPermissionDataRule> deletePermissionRule(@RequestParam(name = "id", required = true) String id) {
 		Result<SysPermissionDataRule> result = new Result<SysPermissionDataRule>();
@@ -964,8 +969,8 @@ public class SysPermissionController {
 	 *
 	 * @return
 	 */
+	@RequiresPermissions("system:permission:saveDepart") //20240806 cfm add
 	@RequestMapping(value = "/saveDepartPermission", method = RequestMethod.POST)
-	//@RequiresRoles({ "admin" })
 	public Result<String> saveDepartPermission(@RequestBody JSONObject json) {
 		long start = System.currentTimeMillis();
 		Result<String> result = new Result<>();

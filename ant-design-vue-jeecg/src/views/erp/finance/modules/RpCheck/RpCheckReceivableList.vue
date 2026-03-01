@@ -21,12 +21,12 @@
 
 <script>
   import { JeecgListMixin } from '@/mixins/JeecgListMixin'
-  import ATableDragResize from '../../../common/mixins/ATableDragResize'
+  import ListColumnResizeMixin from '../../../common/mixins/ListColumnResizeMixin'
   import XEUtils from "xe-utils";
 
   export default {
     name: "RpCheckReceivableList",
-    mixins:[JeecgListMixin, ATableDragResize],
+    mixins:[JeecgListMixin, ListColumnResizeMixin],
     props: {
       //对应的核销明细组件
       checkEntryTableRefs: {type: Object, required: true},
@@ -112,7 +112,7 @@
 <style lang="less" scoped>
   @import '~@assets/less/common.less';
 
-  //ATableDragResize.js中vue-draggable-resizable所用样式
+  //ListColumnResizeMixin.js中vue-draggable-resizable所用样式
   /deep/.table-draggable-handle {
     border:1px solid red;
     height: 100% !important;

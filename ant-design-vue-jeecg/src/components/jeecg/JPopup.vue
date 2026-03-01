@@ -3,7 +3,7 @@
     <!---->
     <a-input @click="openModal" :placeholder="placeholder" v-model="showText" readOnly :disabled="disabled">
       <a-icon slot="prefix" type="cluster" :title="title"/>
-      <a-icon v-if="showText" slot="suffix" type="close-circle" @click="handleEmpty" title="清空"/>
+      <a-icon v-if="showText && allowClear" slot="suffix" type="close-circle" @click="handleEmpty" title="清空"/>
     </a-input>
 
     <j-popup-onl-report
@@ -94,7 +94,13 @@
         default: ','
       },
       /** 分组ID，用于将多个popup的请求合并到一起，不传不分组 */
-      groupId: String
+      groupId: String,
+      //20231231 cfm add: <a-icon>中用到
+      allowClear: {
+        type: Boolean,
+        required: false,
+        default: true
+      },
 
     },
     data() {

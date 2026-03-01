@@ -24,20 +24,22 @@
 
 <script>
   import { getAction, putAction } from '@/api/manage'
+  import { mixinDevice } from '@/utils/mixin.js'
 
   export default {
     name: "CloseAccounts",
-    inject:['closeCurrent'],
+    inject:['closeCurrent'], //关闭当前modal,参考：src/views/jeecg/SelectDemo.vue
+    mixins: [mixinDevice],
     components: {},
     data () {
       return {
         model: {year: 0, month: 0},
 
         helpMsg: '说明\n' +
-          '· 当前年月之前的月度为已结账，不能新建和作废单据日期在已结账期间的单据。\n' +
+          '· 当前月度之前的月度为已结账，不能新建和作废单据日期在已结账期间的单据。\n' +
           '· 当前年月及之后的月度为未结账，可以新建和作废单据日期在未结账期间的单据。\n' +
-          '· 月度结账：结账成功后，当前年月增加一个月。\n' +
-          '· 月度回退：回退成功后，当前年月减少一个月。',
+          '· 月度结账：结账成功后，当前月度增加一个月。\n' +
+          '· 月度回退：回退成功后，当前月度减少一个月。',
 
         labelCol: {
           xl: { span: 10 },
@@ -98,7 +100,7 @@
               title: '月度结账',
               content: '月度结账成功！',
               okText: '确定',
-              onOk: () => this.closeCurrent(), //closeCurrent 参考：src/views/jeecg/SelectDemo.vue
+              onOk: () => {if (!this.isMobile()) this.closeCurrent()},
             });
           }else{
             this.$warning({
@@ -129,7 +131,7 @@
               title: '月度回退',
               content: '月度回退成功！',
               okText: '确定',
-              onOk: () => this.closeCurrent(),
+              onOk: () => {if (!this.isMobile()) this.closeCurrent()},
             });
           }else{
             this.$warning({

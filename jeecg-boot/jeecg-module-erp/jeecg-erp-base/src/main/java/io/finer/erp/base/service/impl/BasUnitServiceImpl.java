@@ -209,8 +209,13 @@ public class BasUnitServiceImpl extends ServiceImpl<BasUnitMapper, BasUnit> impl
 			throw new JeecgBootException(String.format("【%s，%s】基准单位不同，不能转换！",
 					from.getName(), to.getName()));
 		}
+		if (from.getFactor().compareTo(BigDecimal.ZERO) <= 0 || to.getFactor().compareTo(BigDecimal.ZERO) <= 0) {
+			throw new JeecgBootException(String.format("【%s，%s】换算系数必须大于0！",
+					from.getName(), to.getName()));
+		}
 
-		return from.getFactor().divide(to.getFactor());
+		//20221217 cfm modi:解决除不尽异常
+		return from.getFactor().divide(to.getFactor(), 6, BigDecimal.ROUND_HALF_UP);
 	}
 
 	@Override

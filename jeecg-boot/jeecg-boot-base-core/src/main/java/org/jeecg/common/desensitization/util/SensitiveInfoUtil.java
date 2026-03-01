@@ -63,7 +63,7 @@ public class SensitiveInfoUtil {
      * @throws IllegalAccessException
      */
     public static Object handlerObject(Object obj, boolean isEncode) throws IllegalAccessException {
-        log.debug(" obj --> "+ obj.toString());
+        //20250315 cfm del: log.debug(" obj --> "+ obj.toString());
         long startTime=System.currentTimeMillis();
         if (oConvertUtils.isEmpty(obj)) {
             return obj;

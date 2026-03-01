@@ -3,6 +3,8 @@ package io.finer.erp.base.controller;
 import java.util.Arrays;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.system.query.QueryGenerator;
 import io.finer.erp.base.entity.BasSupplier;
@@ -46,6 +48,7 @@ public class BasSupplierController extends JeecgController<BasSupplier, IBasSupp
 	 */
 	//@AutoLog(value = "供应商-分页列表查询")
 	@ApiOperation(value="供应商-分页列表查询", notes="供应商-分页列表查询")
+	@RequiresPermissions("base:supplier:list") //20240806 cfm add
 	@GetMapping(value = "/list")
 	public Result<IPage<BasSupplier>> queryPageList(BasSupplier basSupplier,
 								   @RequestParam(name="pageNo", defaultValue="1") Integer pageNo,
@@ -65,6 +68,7 @@ public class BasSupplierController extends JeecgController<BasSupplier, IBasSupp
 	  */
 	 //@AutoLog(value = "供应商-通过id查询")
 	 @ApiOperation(value="供应商-通过id查询", notes="供应商-通过id查询")
+	 @RequiresPermissions("base:supplier:queryById") //20240806 cfm add
 	 @GetMapping(value = "/queryById")
 	 public Result<BasSupplier> queryById(@RequestParam(name="id",required=true) String id) {
 		 BasSupplier basSupplier = basSupplierService.getById(id);
@@ -82,6 +86,7 @@ public class BasSupplierController extends JeecgController<BasSupplier, IBasSupp
 	 */
 	@AutoLog(value = "供应商-添加")
 	@ApiOperation(value="供应商-添加", notes="供应商-添加")
+	@RequiresPermissions("base:supplier:add") //20240806 cfm add
 	@PostMapping(value = "/add")
 	public Result<String> add(@RequestBody BasSupplier basSupplier) {
 		basSupplierService.save(basSupplier);
@@ -96,6 +101,7 @@ public class BasSupplierController extends JeecgController<BasSupplier, IBasSupp
 	 */
 	@AutoLog(value = "供应商-编辑")
 	@ApiOperation(value="供应商-编辑", notes="供应商-编辑")
+	@RequiresPermissions("base:supplier:edit") //20240806 cfm add
 	@RequestMapping(value = "/edit", method = {RequestMethod.PUT,RequestMethod.POST})
 	public Result<String> edit(@RequestBody BasSupplier basSupplier) {
 		basSupplierService.updateById(basSupplier);
@@ -110,6 +116,7 @@ public class BasSupplierController extends JeecgController<BasSupplier, IBasSupp
 	 */
 	@AutoLog(value = "供应商-通过id删除")
 	@ApiOperation(value="供应商-通过id删除", notes="供应商-通过id删除")
+	@RequiresPermissions("base:supplier:delete") //20240806 cfm add
 	@DeleteMapping(value = "/delete")
 	public Result<String> delete(@RequestParam(name="id",required=true) String id) {
 		basSupplierService.removeById(id);
@@ -124,6 +131,7 @@ public class BasSupplierController extends JeecgController<BasSupplier, IBasSupp
 	 */
 	@AutoLog(value = "供应商-批量删除")
 	@ApiOperation(value="供应商-批量删除", notes="供应商-批量删除")
+	@RequiresPermissions("base:supplier:delete") //20240806 cfm add
 	@DeleteMapping(value = "/deleteBatch")
 	public Result<String> deleteBatch(@RequestParam(name="ids",required=true) String ids) {
 		this.basSupplierService.removeByIds(Arrays.asList(ids.split(",")));
@@ -137,6 +145,7 @@ public class BasSupplierController extends JeecgController<BasSupplier, IBasSupp
     * @param basSupplier
     */
 	@AutoLog(value = "导出为excel")
+	@RequiresPermissions("base:supplier:export") //20240806 cfm add
     @RequestMapping(value = "/exportXls")
     public ModelAndView exportXls(HttpServletRequest request, BasSupplier basSupplier) {
         return super.exportXls(request, basSupplier, BasSupplier.class, "供应商");
@@ -150,6 +159,7 @@ public class BasSupplierController extends JeecgController<BasSupplier, IBasSupp
     * @return
     */
 	@AutoLog(value = "通过excel导入数据")
+	@RequiresPermissions("base:supplier:import") //20240806 cfm add
     @RequestMapping(value = "/importExcel", method = RequestMethod.POST)
     public Result<?> importExcel(HttpServletRequest request, HttpServletResponse response) {
         return super.importExcel(request, response, BasSupplier.class);

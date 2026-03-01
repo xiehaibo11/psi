@@ -10,5 +10,11 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @Version: V1.0
  */
 public interface IBasCustomerService extends IService<BasCustomer> {
-
+    /**
+     *  编辑
+     *  注意：如果属性creditQuota为null，则数据库中将被修改为null；其他属性为null，不修改。
+     *
+     * @param basCustomer
+     */
+    void edit(BasCustomer basCustomer); //20251030 cfm add
 }

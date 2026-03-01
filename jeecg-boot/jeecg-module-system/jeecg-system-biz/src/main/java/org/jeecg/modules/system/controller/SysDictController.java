@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.constant.CacheConstant;
@@ -18,6 +19,7 @@ import org.jeecg.common.system.vo.DictModel;
 import org.jeecg.common.system.vo.DictQuery;
 import org.jeecg.common.system.vo.LoginUser;
 import org.jeecg.common.util.ImportExcelUtil;
+import org.jeecg.common.util.RedisUtil;
 import org.jeecg.common.util.SqlInjectionUtil;
 import org.jeecg.common.util.oConvertUtils;
 import org.jeecg.modules.system.entity.SysDict;
@@ -68,6 +70,8 @@ public class SysDictController {
 	public RedisTemplate<String, Object> redisTemplate;
 	@Autowired
 	private DictQueryBlackListHandler dictQueryBlackListHandler;
+	@Autowired
+	private RedisUtil redisUtil;
 
 	@RequestMapping(value = "/list", method = RequestMethod.GET)
 	public Result<IPage<SysDict>> queryPageList(SysDict sysDict,@RequestParam(name="pageNo", defaultValue="1") Integer pageNo,
@@ -364,7 +368,7 @@ public class SysDictController {
 	 * @param sysDict
 	 * @return
 	 */
-	//@RequiresRoles({"admin"})
+	@RequiresPermissions("system:dict:add") //20240806 cfm add
 	@RequestMapping(value = "/add", method = RequestMethod.POST)
 	public Result<SysDict> add(@RequestBody SysDict sysDict) {
 		Result<SysDict> result = new Result<SysDict>();
@@ -385,7 +389,7 @@ public class SysDictController {
 	 * @param sysDict
 	 * @return
 	 */
-	//@RequiresRoles({"admin"})
+	@RequiresPermissions("system:dict:edit") //20240806 cfm add
 	@RequestMapping(value = "/edit", method = { RequestMethod.PUT,RequestMethod.POST })
 	public Result<SysDict> edit(@RequestBody SysDict sysDict) {
 		Result<SysDict> result = new Result<SysDict>();
@@ -407,7 +411,7 @@ public class SysDictController {
 	 * @param id
 	 * @return
 	 */
-	//@RequiresRoles({"admin"})
+	@RequiresPermissions("system:dict:delete") //20240806 cfm add
 	@RequestMapping(value = "/delete", method = RequestMethod.DELETE)
 	@CacheEvict(value={CacheConstant.SYS_DICT_CACHE, CacheConstant.SYS_ENABLE_DICT_CACHE}, allEntries=true)
 	public Result<SysDict> delete(@RequestParam(name="id",required=true) String id) {
@@ -426,7 +430,7 @@ public class SysDictController {
 	 * @param ids
 	 * @return
 	 */
-	//@RequiresRoles({"admin"})
+	@RequiresPermissions("system:dict:delete") //20240806 cfm add
 	@RequestMapping(value = "/deleteBatch", method = RequestMethod.DELETE)
 	@CacheEvict(value= {CacheConstant.SYS_DICT_CACHE, CacheConstant.SYS_ENABLE_DICT_CACHE}, allEntries=true)
 	public Result<SysDict> deleteBatch(@RequestParam(name="ids",required=true) String ids) {
@@ -448,22 +452,33 @@ public class SysDictController {
 	public Result<?> refleshCache() {
 		Result<?> result = new Result<SysDict>();
 		//清空字典缓存
-		Set keys = redisTemplate.keys(CacheConstant.SYS_DICT_CACHE + "*");
-		Set keys7 = redisTemplate.keys(CacheConstant.SYS_ENABLE_DICT_CACHE + "*");
-		Set keys2 = redisTemplate.keys(CacheConstant.SYS_DICT_TABLE_CACHE + "*");
-		Set keys21 = redisTemplate.keys(CacheConstant.SYS_DICT_TABLE_BY_KEYS_CACHE + "*");
-		Set keys3 = redisTemplate.keys(CacheConstant.SYS_DEPARTS_CACHE + "*");
-		Set keys4 = redisTemplate.keys(CacheConstant.SYS_DEPART_IDS_CACHE + "*");
-		Set keys5 = redisTemplate.keys( "jmreport:cache:dict*");
-		Set keys6 = redisTemplate.keys( "jmreport:cache:dictTable*");
-		redisTemplate.delete(keys);
-		redisTemplate.delete(keys2);
-		redisTemplate.delete(keys21);
-		redisTemplate.delete(keys3);
-		redisTemplate.delete(keys4);
-		redisTemplate.delete(keys5);
-		redisTemplate.delete(keys6);
-		redisTemplate.delete(keys7);
+//		Set keys = redisTemplate.keys(CacheConstant.SYS_DICT_CACHE + "*");
+//		Set keys7 = redisTemplate.keys(CacheConstant.SYS_ENABLE_DICT_CACHE + "*");
+//		Set keys2 = redisTemplate.keys(CacheConstant.SYS_DICT_TABLE_CACHE + "*");
+//		Set keys21 = redisTemplate.keys(CacheConstant.SYS_DICT_TABLE_BY_KEYS_CACHE + "*");
+//		Set keys3 = redisTemplate.keys(CacheConstant.SYS_DEPARTS_CACHE + "*");
+//		Set keys4 = redisTemplate.keys(CacheConstant.SYS_DEPART_IDS_CACHE + "*");
+//		Set keys5 = redisTemplate.keys( "jmreport:cache:dict*");
+//		Set keys6 = redisTemplate.keys( "jmreport:cache:dictTable*");
+//		redisTemplate.delete(keys);
+//		redisTemplate.delete(keys2);
+//		redisTemplate.delete(keys21);
+//		redisTemplate.delete(keys3);
+//		redisTemplate.delete(keys4);
+//		redisTemplate.delete(keys5);
+//		redisTemplate.delete(keys6);
+//		redisTemplate.delete(keys7);
+
+		//update-begin-author:liusq date:20230404 for:  [issue/4358]springCache中的清除缓存的操作使用了“keys”
+		redisUtil.removeAll(CacheConstant.SYS_DICT_CACHE);
+		redisUtil.removeAll(CacheConstant.SYS_ENABLE_DICT_CACHE);
+		redisUtil.removeAll(CacheConstant.SYS_DICT_TABLE_CACHE);
+		redisUtil.removeAll(CacheConstant.SYS_DICT_TABLE_BY_KEYS_CACHE);
+		redisUtil.removeAll(CacheConstant.SYS_DEPARTS_CACHE);
+		redisUtil.removeAll(CacheConstant.SYS_DEPART_IDS_CACHE);
+		redisUtil.removeAll("jmreport:cache:dict");
+		redisUtil.removeAll("jmreport:cache:dictTable");
+		//update-end-author:liusq date:20230404 for:  [issue/4358]springCache中的清除缓存的操作使用了“keys”
 		return result;
 	}
 
@@ -509,7 +524,7 @@ public class SysDictController {
 	 * @param
 	 * @return
 	 */
-	//@RequiresRoles({"admin"})
+	@RequiresPermissions("system:dict:import") //20240806 cfm add
 	@RequestMapping(value = "/importExcel", method = RequestMethod.POST)
 	public Result<?> importExcel(HttpServletRequest request, HttpServletResponse response) {
  		MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;

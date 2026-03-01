@@ -24,10 +24,6 @@
     name: 'BasSupplierModal',
     components: {BasSupplierForm},
     mixins: [DrawerMixin],
-
-    data () {
-      return { width:800}
-    },
   }
 </script>
 

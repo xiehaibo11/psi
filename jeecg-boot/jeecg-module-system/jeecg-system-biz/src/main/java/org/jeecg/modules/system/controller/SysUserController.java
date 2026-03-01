@@ -159,8 +159,7 @@ public class SysUserController {
 		return result;
 	}
 
-    //@RequiresRoles({"admin"})
-    //Permissions("system:user:add")
+    @RequiresPermissions("system:user:add") //20240806 cfm add
 	@RequestMapping(value = "/add", method = RequestMethod.POST)
 	public Result<SysUser> add(@RequestBody JSONObject jsonObject) {
 		Result<SysUser> result = new Result<SysUser>();
@@ -188,8 +187,7 @@ public class SysUserController {
 		return result;
 	}
 
-    //@RequiresRoles({"admin"})
-    //Permissions("system:user:edit")
+    @RequiresPermissions("system:user:edit") //20240806 cfm add
 	@RequestMapping(value = "/edit", method = {RequestMethod.PUT,RequestMethod.POST})
 	public Result<SysUser> edit(@RequestBody JSONObject jsonObject) {
 		Result<SysUser> result = new Result<SysUser>();
@@ -225,7 +223,7 @@ public class SysUserController {
 	/**
 	 * 删除用户
 	 */
-	//@RequiresRoles({"admin"})
+    @RequiresPermissions("system:user:delete") //20240806 cfm add
 	@RequestMapping(value = "/delete", method = RequestMethod.DELETE)
 	public Result<?> delete(@RequestParam(name="id",required=true) String id) {
 		baseCommonService.addLog("删除用户，id： " +id ,CommonConstant.LOG_TYPE_2, 3);
@@ -236,7 +234,7 @@ public class SysUserController {
 	/**
 	 * 批量删除用户
 	 */
-	//@RequiresRoles({"admin"})
+    @RequiresPermissions("system:user:delete") //20240806 cfm add
 	@RequestMapping(value = "/deleteBatch", method = RequestMethod.DELETE)
 	public Result<?> deleteBatch(@RequestParam(name="ids",required=true) String ids) {
 		baseCommonService.addLog("批量删除用户， ids： " +ids ,CommonConstant.LOG_TYPE_2, 3);
@@ -249,7 +247,7 @@ public class SysUserController {
 	 * @param jsonObject
 	 * @return
 	 */
-	//@RequiresRoles({"admin"})
+    @RequiresPermissions("system:user:frozen") //20240806 cfm add
 	@RequestMapping(value = "/frozenBatch", method = RequestMethod.PUT)
 	public Result<SysUser> frozenBatch(@RequestBody JSONObject jsonObject) {
 		Result<SysUser> result = new Result<SysUser>();
@@ -337,7 +335,7 @@ public class SysUserController {
     /**
      * 修改密码
      */
-    //@RequiresRoles({"admin"})
+    @RequiresPermissions("system:user:changepwd") //20240806 cfm add
     @RequestMapping(value = "/changePassword", method = RequestMethod.PUT)
     public Result<?> changePassword(@RequestBody SysUser sysUser) {
         SysUser u = this.sysUserService.getOne(new LambdaQueryWrapper<SysUser>().eq(SysUser::getUsername, sysUser.getUsername()));
@@ -460,8 +458,7 @@ public class SysUserController {
      * @param request
      * @param sysUser
      */
-    //@RequiresRoles({"admin"})
-    //@RequiresPermissions("system:user:export")
+    @RequiresPermissions("system:user:export") //20240806 cfm add
     @RequestMapping(value = "/exportXls")
     public ModelAndView exportXls(SysUser sysUser,HttpServletRequest request) {
         // Step.1 组装查询条件
@@ -494,8 +491,7 @@ public class SysUserController {
      * @param response
      * @return
      */
-    //@RequiresRoles({"admin"})
-    //Permissions("system:user:import")
+    @RequiresPermissions("system:user:import") //20240806 cfm add
     @RequestMapping(value = "/importExcel", method = RequestMethod.POST)
     public Result<?> importExcel(HttpServletRequest request, HttpServletResponse response)throws IOException {
         MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
@@ -591,7 +587,7 @@ public class SysUserController {
 	/**
 	 * 首页用户重置密码
 	 */
-    //@RequiresRoles({"admin"})
+    @RequiresPermissions("system:user:updatepwd") //20240806 cfm add
     @RequestMapping(value = "/updatePassword", method = RequestMethod.PUT)
 	public Result<?> updatePassword(@RequestBody JSONObject json) {
 		String username = json.getString("username");
@@ -632,7 +628,7 @@ public class SysUserController {
      * @param
      * @return
      */
-    //@RequiresRoles({"admin"})
+    @RequiresPermissions("system:user:addUserRole") //20240806 cfm add
     @RequestMapping(value = "/addSysUserRole", method = RequestMethod.POST)
     public Result<String> addSysUserRole(@RequestBody SysUserRoleVO sysUserRoleVO) {
         Result<String> result = new Result<String>();
@@ -663,7 +659,7 @@ public class SysUserController {
      * @param
      * @return
      */
-    //@RequiresRoles({"admin"})
+    @RequiresPermissions("system:user:deleteUserRole") //20240806 cfm add
     @RequestMapping(value = "/deleteUserRole", method = RequestMethod.DELETE)
     public Result<SysUserRole> deleteUserRole(@RequestParam(name="roleId") String roleId,
                                                     @RequestParam(name="userId",required=true) String userId
@@ -687,7 +683,7 @@ public class SysUserController {
      * @param
      * @return
      */
-    //@RequiresRoles({"admin"})
+    @RequiresPermissions("system:user:deleteUserRole") //20240806 cfm add
     @RequestMapping(value = "/deleteUserRoleBatch", method = RequestMethod.DELETE)
     public Result<SysUserRole> deleteUserRoleBatch(
             @RequestParam(name="roleId") String roleId,
@@ -814,7 +810,7 @@ public class SysUserController {
     /**
      * 给指定部门添加对应的用户
      */
-    //@RequiresRoles({"admin"})
+    @RequiresPermissions("system:user:editDepartWithUser") //20240806 cfm add
     @RequestMapping(value = "/editSysDepartWithUser", method = RequestMethod.POST)
     public Result<String> editSysDepartWithUser(@RequestBody SysDepartUsersVO sysDepartUsersVO) {
         Result<String> result = new Result<String>();
@@ -843,7 +839,7 @@ public class SysUserController {
     /**
      *   删除指定机构的用户关系
      */
-    //@RequiresRoles({"admin"})
+    @RequiresPermissions("system:user:deleteUserInDepart") //20240806 cfm add
     @RequestMapping(value = "/deleteUserInDepart", method = RequestMethod.DELETE)
     public Result<SysUserDepart> deleteUserInDepart(@RequestParam(name="depId") String depId,
                                                     @RequestParam(name="userId",required=true) String userId
@@ -875,7 +871,7 @@ public class SysUserController {
     /**
      * 批量删除指定机构的用户关系
      */
-    //@RequiresRoles({"admin"})
+    @RequiresPermissions("system:user:deleteUserInDepart") //20240806 cfm add
     @RequestMapping(value = "/deleteUserInDepartBatch", method = RequestMethod.DELETE)
     public Result<SysUserDepart> deleteUserInDepartBatch(
             @RequestParam(name="depId") String depId,
@@ -895,7 +891,7 @@ public class SysUserController {
         }
         return result;
     }
-    
+
     /**
          *  查询当前用户的所有部门/当前部门编码
      * @return
@@ -918,12 +914,12 @@ public class SysUserController {
         return result;
     }
 
-    
+
 
 
 	/**
 	 * 用户注册接口
-	 * 
+	 *
 	 * @param jsonObject
 	 * @param user
 	 * @return
@@ -1070,7 +1066,7 @@ public class SysUserController {
 		result.setSuccess(true);
 		return result;
 	}
-	
+
 	/**
 	 * 用户更改密码
 	 */
@@ -1120,11 +1116,11 @@ public class SysUserController {
             return result;
         }
     }
-	
+
 
 	/**
 	 * 根据TOKEN获取用户的部分信息（返回的数据是可供表单设计器使用的数据）
-	 * 
+	 *
 	 * @return
 	 */
 	@GetMapping("/getUserSectionInfoByToken")
@@ -1135,7 +1131,7 @@ public class SysUserController {
 			if (oConvertUtils.isEmpty(token)) {
 				 username = JwtUtil.getUserNameByToken(request);
 			} else {
-				 username = JwtUtil.getUsername(token);				
+				 username = JwtUtil.getUsername(token);
 			}
 
 			log.debug(" ------ 通过令牌获取部分用户信息，当前用户： " + username);
@@ -1156,7 +1152,7 @@ public class SysUserController {
 			return Result.error(500, "查询失败:" + e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * 【APP端接口】获取用户列表  根据用户名和真实名 模糊匹配
 	 * @param keyword
@@ -1193,7 +1189,7 @@ public class SysUserController {
 			log.error(e.getMessage(), e);
 			return Result.error(500, "查询失败:" + e.getMessage());
 		}
-		
+
 	}
 
     /**
@@ -1221,6 +1217,7 @@ public class SysUserController {
      * @param jsonObject
      * @return
      */
+    @RequiresPermissions("system:user:putRecycleBin") //20240806 cfm add
     @RequestMapping(value = "/putRecycleBin", method = RequestMethod.PUT)
     public Result putRecycleBin(@RequestBody JSONObject jsonObject, HttpServletRequest request) {
         String userIds = jsonObject.getString("userIds");
@@ -1239,7 +1236,7 @@ public class SysUserController {
      * @param userIds 被删除的用户ID，多个id用半角逗号分割
      * @return
      */
-    //@RequiresRoles({"admin"})
+    @RequiresPermissions("system:user:deleteRecycleBin") //20240806 cfm add
     @RequestMapping(value = "/deleteRecycleBin", method = RequestMethod.DELETE)
     public Result deleteRecycleBin(@RequestParam("userIds") String userIds) {
         if (StringUtils.isNotBlank(userIds)) {
@@ -1254,6 +1251,8 @@ public class SysUserController {
      * @param jsonObject
      * @return
      */
+    @RequiresRoles({"admin"})
+    @RequiresPermissions("system:user:appEdit") //20240806 cfm add
     @RequestMapping(value = "/appEdit", method = {RequestMethod.PUT,RequestMethod.POST})
     public Result<SysUser> appEdit(HttpServletRequest request,@RequestBody JSONObject jsonObject) {
         Result<SysUser> result = new Result<SysUser>();

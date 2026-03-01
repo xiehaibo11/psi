@@ -11,8 +11,10 @@
     <!--  ---------------------------- end 图片左右换位置 ------------------------------------- -->
 
     <!--20221208 cfm add for: 在线文件浏览, 增加@download、showUploadList-->
+    <!--20251207 cfm add: 增加accept属性 -->
     <a-upload
       name="file"
+      :accept="accept"
       :multiple="multiple"
       :action="uploadAction"
       :headers="headers"
@@ -48,6 +50,7 @@
   import Vue from 'vue'
   import { ACCESS_TOKEN } from "@/store/mutation-types"
   import { getFileAccessHttpUrl } from '@/api/manage';
+  import { Base64 } from 'js-base64'; // 20240907 cfm add
 
   const FILE_TYPE_ALL = "all"
   const FILE_TYPE_IMG = "image"
@@ -144,6 +147,18 @@
       },
       beforeUpload: {
         type: Function
+      },
+
+      //20251207 cfm add
+      accept:{
+        type:String,
+        required:false,
+        default: ""
+      },
+      fileSize:{ //文件大小限制MB
+        type:Number,
+        required:false,
+        default: 10
       },
     },
     watch:{
@@ -247,9 +262,27 @@
           path = arr.join(",")
         }
         this.$emit('change', path);
+        this.$emit('input', path); //20251207 cfm add for form-designer
       },
       doBeforeUpload(file){
         this.uploadGoOn=true
+
+        //20251207 cfm add：文件数限制
+        //（1）如果已上传的文件数已达上限，不允许上传；
+        //（2）如果一次选择上传的文件数超过上限，则显示文件列表虽然未超（文件列表在handleChange方法中处理），但文件都已上传。
+        // 因此，为避免一次选择上传的文件数超过上限，可限制不能多选（组件属性multiple设为false）
+        if (this.number > 0 && this.fileList.length >= this.number) {
+          this.$message.warning(`最多只能上传${this.number}个文件！`);
+          this.uploadGoOn =false;
+          return false;
+        }
+
+        //20251207 cfm add：文件大小限制
+        if(file.size > this.fileSize*1024*1024){
+          this.$message.warning(`【${file.name}】文件大小超出${this.fileSize}MB限制，请从列表中移除！`);
+          return false;
+        }
+
         var fileType = file.type;
         if(this.fileType===FILE_TYPE_IMG){
           if(fileType.indexOf('image')<0){
@@ -312,6 +345,7 @@
               // update-end-author:lvdandan date:20200603 for:【TESTA-514】【开源issue】多个文件同时上传时，控制台报错
             }
             this.$emit('change', this.newFileList);
+            this.$emit('input', this.newFileList);//20251207 cfm add for form-designer
           }
         }
       },
@@ -329,12 +363,20 @@
       //   }
       // },
         } else if (file.url) { // begin-20221208 cfm modi: 在线文件浏览
-          let url = window._CONFIG['onlinePreviewDomainURL'] + '?url=' + encodeURIComponent(file.url);
-          window.open(url, '_blank');
+          // 20240907 cfm modi，20241223 cfm modi
+          // let url = window._CONFIG['onlinePreviewDomainURL'] + '?url=' + encodeURIComponent(file.url); // kkFileView 2.x.x 及以下版本
+          let url = file.url + '?token=' + Vue.ls.get(ACCESS_TOKEN);
+          url = window._CONFIG['onlinePreviewDomainURL'] + '?url=' + encodeURIComponent(Base64.encode(url)); // kkFileView 3.x.x 及以上版本
+
+          // 20240716 cfm modi for 5+App
+          // window.open(url, '_blank');
+          if (navigator.userAgent.indexOf("Html5Plus") >= 0) plus.runtime.openURL(url);
+          else window.open(url, '_blank');
+
         }
       },
       handleDownload(file) {
-        location.href = file.url;
+        location.href = file.url + '?token=' + Vue.ls.get(ACCESS_TOKEN); // 20240907 cfm modi: 增加了token参数
       },
       // end-20221208 cfm modi: 在线文件浏览
 
@@ -364,6 +406,7 @@
           }
           this.currentImg = last
           this.$emit('change',arr.join(','))
+          this.$emit('input',arr.join(',')) //20251207 cfm add for form-designer
         }
       },
       moveNext(){
@@ -385,6 +428,7 @@
           }
           this.currentImg = next
           this.$emit('change',arr.join(','))
+          this.$emit('input',arr.join(',')) //20251207 cfm add for form-designer
         }
       },
       getIndexByUrl(){
@@ -459,6 +503,15 @@
     .anticon-delete{
       display: none;
     }
+    /*update-begin-author:taoyan date:2022-12-5 for: issues/4250 建议JUpload组件，disabled为true的时候上传button能够变灰或者其他样式图案，便于知晓无法再点击上传*/
+    .ant-btn, .ant-upload-disabled{
+      cursor: not-allowed;
+      color: rgba(0, 0, 0, 0.25);
+      background-color: #f5f5f5;
+      border-color: #d9d9d9;
+    }
+    /*update-end-author:taoyan date:2022-12-5 for: issues/4250 建议JUpload组件，disabled为true的时候上传button能够变灰或者其他样式图案，便于知晓无法再点击上传*/
+
   }
 }
   //---------------------------- begin 图片左右换位置 -------------------------------------

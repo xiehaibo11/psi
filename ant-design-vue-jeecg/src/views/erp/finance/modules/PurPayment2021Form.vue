@@ -3,38 +3,51 @@
     <!-- 主表单区域 -->
     <div>
       <a-form-model ref="form" :model="model" :rules="validatorRules">
-        <bill-header ref="billHeader" :model="model" :disabled="disabled" :moreStatus.sync="moreStatus"/>
+        <bill-header ref="billHeader" :model="model" :disabled="disabled" :moreStatus.sync="moreStatus" :moreStatus2.sync="moreStatus2"/>
 
-          <a-row>
-            <a-col :span="8" >
-              <a-form-model-item label="单据主题" :labelCol="labelCol3" :wrapperCol="wrapperCol3" prop="subject">
-                <a-input v-model="model.subject" placeholder="请输入" :readOnly="disabled"/>
-              </a-form-model-item>
-            </a-col>
-            <a-col :span="8" >
-              <a-form-model-item label="供应商" :labelCol="labelCol3" :wrapperCol="wrapperCol3" prop="supplierId">
-                <a-tooltip :title="!disabled && entryTable.rowCount>0 ? '有明细时不能改变！' : ''" placement="bottom">
-                  <j-search-select-tag v-model="model.supplierId" :async="true" dict="bas_supplier,aux_name,id"
-                                       :disabled="disabled || entryTable.rowCount>0"/>
-                </a-tooltip>
-              </a-form-model-item>
-            </a-col>
-            <a-col :span="8" v-show="action==='detail'">
-              <a-form-model-item label="已核销金额" :labelCol="labelCol3" :wrapperCol="wrapperCol3" prop="checkedAmt">
-                <a-input-number v-model="model.checkedAmt" :disabled="true"
-                  :formatter="value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                  :parser="value => value.replace(/\$\s?|(,*)/g, '')"
-                  :precision="2" style="width: 100%"/>
-              </a-form-model-item>
-            </a-col>
-          </a-row>
+        <a-row>
+          <a-col :span="8" >
+            <a-form-model-item label="供应商" :labelCol="labelCol3" :wrapperCol="wrapperCol3" prop="supplierId">
+              <a-tooltip :title="!disabled && entryTable.rowCount>0 ? '有明细时不能改变！' : ''" placement="bottom">
+                <j-search-select-tag v-model="model.supplierId" dict="bas_supplier,aux_name,id" :disabled="disabled || entryTable.rowCount>0"/>
+              </a-tooltip>
+            </a-form-model-item>
+          </a-col>
+          <a-col :span="8" v-show="action==='detail'">
+            <a-form-model-item label="已核销金额" :labelCol="labelCol3" :wrapperCol="wrapperCol3" prop="checkedAmt">
+              <a-input-number v-model="model.checkedAmt" :disabled="true"
+                :formatter="value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                :parser="value => value.replace(/\$\s?|(,*)/g, '')"
+                :precision="2" style="width: 100%"/>
+            </a-form-model-item>
+          </a-col>
+        </a-row>
+
+        <a-row>
+          <a-col :xl="8" :lg="12" :md="24" v-show="moreStatus2 || !!model.subject && model.subject.length > 0">
+            <a-form-model-item label="单据主题" :labelCol="labelCol3" :wrapperCol="wrapperCol3" prop="subject">
+              <a-input v-model="model.subject" placeholder="请输入" :readOnly="disabled"/>
+            </a-form-model-item>
+          </a-col>
+          <a-col :xl="8" :lg="12" :md="24" v-show="moreStatus2 || !!model.remark && model.remark.length > 0">
+            <a-form-model-item label="备注" :labelCol="labelCol3" :wrapperCol="wrapperCol3" prop="remark">
+              <a-textarea v-model="model.remark" :readOnly="disabled" rows="1" autoSize/>
+            </a-form-model-item>
+          </a-col>
+          <a-col :xl="8" :lg="12" :md="24" v-show="moreStatus2 || !!model.attachment && model.attachment.length > 0">
+            <a-form-model-item label="附件" :labelCol="labelCol3" :wrapperCol="wrapperCol3" prop="attachment">
+              <j-upload v-model="model.attachment" :disabled="disabled" bizPath="erp"/>
+            </a-form-model-item>
+          </a-col>
+        </a-row>
 
         <!-- 子表单区域 -->
         <a-tabs v-model="activeKey" @change="handleChangeTabs">
-          <a-tab-pane tab="付款申请" :key="refKeys[1]" :forceRender="true">
+          <!--20251101 cfm modi for 内置BPM：各源单tab增加 v-if... -->
+          <a-tab-pane v-if="srcVisible" tab="付款申请" key="srcTable" :forceRender="true">
             <j-vxe-table
               keep-source
-              :ref="refKeys[1]"
+              ref="srcTable"
               :loading="srcTable.loading"
               :columns="srcTable.columns"
               :dataSource="srcTable.dataSource"
@@ -46,10 +59,10 @@
               :edit-config="{enabled: false, showIcon: false}"/>
           </a-tab-pane>
 
-          <a-tab-pane tab="明细" :key="refKeys[0]" :forceRender="true">
+          <a-tab-pane tab="明细" key="entryTable" :forceRender="true">
             <j-vxe-table
               keep-source
-              :ref="refKeys[0]"
+              ref="entryTable"
               :loading="entryTable.loading"
               :columns="entryTable.columns"
               :dataSource="entryTable.dataSource"
@@ -66,12 +79,11 @@
               @remove="event => {this.entryTable.rowCount = this.$refs.entryTable.getTableData().length; this.removeFreeSrcBills();}"
             >
               <template v-if="!disabled" v-slot:toolbarPrefix>
-                <a-tooltip :title="!model.supplierId || model.supplierId.length===0 ? '请先选择供应商！':'供应商是弹窗查询参数'"
-                           placement="bottom">
+                <a-tooltip :title="!model.supplierId || model.supplierId.length===0 ? '请先选择供应商！':'供应商是弹窗查询参数'" placement="bottom">
                   <a-button @click="$refs.reqPopup.openModal()" icon="plus" type="primary"
                             :disabled="!model.supplierId || model.supplierId.length===0">付款申请</a-button>
                 </a-tooltip>
-                <a-tooltip :title="entryTable.selectedRowCount!==1 ? '请选择一行明细!':''" placement="bottom">
+                <a-tooltip v-if="!isMobile()" :title="entryTable.selectedRowCount!==1 ? '请选择一行明细!':''" placement="bottom">
                   <a-button @click="handleCopyAndAdd" icon="plus" :disabled="entryTable.selectedRowCount!==1">复制新增</a-button>
                 </a-tooltip>
 
@@ -89,7 +101,7 @@
           </template>
         </a-tabs>
 
-        <bill-footer ref="billFooter" :model="model" :disabled="disabled" :action="action"/>
+        <bill-approval v-if="action==='check' || action==='ebpm'" :model="model" :disabled="disabled" style="margin-top: 16px"/>
       </a-form-model>
     </div>
 
@@ -97,21 +109,28 @@
 </template>
 
 <script>
-  import { JVxeTableModelMixin } from '@/mixins/JVxeTableModelMixin'
-  import { JVXETypes } from '@/components/jeecg/JVxeTable'
-  import { getRefPromise} from '@/components/jeecg/JVxeTable/utils/vxeUtils.js'
-  import { BillFormMixin, BillFormGridMixin} from '../../common/mixins/BillFormMixin'
-  import { BillVxeTableMixin } from '../../common/mixins/BillVxeTableMixin'
-  import BillHeader from "../../common/components/BillHeader";
-  import BillFooter from "../../common/components/BillFooter";
-  import VxeTableColumnsSetter from "../../common/components/VxeTableColumnsSetter";
+  import {JVXETypes} from '@/components/jeecg/JVxeTable'
+  import {getRefPromise} from '@/components/jeecg/JVxeTable/utils/vxeUtils.js'
+  import {JVxeTableModelMixin} from '@/mixins/JVxeTableModelMixin'
+  import {BillFormMixin} from '../../common/mixins/bill/BillFormMixin'
+  import {BillFormGridMixin} from '../../common/mixins/bill/BillFormGridMixin'
+  import {DetailMixin} from '../../common/mixins/bill/DetailMixin'
+  import {DetailValueMixin} from '../../common/mixins/bill/DetailValueMixin'
+  import {DetailFormatMixin} from '../../common/mixins/bill/DetailFormatMixin'
+  import {DetailValidatorMixin} from '../../common/mixins/bill/DetailValidatorMixin'
+  import {DataMixin} from '../../common/mixins/DataMixin'
+  import {mixinDevice} from '@/utils/mixin'
+  import BillHeader from "../../common/components/BillHeader"
+  import BillApproval from "../../common/components/BillApproval"
+  import VxeTableColumnsSetter from "../../common/components/VxeTableColumnsSetter"
   import pick from "lodash.pick";
   import XEUtils from "xe-utils";
+  import {stringIsEmpty} from "../../../erp/common/utils/util";
 
   export default {
     name: 'PurPayment2021Form',
-    mixins: [JVxeTableModelMixin, BillFormMixin, BillFormGridMixin, BillVxeTableMixin],
-    components: {BillHeader, BillFooter, VxeTableColumnsSetter},
+    mixins: [JVxeTableModelMixin, BillFormMixin, BillFormGridMixin, DetailMixin, DetailValueMixin, DetailFormatMixin, DetailValidatorMixin, DataMixin, mixinDevice],
+    components: {BillHeader, BillApproval, VxeTableColumnsSetter},
 
     data() {
       return {
@@ -134,8 +153,8 @@
 
         entryNoStep: 10,
         addDefaultRowNum: 0,
-        refKeys: ['entryTable', 'srcTable'],
-        tableKeys:['entryTable'],//用于校验和提交子表数据的方法getAllTable(),须与refkeys中位置相同
+        refKeys: ['entryTable'],
+        tableKeys:['entryTable'],
         activeKey: 'entryTable',
 
         // 明细
@@ -198,29 +217,28 @@
               formatter: this.formatAmt,
               placeholder: '请输入',
               defaultValue: '',
-              validateRules: [{ required: true, message: '${title}不能为空' },
-                {handler: this.rubricValidator}, {handler: this.amtValidator}],
+              validateRules: [{ required: true, message: '${title}不能为空' }, {handler: this.rubricValidator}, {handler: this.amtValidator}],
               statistics: ['sum'],
             },
             {
               title: '备注',
               key: 'remark',
               type: JVXETypes.input,
-              width:"160px",
+              width:"100px",
               defaultValue: '',
             },
             {
               title: '自定义1',
               key: 'custom1',
               type: JVXETypes.input,
-              width:"100px",
+              width:"80px",
               defaultValue: '',
             },
             {
               title: '自定义2',
               key: 'custom2',
               type: JVXETypes.input,
-              width:"100px",
+              width:"80px",
               defaultValue: '',
             },
           ]
@@ -250,14 +268,6 @@
               sortable: true,
             },
             {
-              title: '单据主题',
-              key: 'subject',
-              type: JVXETypes.input,
-              width:"200px",
-              defaultValue:'',
-              sortable: true,
-            },
-            {
               title: '申请金额',
               key: 'amt',
               type: JVXETypes.inputNumber,
@@ -278,10 +288,18 @@
               statistics: ['sum'],
             },
             {
+              title: '单据主题',
+              key: 'subject',
+              type: JVXETypes.input,
+              width:"200px",
+              defaultValue:'',
+              sortable: true,
+            },
+            {
               title: '备注',
               key: 'remark',
               type: JVXETypes.input,
-              width:"160px",
+              width:"100px",
               defaultValue:'',
             },
           ]
@@ -294,7 +312,28 @@
           ebpm: "/finance/finPayment/bpm/end",
           execute: "/finance/finPayment/execute",
           void: "/finance/finPayment/void",
+          queryById: "/finance/finPayment/queryById", //20251101 cfm add for 内置BPM
         },
+      }
+    },
+
+    watch:{
+      'entryTable.dataSource'() {
+        this.entryTable.rowCount = this.entryTable.dataSource.length;
+      },
+
+      'entryTable.loading': {
+        immediate: true,
+        handler() {
+          this.$emit("update:loading", this.entryTable.loading);
+        }
+      },
+
+      'entryTable.rowCount': {
+        immediate: true,
+        handler() {
+          this.$emit("update:entryCount", this.entryTable.rowCount);
+        }
       }
     },
 
@@ -321,8 +360,7 @@
       },
 
       editAfter() {
-        if (this.model.id)
-          this.requestSubDatas(this.entryTable, this.srcTable);
+        if (this.model.id) this.requestSubDatas(this.entryTable, this.srcTable);
       },
 
       classifyIntoFormData(allValues) {
@@ -334,7 +372,7 @@
       },
 
       onReqPopupInput(val, row) {
-        if(!row.id || row.id.length===0) return;
+        if(stringIsEmpty(row.id)) return;
         const that = this;
         this.requestSrcDeltas(row.id, this.srcTable, null, success);
 
@@ -358,7 +396,7 @@
 
       amtValidator({cellValue, row, column}, callback, target) {
         let v = Number(cellValue);
-        if (isNaN(v) || !row.srcBillId || row.srcBillId.length === 0) {
+        if (isNaN(v) || stringIsEmpty(row.srcBillId)) {
           callback();
           return;
         }

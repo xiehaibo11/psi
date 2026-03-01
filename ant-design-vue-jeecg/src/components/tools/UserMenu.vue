@@ -2,11 +2,13 @@
   <div class="user-wrapper" :class="theme">
     <!-- update_begin author:zhaoxin date:20191129 for: 做头部菜单栏导航 -->
     <!-- update-begin author:sunjianlei date:20191@20 for: 解决全局样式冲突的问题 -->
-    <span class="action" @click="showClick">
+    <!-- 20240425 cfm modi: 增加 v-if... -->
+    <span v-if="isDesktop()" class="action" @click="showClick">
       <a-icon type="search"></a-icon>
     </span>
     <!-- update-begin author:sunjianlei date:20200219 for: 菜单搜索改为动态组件，在手机端呈现出弹出框 -->
-    <component :is="searchMenuComp" v-show="searchMenuVisible || isMobile()" class="borders" :visible="searchMenuVisible" title="搜索菜单" :footer="null" @cancel="searchMenuVisible=false">
+    <!-- 20240425 cfm modi: 增加 v-if... -->
+    <component v-if="isDesktop()" :is="searchMenuComp" v-show="searchMenuVisible || isMobile()" class="borders" :visible="searchMenuVisible" title="搜索菜单" :footer="null" @cancel="searchMenuVisible=false">
       <a-select
         class="search-input"
         showSearch
@@ -32,12 +34,22 @@
     <!--        <a-icon type="question-circle-o"></a-icon>-->
     <!--      </a>-->
     <!--    </span>-->
-    <!--    <header-notice class="action"/>-->
+    <header-notice class="action"/>
     <a-dropdown>
       <span class="action action-full ant-dropdown-link user-dropdown-menu">
+        <a-avatar class="avatar" size="small" :src="getAvatar()"/>
         <span v-if="isDesktop()">欢迎您，{{ nickname() }}</span>
       </span>
       <a-menu slot="overlay" class="user-dropdown-menu-wrapper">
+        <!-- 20240425 cfm add -->
+        <a-menu-item v-if="isMobile()" key="11">
+          <span>欢迎您，{{ nickname() }}</span>
+        </a-menu-item>
+        <a-menu-item v-if="isMobile()" key="12">
+          <span>当前月度：{{bizPeriod().year}}-{{bizPeriod().month}}</span>
+        </a-menu-item>
+        <a-menu-divider v-if="isMobile()"/>
+
         <a-menu-item key="5" @click="updateCurrentDepart">
           <a-icon type="cluster"/>
           <span>切换部门</span>
@@ -46,7 +58,8 @@
           <a-icon type="setting"/>
           <span>密码修改</span>
         </a-menu-item>
-        <a-menu-item key="3"  @click="systemSetting">
+        <!-- 20240425 cfm modi: 增加 v-if... -->
+        <a-menu-item v-if="isDesktop()" key="3"  @click="systemSetting">
           <a-icon type="tool"/>
           <span>系统设置</span>
         </a-menu-item>
@@ -64,7 +77,8 @@
       </a-menu>
     </a-dropdown>
     <!--20221107 cfm add -->
-    <span style="margin: 0 8px">当前月度：{{bizPeriod().year}}-{{bizPeriod().month}}</span>
+    <!-- 20240425 cfm modi: 增加 v-if... -->
+    <span v-if="isDesktop()" style="margin: 0 8px">当前月度：{{bizPeriod().year}}-{{bizPeriod().month}}</span>
 
     <user-password ref="userPassword"></user-password>
     <depart-select ref="departSelect" :closable="true" title="部门切换"></depart-select>
@@ -116,7 +130,12 @@
       this.searchMenuOptions=[...lists]
 
       //20221108 cfm add
-      this.getBizPeriod();
+      this.getBizPeriod({});
+      //20221218 cfm add
+      this.getBizOptions({});
+      this.getMaterialList({});
+      //20230217 cfm add
+      this.getUnitList({});
     },
 
     mounted() {
@@ -156,8 +175,8 @@
         this.shows = false
       },
       /* update_end author:zhaoxin date:20191129 for: 做头部菜单栏导航*/
-      ...mapActions(["Logout", "getBizPeriod"]),
-      ...mapGetters(["nickname", "avatar","userInfo","bizPeriod"]),
+      ...mapActions(["Logout", "getBizPeriod", "getBizOptions", "getMaterialList", "getUnitList"]),
+      ...mapGetters(["nickname", "avatar","userInfo","bizPeriod", "materialList"]),
       getAvatar(){
         return getFileAccessHttpUrl(this.avatar())
       },

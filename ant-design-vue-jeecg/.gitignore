@@ -1,6 +1,5 @@
 node_modules
 .DS_Store
-.github
 dist
 .npmrc
 .cache
@@ -15,3 +14,4 @@ dist
 **/dist
 
 ## front
+/yarn-error.log

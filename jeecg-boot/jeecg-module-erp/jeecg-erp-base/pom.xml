@@ -5,19 +5,13 @@
     <parent>
         <artifactId>jeecg-module-erp</artifactId>
         <groupId>io.finer.jeecg</groupId>
-        <version>1.0.0</version>
+        <version>2.1.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>jeecg-erp-base</artifactId>
 
     <dependencies>
-        <dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-core</artifactId>
-            <version>3.5.1</version>
-            <scope>compile</scope>
-        </dependency>
         <dependency>
             <groupId>org.jeecgframework.boot</groupId>
             <artifactId>jeecg-boot-base-core</artifactId>

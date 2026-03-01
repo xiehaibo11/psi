@@ -11,7 +11,9 @@
         </a-row>
       </a-checkbox-group>
     </template>
-    <a-button type="link" icon="setting">自定义列</a-button>
+    <a-tooltip title="自定义列" placement="topRight">
+      <a-button type="link" icon="setting" style="margin-top: 8px"/>
+    </a-tooltip>
   </a-popover>
 </template>
 
@@ -99,7 +101,7 @@
               if (column.type === JVXETypes.hidden && !!column.type_s) column.type = column.type_s;
             }
             else {
-              column.type_s = column.type;
+              if (!column.type_s) column.type_s = column.type; //20230218 modi: 增加if
               column.type = JVXETypes.hidden;
             }
           }

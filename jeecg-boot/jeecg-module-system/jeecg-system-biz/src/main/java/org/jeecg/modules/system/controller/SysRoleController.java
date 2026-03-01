@@ -13,6 +13,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.constant.CacheConstant;
@@ -89,6 +90,7 @@ public class SysRoleController {
 	 * @param req
 	 * @return
 	 */
+	//20251101 cfm del: @RequiresPermissions("system:role:list") //20240806 cfm add
 	@RequestMapping(value = "/list", method = RequestMethod.GET)
 	public Result<IPage<SysRole>> queryPageList(SysRole role,
 									  @RequestParam(name="pageNo", defaultValue="1") Integer pageNo,
@@ -102,14 +104,14 @@ public class SysRoleController {
 		result.setResult(pageList);
 		return result;
 	}
-	
+
 	/**
 	  *   添加
 	 * @param role
 	 * @return
 	 */
+	@RequiresPermissions("system:role:add") //20240806 cfm add
 	@RequestMapping(value = "/add", method = RequestMethod.POST)
-	//@RequiresRoles({"admin"})
 	public Result<SysRole> add(@RequestBody SysRole role) {
 		Result<SysRole> result = new Result<SysRole>();
 		try {
@@ -122,13 +124,13 @@ public class SysRoleController {
 		}
 		return result;
 	}
-	
+
 	/**
 	  *  编辑
 	 * @param role
 	 * @return
 	 */
-	//@RequiresRoles({"admin"})
+	@RequiresPermissions("system:role:edit") //20240806 cfm add
 	@RequestMapping(value = "/edit",method = {RequestMethod.PUT,RequestMethod.POST})
 	public Result<SysRole> edit(@RequestBody SysRole role) {
 		Result<SysRole> result = new Result<SysRole>();
@@ -143,28 +145,28 @@ public class SysRoleController {
 				result.success("修改成功!");
 			}
 		}
-		
+
 		return result;
 	}
-	
+
 	/**
 	  *   通过id删除
 	 * @param id
 	 * @return
 	 */
-	//@RequiresRoles({"admin"})
+	@RequiresPermissions("system:role:delete") //20240806 cfm add
 	@RequestMapping(value = "/delete", method = RequestMethod.DELETE)
 	public Result<?> delete(@RequestParam(name="id",required=true) String id) {
 		sysRoleService.deleteRole(id);
 		return Result.ok("删除角色成功");
 	}
-	
+
 	/**
 	  *  批量删除
 	 * @param ids
 	 * @return
 	 */
-	//@RequiresRoles({"admin"})
+	@RequiresPermissions("system:role:delete") //20240806 cfm add
 	@RequestMapping(value = "/deleteBatch", method = RequestMethod.DELETE)
 	public Result<SysRole> deleteBatch(@RequestParam(name="ids",required=true) String ids) {
 		Result<SysRole> result = new Result<SysRole>();
@@ -176,7 +178,7 @@ public class SysRoleController {
 		}
 		return result;
 	}
-	
+
 	/**
 	  * 通过id查询
 	 * @param id
@@ -194,7 +196,7 @@ public class SysRoleController {
 		}
 		return result;
 	}
-	
+
 	@RequestMapping(value = "/queryall", method = RequestMethod.GET)
 	public Result<List<SysRole>> queryall() {
 		Result<List<SysRole>> result = new Result<>();
@@ -207,7 +209,7 @@ public class SysRoleController {
 		}
 		return result;
 	}
-	
+
 	/**
 	  * 校验角色编码唯一
 	 */
@@ -251,6 +253,7 @@ public class SysRoleController {
 	 * 导出excel
 	 * @param request
 	 */
+	@RequiresPermissions("system:role:export") //20240806 cfm add
 	@RequestMapping(value = "/exportXls")
 	public ModelAndView exportXls(SysRole sysRole,HttpServletRequest request) {
 		// Step.1 组装查询条件
@@ -273,6 +276,7 @@ public class SysRoleController {
 	 * @param response
 	 * @return
 	 */
+	@RequiresPermissions("system:role:import") //20240806 cfm add
 	@RequestMapping(value = "/importExcel", method = RequestMethod.POST)
 	public Result<?> importExcel(HttpServletRequest request, HttpServletResponse response) {
 		MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
@@ -332,6 +336,7 @@ public class SysRoleController {
 	/**
 	 * 保存数据规则至角色菜单关联表
 	 */
+	@RequiresPermissions("system:role:saveRule") //20240806 cfm add
 	@PostMapping(value = "/datarule")
 	public Result<?> saveDatarule(@RequestBody JSONObject jsonObject) {
 		try {

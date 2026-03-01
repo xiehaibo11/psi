@@ -24,7 +24,7 @@
           </a-col>
           <a-col :xl="5" :lg="6" :md="7" :sm="24">
             <a-form-item label="物料">
-              <j-search-select-tag v-model="queryParam.material_id" :async="true" dict="bas_material,aux_name,id" placeholder="请选择"/>
+              <j-search-select-tag v-model="queryParam.material_id" dict="bas_material,aux_name,id" placeholder="请选择"/>
             </a-form-item>
           </a-col>
 
@@ -41,12 +41,12 @@
             </a-col>
             <a-col :xl="5" :lg="6" :md="7" :sm="24">
               <a-form-item label="客户">
-                <j-search-select-tag v-model="queryParam.customer_id" :async="true" dict="bas_customer,aux_name,id" placeholder="请选择"/>
+                <j-search-select-tag v-model="queryParam.customer_id" dict="bas_customer,aux_name,id" placeholder="请选择"/>
               </a-form-item>
             </a-col>
             <a-col :xl="5" :lg="6" :md="7" :sm="24">
               <a-form-item label="供应商">
-                <j-search-select-tag v-model="queryParam.supplier_id" :async="true" dict="bas_supplier,aux_name,id" placeholder="请选择"/>
+                <j-search-select-tag v-model="queryParam.supplier_id" dict="bas_supplier,aux_name,id" placeholder="请选择"/>
               </a-form-item>
             </a-col>
           </template>
@@ -95,11 +95,12 @@
   import '@/assets/less/TableExpand.less'
   import { JeecgListMixin } from '@/mixins/JeecgListMixin'
   import { ListMixin } from '../../common/mixins/ListMixin'
+  import { CgreportMixin } from '../../common/mixins/CgreportMixin'
   import XEUtils from "xe-utils";
 
   export default {
     name: "StkIoDetail",
-    mixins:[JeecgListMixin, ListMixin],
+    mixins:[JeecgListMixin, ListMixin, CgreportMixin],
 
     data () {
       return {
@@ -135,17 +136,17 @@
             title:'单据类型',
             width:120,
             align:"center",
-            dataIndex: 'stock_io_type_dictText',
+            dataIndex: 'stock_io_type',
           },
           {
             title:'客户',
             align:"left",
-            dataIndex: 'customer_id_dictText',
+            dataIndex: 'customer_id',
           },
           {
             title:'供应商',
             align:"left",
-            dataIndex: 'supplier_id_dictText',
+            dataIndex: 'supplier_id',
           },
           {
             title:'物料编码',
@@ -170,13 +171,13 @@
           {
             title:'仓库',
             align:"left",
-            dataIndex: 'warehouse_id_dictText',
+            dataIndex: 'warehouse_id',
           },
           {
             title:'单位',
             width:80,
             align:"center",
-            dataIndex: 'unit_id_dictText'
+            dataIndex: 'unit_id'
           },
           {
             title:'入库数量',
@@ -216,11 +217,8 @@
           {
           },
         ],
-        url: {
-          list: "/wrapper/cgreport/getData/1573695541629427714",
-          exportXlsUrl: "/online/cgreport/api/exportManySheetXls/1573695541629427714",
-        },
 
+        cgreportId: '1573695541629427714',
         disableMixinCreated: true
       }
     },
@@ -228,7 +226,7 @@
     created() {
       this.isorter.column = 'bill_date';
       this.isorter.order = 'asc';
-      this.loadData();
+      this.initReport();
     },
   }
 </script>

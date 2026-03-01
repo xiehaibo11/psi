@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.aspect.annotation.AutoLog;
 import org.jeecg.common.system.base.controller.JeecgController;
@@ -98,6 +99,7 @@ public class SysCheckRuleController extends JeecgController<SysCheckRule, ISysCh
      */
     @AutoLog(value = "编码校验规则-添加")
     @ApiOperation(value = "编码校验规则-添加", notes = "编码校验规则-添加")
+    @RequiresPermissions("system:checkRule:add") //20240806 cfm add
     @PostMapping(value = "/add")
     public Result add(@RequestBody SysCheckRule sysCheckRule) {
         sysCheckRuleService.save(sysCheckRule);
@@ -112,6 +114,7 @@ public class SysCheckRuleController extends JeecgController<SysCheckRule, ISysCh
      */
     @AutoLog(value = "编码校验规则-编辑")
     @ApiOperation(value = "编码校验规则-编辑", notes = "编码校验规则-编辑")
+    @RequiresPermissions("system:checkRule:edit") //20240806 cfm add
     @RequestMapping(value = "/edit", method = {RequestMethod.PUT,RequestMethod.POST})
     public Result edit(@RequestBody SysCheckRule sysCheckRule) {
         sysCheckRuleService.updateById(sysCheckRule);
@@ -126,6 +129,7 @@ public class SysCheckRuleController extends JeecgController<SysCheckRule, ISysCh
      */
     @AutoLog(value = "编码校验规则-通过id删除")
     @ApiOperation(value = "编码校验规则-通过id删除", notes = "编码校验规则-通过id删除")
+    @RequiresPermissions("system:checkRule:delete") //20240806 cfm add
     @DeleteMapping(value = "/delete")
     public Result delete(@RequestParam(name = "id", required = true) String id) {
         sysCheckRuleService.removeById(id);
@@ -140,6 +144,7 @@ public class SysCheckRuleController extends JeecgController<SysCheckRule, ISysCh
      */
     @AutoLog(value = "编码校验规则-批量删除")
     @ApiOperation(value = "编码校验规则-批量删除", notes = "编码校验规则-批量删除")
+    @RequiresPermissions("system:checkRule:delete") //20240806 cfm add
     @DeleteMapping(value = "/deleteBatch")
     public Result deleteBatch(@RequestParam(name = "ids", required = true) String ids) {
         this.sysCheckRuleService.removeByIds(Arrays.asList(ids.split(",")));
@@ -178,6 +183,7 @@ public class SysCheckRuleController extends JeecgController<SysCheckRule, ISysCh
      * @param response
      * @return
      */
+    @RequiresPermissions("system:checkRule:import") //20240806 cfm add
     @RequestMapping(value = "/importExcel", method = RequestMethod.POST)
     public Result importExcel(HttpServletRequest request, HttpServletResponse response) {
         return super.importExcel(request, response, SysCheckRule.class);

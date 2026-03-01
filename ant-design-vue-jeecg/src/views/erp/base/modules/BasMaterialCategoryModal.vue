@@ -75,7 +75,7 @@
     data () {
       return {
         title:"",
-        width:600,
+        width:Math.min(600, window.innerWidth),
         visible: false,
         disableSubmit: false,
         model:{},

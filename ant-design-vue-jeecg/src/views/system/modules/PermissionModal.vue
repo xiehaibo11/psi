@@ -119,6 +119,16 @@
           <a-input-number placeholder="请输入菜单排序" v-model="model.sortNo" style="width: 200px" :readOnly="disableSubmit"/>
         </a-form-model-item>
 
+        <!--20240323 cfm add  -->
+        <a-form-model-item
+          v-show="show"
+          :labelCol="labelCol"
+          :wrapperCol="wrapperCol"
+          label="终端">
+          <a-checkbox v-model:checked="model.forDesktop">PC端</a-checkbox>
+          <a-checkbox v-model:checked="model.forMobile">移动端</a-checkbox>
+        </a-form-model-item>
+
         <a-form-model-item
           v-show="show"
           :labelCol="labelCol"

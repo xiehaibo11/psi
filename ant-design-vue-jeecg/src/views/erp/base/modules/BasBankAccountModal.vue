@@ -24,10 +24,6 @@
     name: "BasBankAccountModal",
     components: {BasBankAccountForm},
     mixins: [DrawerMixin],
-
-    data() {
-      return { width:600}
-    },
   }
 </script>
 

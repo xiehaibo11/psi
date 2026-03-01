@@ -92,6 +92,7 @@
           <a-icon type="down"/>
         </a-button>
       </a-dropdown>
+      <p style="float: right; color: red">注意：菜单或授权变动，点击【浏览器刷新】才能生效；后端接口权限变动，退出重新登录才能生效！</p> <!-- 20251030 cfm add -->
       <j-super-query :fieldList="superQueryFieldList" @handleSuperQuery="handleSuperQuery"/>
     </div>
 

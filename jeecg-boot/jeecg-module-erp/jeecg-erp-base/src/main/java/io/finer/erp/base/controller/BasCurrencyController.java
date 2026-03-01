@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import io.finer.erp.base.entity.BasCurrency;
 import io.finer.erp.base.service.IBasCurrencyService;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.system.query.QueryGenerator;
 
@@ -83,6 +84,7 @@ public class BasCurrencyController extends JeecgController<BasCurrency, IBasCurr
 	 */
 	@AutoLog(value = "币种-新增")
 	@ApiOperation(value="币种-新增", notes="币种-新增")
+	@RequiresPermissions("base:currency:add") //20240806 cfm add
 	@PostMapping(value = "/add")
 	public Result<?> add(@RequestBody BasCurrency basCurrency) {
 		basCurrencyService.save(basCurrency);
@@ -97,6 +99,7 @@ public class BasCurrencyController extends JeecgController<BasCurrency, IBasCurr
 	 */
 	@AutoLog(value = "币种-编辑")
 	@ApiOperation(value="币种-编辑", notes="币种-编辑")
+	@RequiresPermissions("base:currency:edit") //20240806 cfm add
 	@PutMapping(value = "/edit")
 	public Result<?> edit(@RequestBody BasCurrency basCurrency) {
 		basCurrencyService.updateById(basCurrency);
@@ -111,6 +114,7 @@ public class BasCurrencyController extends JeecgController<BasCurrency, IBasCurr
 	 */
 	@AutoLog(value = "币种-通过id删除")
 	@ApiOperation(value="币种-通过id删除", notes="币种-通过id删除")
+	@RequiresPermissions("base:currency:delete") //20240806 cfm add
 	@DeleteMapping(value = "/delete")
 	public Result<?> delete(@RequestParam(name="id",required=true) String id) {
 		basCurrencyService.removeById(id);
@@ -125,6 +129,7 @@ public class BasCurrencyController extends JeecgController<BasCurrency, IBasCurr
 	 */
 	@AutoLog(value = "币种-批量删除")
 	@ApiOperation(value="币种-批量删除", notes="币种-批量删除")
+	@RequiresPermissions("base:currency:delete") //20240806 cfm add
 	@DeleteMapping(value = "/deleteBatch")
 	public Result<?> deleteBatch(@RequestParam(name="ids",required=true) String ids) {
 		this.basCurrencyService.removeByIds(Arrays.asList(ids.split(",")));
@@ -151,7 +156,8 @@ public class BasCurrencyController extends JeecgController<BasCurrency, IBasCurr
 	 * @return
 	 */
 	@AutoLog(value = "通过excel导入数据")
-    @RequestMapping(value = "/importExcel", method = RequestMethod.POST)
+	@RequiresPermissions("base:currency:import") //20240806 cfm add
+	@RequestMapping(value = "/importExcel", method = RequestMethod.POST)
 	public Result<?> importExcel(HttpServletRequest request, HttpServletResponse response) {
 		return super.importExcel(request, response, BasCurrency.class);
 	}

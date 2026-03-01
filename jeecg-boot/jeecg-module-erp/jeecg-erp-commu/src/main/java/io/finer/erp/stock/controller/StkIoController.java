@@ -5,16 +5,21 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.finer.erp.stock.entity.StkIo;
+import io.finer.erp.stock.entity.StkIoSingle;
 import io.finer.erp.stock.entity.StkIoEntry;
+import io.finer.erp.stock.service.IStkIoSingleService;
 import io.finer.erp.stock.service.IStkIoEntryService;
 import io.finer.erp.stock.service.IStkIoService;
 import io.finer.erp.stock.vo.StkIoPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.aspect.annotation.AutoLog;
+import org.jeecg.common.aspect.annotation.PermissionData;
 import org.jeecg.common.exception.JeecgBootException;
 import org.jeecg.common.system.query.QueryGenerator;
 import org.jeecg.common.system.vo.LoginUser;
@@ -52,6 +57,9 @@ public class StkIoController {
 	private IStkIoService stkIoService;
 	@Autowired
 	private IStkIoEntryService stkIoEntryService;
+	//20230916 cfm add
+	@Autowired
+	private IStkIoSingleService stkIoSingleService;
 
 	/**
 	 * 分页列表查询
@@ -64,7 +72,9 @@ public class StkIoController {
 	 */
 	//@AutoLog(value = "出入库单-分页列表查询")
 	@ApiOperation(value="出入库单-分页列表查询", notes="出入库单-分页列表查询")
-	@GetMapping(value = {"/list", "/list/{stockIoType}", "/list/{stockIoType}/{isRubric}"})  //stockIoType、isRubric会传至stkIo.stockIoType
+	//20231210 cfm modi: 增加{hasSingle}
+	@GetMapping(value = {"/list","/list/{stockIoType}", "/list/{stockIoType}/{hasSingle}", "/list/{stockIoType}/{hasSingle}/{isRubric}"})
+	@PermissionData(pageComponent="stock/stkIo/list") //20240531 cfm add
 	public Result<?> queryPageList(StkIo stkIo,
                                    @RequestParam(name="pageNo", defaultValue="1") Integer pageNo,
                                    @RequestParam(name="pageSize", defaultValue="10") Integer pageSize,
@@ -118,6 +128,15 @@ public class StkIoController {
 		return Result.OK(stkIoEntryList);
 	}
 
+	//20230916 cfm add
+	//@AutoLog(value = "出入库个体-通过id查询")
+	@ApiOperation(value="辅助集合-通过id查询", notes="出入库个体-通过id查询")
+	@GetMapping(value = {"/querySingleByMainId", "/querySingleByMainId/dictText","/querySingleListByMainId", "/querySingleListByMainId/dictText"})
+	public Result<?> querySingleListByMainId(@RequestParam String id) {
+		 List<StkIoSingle> list = stkIoSingleService.selectByMainId(id);
+		 return Result.OK(list);
+	}
+
 	//@AutoLog(value = "明细集合-通过ids查询")
 	@ApiOperation(value="明细集合-通过ids查询", notes="明细-通过ids查询")
 	@GetMapping(value = "/queryEntryByMainIds")
@@ -142,6 +161,15 @@ public class StkIoController {
 	 return Result.OK(stkIoEntryList);
 	}
 
+	 //20230916 cfm add
+	 //@AutoLog(value = "个体集合-通过id查询")
+	 @ApiOperation(value="个体集合-通过id查询", notes="个体-通过id查询")
+	 @GetMapping(value = "/queryEditingSingleByMainId")
+	 public Result<?> queryEditingSingleListByMainId(@RequestParam(name="id",required=true) String id) {
+		 List<StkIoSingle> list = stkIoSingleService.selectEditingByMainId(id);
+		 return Result.OK(list);
+	 }
+
 	/**
 	*   新增
 	*
@@ -150,16 +178,19 @@ public class StkIoController {
 	*/
 	@AutoLog(value = "出入库单-新增")
 	@ApiOperation(value="出入库单-新增", notes="出入库单-新增")
+	@RequiresPermissions("stock:io:add") //20240806 cfm add
 	@PostMapping(value = "/add/{action}")
 	public Result<?> add(@RequestBody StkIoPage stkIoPage, @PathVariable String action) {
 		StkIo bill = new StkIo();
 		BeanUtils.copyProperties(stkIoPage, bill);
 		try {
 			if (action.equals("submit")) {
-				stkIoService.submitAdd(bill, stkIoPage.getStkIoEntryList());
+				//20230916 cfm modi: 增加", stkIoPage.getStkIoSingleList()"
+				stkIoService.submitAdd(bill, stkIoPage.getStkIoEntryList(), stkIoPage.getStkIoSingleList());
 				return Result.OK("新增提交成功！");
 			} else {
-				stkIoService.saveAdd(bill, stkIoPage.getStkIoEntryList());
+				//20230916 cfm modi: 增加", stkIoPage.getStkIoSingleList()"
+				stkIoService.saveAdd(bill, stkIoPage.getStkIoEntryList(), stkIoPage.getStkIoSingleList());
 				return Result.OK("新增保存成功！");
 			}
 		} catch (Exception e) {
@@ -175,16 +206,19 @@ public class StkIoController {
 	 */
 	@AutoLog(value = "出入库单-编辑")
 	@ApiOperation(value="出入库单-编辑", notes="出入库单-编辑")
+	@RequiresPermissions("stock:io:edit") //20240806 cfm add
 	@PutMapping(value = "/edit/{action}")
 	public Result<?> edit(@RequestBody StkIoPage stkIoPage, @PathVariable String action) {
 		StkIo bill = new StkIo();
 		BeanUtils.copyProperties(stkIoPage, bill);
 		try {
 			if (action.equals("submit")) {
-				stkIoService.submitEdit(bill, stkIoPage.getStkIoEntryList());
+				//20230916 cfm modi: 增加", stkIoPage.getStkIoSingleList()"
+				stkIoService.submitEdit(bill, stkIoPage.getStkIoEntryList(), stkIoPage.getStkIoSingleList());
 				return Result.OK("编辑提交成功!");
 			} else {
-				stkIoService.saveEdit(bill, stkIoPage.getStkIoEntryList());
+				//20230916 cfm modi: 增加", stkIoPage.getStkIoSingleList()"
+				stkIoService.saveEdit(bill, stkIoPage.getStkIoEntryList(), stkIoPage.getStkIoSingleList());
 				return Result.OK("编辑保存成功!");
 			}
 
@@ -201,6 +235,7 @@ public class StkIoController {
 	 */
 	@AutoLog(value = "出入库单-通过id删除")
 	@ApiOperation(value="出入库单-通过id删除", notes="出入库单-通过id删除")
+	@RequiresPermissions("stock:io:delete") //20240806 cfm add
 	@DeleteMapping(value = "/delete")
 	public Result<?> delete(@RequestParam(name="id",required=true) String id) {
 		try {
@@ -219,6 +254,7 @@ public class StkIoController {
 	 */
 	@AutoLog(value = "出入库单-批量删除")
 	@ApiOperation(value="出入库单-批量删除", notes="出入库单-批量删除")
+	@RequiresPermissions("stock:io:delete") //20240806 cfm add
 	@DeleteMapping(value = "/deleteBatch")
 	public Result<?> deleteBatch(@RequestParam(name="ids",required=true) String ids) {
 		try {
@@ -231,6 +267,7 @@ public class StkIoController {
 
     @AutoLog(value = "出入库单-审核")
 	@ApiOperation(value="出入库单-审核", notes="出入库单-审核")
+	@RequiresPermissions("stock:io:check") //20240806 cfm add
 	@PutMapping(value = "/check")
 	public Result<?> check(@RequestBody JSONObject json) {
     	try {
@@ -257,6 +294,7 @@ public class StkIoController {
 
 	 @AutoLog(value = "出入库单-结束审批")
 	 @ApiOperation(value="出入库单-结束审批", notes="出入库单-结束审批")
+	 @RequiresPermissions("stock:io:bpm:end") //20240806 cfm add
 	 @PutMapping(value = "/bpm/end")
 	 public Result<?> bpmInstanceManualEnd(@RequestBody JSONObject json) {
 		 try {
@@ -271,6 +309,7 @@ public class StkIoController {
 
 	 @AutoLog(value = "出入库单-执行")
 	 @ApiOperation(value="出入库单-执行", notes="出入库单-执行")
+	 @RequiresPermissions("stock:io:execute") //20240806 cfm add
 	 @PutMapping(value = "/execute")
 	 public Result<?> execute(@RequestBody JSONObject json) {
 		 try {
@@ -283,6 +322,7 @@ public class StkIoController {
 
 	 @AutoLog(value = "出入库单-关闭")
 	 @ApiOperation(value="出入库单-关闭", notes="出入库单-关闭")
+	 @RequiresPermissions("stock:io:close") //20240806 cfm add
 	 @PutMapping(value = "/close")
 	 public Result<?> close(@RequestBody JSONObject json) {
 		 try {
@@ -295,6 +335,7 @@ public class StkIoController {
 
 	 @AutoLog(value = "出入库单--反关闭")
 	 @ApiOperation(value="出入库单--反关闭", notes="出入库单--反关闭")
+	 @RequiresPermissions("stock:io:unclose") //20240806 cfm add
 	 @PutMapping(value = "/unclose")
 	 public Result<?> unclose(@RequestBody JSONObject json) {
 		 try {
@@ -313,6 +354,7 @@ public class StkIoController {
 	  */
 	 @AutoLog(value = "出入库单-批量关闭")
 	 @ApiOperation(value="出入库单-批量关闭", notes="出入库单-批量关闭")
+	 @RequiresPermissions("stock:io:close") //20240806 cfm add
 	 @PutMapping(value = "/closeBatch")
 	 public Result<String> closeBatch(@RequestBody JSONObject json) {
 		 try {
@@ -331,6 +373,7 @@ public class StkIoController {
 	  */
 	 @AutoLog(value = "出入库单-批量反关闭")
 	 @ApiOperation(value="出入库单-批量反关闭", notes="出入库单-批量反关闭")
+	 @RequiresPermissions("stock:io:unclose") //20240806 cfm add
 	 @PutMapping(value = "/uncloseBatch")
 	 public Result<String> uncloseBatch(@RequestBody JSONObject json) {
 		 try {
@@ -343,6 +386,7 @@ public class StkIoController {
 
 	 @AutoLog(value = "出入库单-作废")
 	 @ApiOperation(value="出入库单-作废", notes="出入库单-作废")
+	 @RequiresPermissions("stock:io:void") //20240806 cfm add
 	 @PutMapping(value = "/void")
 	 public Result<?> voidBill(@RequestBody JSONObject json) {
 		 try {
@@ -360,7 +404,9 @@ public class StkIoController {
 	  * @param stkIo
 	  */
 	 @AutoLog(value = "导出为excel")
-	 @RequestMapping(value = {"/exportXls", "/exportXls/{stockIoType}", "/exportXls/{stockIoType}/{isRubric}"})  //stockIoType会传至stkIo.stockIoType
+	 @RequiresPermissions("stock:io:export") //20240806 cfm add
+	 //20231210 cfm modi: 增加{hasSingle}
+	 @GetMapping(value = {"/exportXls","/exportXls/{stockIoType}", "/exportXls/{stockIoType}/{hasSingle}", "/exportXls/{stockIoType}/{hasSingle}/{isRubric}"})
 	 public ModelAndView exportXls(HttpServletRequest request, StkIo stkIo) {
 		 // Step.1 组装查询条件查询数据
 		 QueryWrapper<StkIo> queryWrapper = QueryGenerator.initQueryWrapper(stkIo, request.getParameterMap());
@@ -385,6 +431,16 @@ public class StkIoController {
 			 BeanUtils.copyProperties(main, vo);
 			 List<StkIoEntry> stkIoEntryList = stkIoEntryService.selectByMainId(main.getId());
 			 vo.setStkIoEntryList(stkIoEntryList);
+
+			 //20231210 cfm add
+			 if (main.getHasSingle() == 1) {
+				 List<StkIoSingle> stkIoSingleList = stkIoSingleService.selectByMainId(main.getId());
+				 vo.setStkIoSingleList(stkIoSingleList);
+			 }
+			 else { //20240221 cfm add
+				 vo.setStkIoSingleList(new ArrayList<>());
+			 }
+
 			 pageList.add(vo);
 		 }
 
@@ -404,9 +460,12 @@ public class StkIoController {
 	  * @return
 	  */
 	 @AutoLog(value = "通过excel导入数据")
-	 @RequestMapping(value = {"/importExcel", "/importExcel/{stockIoType}", "/importExcel/{stockIoType}/{isRubric}"}, method = RequestMethod.POST)
+	 @RequiresPermissions("stock:io:import") //20240806 cfm add
+	 //20231210 cfm modi: 增加{hasSingle}
+	 @RequestMapping(value = {"/importExcel", "/importExcel/{stockIoType}", "/importExcel/{stockIoType}/{hasSingle}", "/importExcel/{stockIoType}/{hasSingle}/{isRubric}"}, method = RequestMethod.POST)
 	 public Result<?> importExcel(HttpServletRequest request,
 								  @PathVariable(required = false) String stockIoType,
+								  @PathVariable(required = false) Integer hasSingle,
 								  @PathVariable(required = false) Integer isRubric) {
 		 MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
 		 Map<String, MultipartFile> fileMap = multipartRequest.getFileMap();
@@ -419,17 +478,35 @@ public class StkIoController {
 			 try {
 				 List<StkIoPage> list = ExcelImportUtil.importExcel(file.getInputStream(), StkIoPage.class, params);
 
+				 //20231210 cfm modi
 				 Map<StkIo, List<StkIoEntry>> billMap = new HashMap<>();
+				 Map<StkIo, List<StkIoSingle>> billMap2 = new HashMap<>();
 				 for (StkIoPage page : list) {
+					 //去掉空白的子表记录
+					 List<StkIoEntry> entryList = page.getStkIoEntryList();
+					 for (int i = entryList.size() - 1; i >= 0; i--) {
+					 	if (StringUtils.isEmpty(entryList.get(i).getMaterialId())) {
+							 entryList.remove(i);
+						 }
+					 }
+					 List<StkIoSingle> singleList = page.getStkIoSingleList();
+					 for (int i = singleList.size() - 1; i >= 0; i--) {
+						 if (StringUtils.isEmpty(singleList.get(i).getMaterialId())) {
+							 singleList.remove(i);
+						 }
+					 }
+
 					 StkIo bill = new StkIo();
 					 BeanUtils.copyProperties(page, bill);
 					 if (stockIoType != null && !bill.getStockIoType().equals(stockIoType) ||
+							 hasSingle != null && !bill.getHasSingle().equals(hasSingle) ||
 							 isRubric != null && !bill.getIsRubric().equals(isRubric)) {
-						 throw new JeecgBootException(bill.getBillNo() + "：“出入库类型”或“是否红字”不符！");
+						 throw new JeecgBootException(bill.getBillNo() + "：“出入库类型”、“是否有个体”或“是否红字”不符！");
 					 }
 					 billMap.put(bill, page.getStkIoEntryList());
+					 billMap2.put(bill, page.getStkIoSingleList());
 				 }
-				 stkIoService.saveAddBatch(billMap);//20211204 cfm：事务化
+				 stkIoService.saveAddBatch(billMap, billMap2);//20211204 cfm：事务化
 
 				 return Result.OK("文件导入成功！数据行数:" + list.size());
 			 } catch (Exception e) {

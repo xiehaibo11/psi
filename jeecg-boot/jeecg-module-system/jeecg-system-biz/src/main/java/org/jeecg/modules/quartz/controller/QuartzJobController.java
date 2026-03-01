@@ -7,6 +7,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.constant.CommonConstant;
@@ -78,7 +79,7 @@ public class QuartzJobController {
 	 * @param quartzJob
 	 * @return
 	 */
-	//@RequiresRoles("admin")
+	@RequiresPermissions("system:quartzJob:add") //20240806 cfm add
 	@RequestMapping(value = "/add", method = RequestMethod.POST)
 	public Result<?> add(@RequestBody QuartzJob quartzJob) {
 		quartzJobService.saveAndScheduleJob(quartzJob);
@@ -91,7 +92,7 @@ public class QuartzJobController {
 	 * @param quartzJob
 	 * @return
 	 */
-	//@RequiresRoles("admin")
+	@RequiresPermissions("system:quartzJob:edit") //20240806 cfm add
 	@RequestMapping(value = "/edit", method ={RequestMethod.PUT, RequestMethod.POST})
 	public Result<?> eidt(@RequestBody QuartzJob quartzJob) {
 		try {
@@ -109,7 +110,7 @@ public class QuartzJobController {
 	 * @param id
 	 * @return
 	 */
-	//@RequiresRoles("admin")
+	@RequiresPermissions("system:quartzJob:delete") //20240806 cfm add
 	@RequestMapping(value = "/delete", method = RequestMethod.DELETE)
 	public Result<?> delete(@RequestParam(name = "id", required = true) String id) {
 		QuartzJob quartzJob = quartzJobService.getById(id);
@@ -127,7 +128,7 @@ public class QuartzJobController {
 	 * @param ids
 	 * @return
 	 */
-	//@RequiresRoles("admin")
+	@RequiresPermissions("system:quartzJob:delete") //20240806 cfm add
 	@RequestMapping(value = "/deleteBatch", method = RequestMethod.DELETE)
 	public Result<?> deleteBatch(@RequestParam(name = "ids", required = true) String ids) {
 		if (ids == null || "".equals(ids.trim())) {
@@ -146,7 +147,7 @@ public class QuartzJobController {
 	 * @param id
 	 * @return
 	 */
-	//@RequiresRoles("admin")
+	@RequiresPermissions("system:quartzJob:pause") //20240806 cfm add
 	@GetMapping(value = "/pause")
 	@ApiOperation(value = "停止定时任务")
 	public Result<Object> pauseJob(@RequestParam(name = "id") String id) {
@@ -164,7 +165,7 @@ public class QuartzJobController {
 	 * @param id
 	 * @return
 	 */
-	//@RequiresRoles("admin")
+	@RequiresPermissions("system:quartzJob:resume") //20240806 cfm add
 	@GetMapping(value = "/resume")
 	@ApiOperation(value = "启动定时任务")
 	public Result<Object> resumeJob(@RequestParam(name = "id") String id) {
@@ -221,6 +222,7 @@ public class QuartzJobController {
 	 * @param response
 	 * @return
 	 */
+	@RequiresPermissions("system:quartzJob:import") //20240806 cfm add
 	@RequestMapping(value = "/importExcel", method = RequestMethod.POST)
 	public Result<?> importExcel(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
@@ -264,7 +266,7 @@ public class QuartzJobController {
 	 * @param id
 	 * @return
 	 */
-	//@RequiresRoles("admin")
+	@RequiresPermissions("system:quartzJob:execute") //20240806 cfm add
 	@GetMapping("/execute")
 	public Result<?> execute(@RequestParam(name = "id", required = true) String id) {
 		QuartzJob quartzJob = quartzJobService.getById(id);

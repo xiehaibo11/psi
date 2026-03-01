@@ -12,7 +12,7 @@
           </a-col>
           <a-col :xl="6" :lg="7" :md="8" :sm="24">
             <a-form-item label="物料">
-              <j-search-select-tag v-model="queryParam.materialId" :async="true" dict="bas_material,aux_name,id" placeholder="请选择"/>
+              <j-search-select-tag v-model="queryParam.materialId" dict="bas_material,aux_name,id" placeholder="请选择"/>
             </a-form-item>
           </a-col>
           <template v-if="toggleSearchStatus">
@@ -25,7 +25,7 @@
             </a-col>
             <a-col :xl="6" :lg="7" :md="8" :sm="24">
               <a-form-item label="供应商">
-                <j-search-select-tag v-model="queryParam.supplierId" :async="true" dict="bas_supplier,aux_name,id" placeholder="请选择"/>
+                <j-search-select-tag v-model="queryParam.supplierId" dict="bas_supplier,aux_name,id" placeholder="请选择"/>
               </a-form-item>
             </a-col>
             <a-col :xl="4" :lg="6" :md="7" :sm="24">
@@ -52,9 +52,9 @@
 
     <!-- 操作按钮区域 -->
     <div class="table-operator">
-      <a-button type="link"  icon="download" @click="handleExportXls('详细即时库存')">导出</a-button>
+      <a-button :disabled="isDisabledAuth('StkInventory:edit')" type="link"  icon="download" @click="handleExportXls('详细即时库存')">导出</a-button>
       <a-upload name="file" :showUploadList="false" :multiple="false" :headers="tokenHeader" :action="importExcelUrl" @change="handleImportExcel">
-        <a-button type="link" icon="import">导入</a-button>
+        <a-button :disabled="isDisabledAuth('StkInventory:edit')" type="link" icon="import">导入</a-button>
       </a-upload>
 
       <i class="anticon anticon-info-circle ant-alert-icon"></i> 已选择 <a style="font-weight: 600">{{ selectedRowKeys.length }}</a>项
@@ -82,7 +82,7 @@
         <a slot="materialCode" @click="myHandleDetail(record)" slot-scope="text, record">{{text}}</a>
 
         <span slot="action" slot-scope="text, record">
-          <a @click="myHandleEdit(record)">编辑</a>
+          <a :disabled="isDisabledAuth('StkInventory:edit')" @click="myHandleEdit(record)">编辑</a>
           <a-divider type="vertical" />
           <a-dropdown>
             <a class="ant-dropdown-link">更多 <a-icon type="down" /></a>
@@ -131,7 +131,6 @@
             fixed: 'left',
             dataIndex: 'materialCode',
             scopedSlots: { customRender: 'materialCode' },
-            sorter: true
           },
           {
             title:'物料名称',
@@ -142,6 +141,13 @@
             sorter: true
           },
           {
+            title:'条码',
+            width:160,
+            align:"left",
+            dataIndex: 'barcode',
+            sorter: true
+          },
+          {
             title:'规格型号',
             width:200,
             align:"left",
@@ -149,7 +155,7 @@
           },
           {
             title:'批次',
-            width:240,
+            width:160,
             align:"center",
             dataIndex: 'batchNo',
             sorter: true

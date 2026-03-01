@@ -1,6 +1,7 @@
 package org.jeecg.modules.system.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.exception.JeecgBootException;
 import org.jeecg.common.util.CommonUtils;
@@ -32,6 +33,7 @@ public class SysUploadController {
      * 上传
      * @param request
      */
+    @RequiresPermissions("system:upload:uploadMinio") //20240806 cfm add
     @PostMapping(value = "/uploadMinio")
     public Result<?> uploadMinio(HttpServletRequest request) throws Exception {
         Result<?> result = new Result<>();

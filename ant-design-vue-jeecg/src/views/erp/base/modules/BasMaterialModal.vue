@@ -24,10 +24,6 @@
     name: "BasMaterialModal",
     components: {BasMaterialForm},
     mixins: [DrawerMixin],
-
-    data() {
-      return { width:600}
-    },
   }
 </script>
 

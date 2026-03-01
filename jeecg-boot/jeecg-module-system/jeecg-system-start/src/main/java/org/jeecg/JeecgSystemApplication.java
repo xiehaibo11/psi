@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.jeecg.common.util.oConvertUtils;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -18,7 +20,8 @@ import java.net.UnknownHostException;
 * 报错提醒: 未集成mongo报错，可以打开启动类上面的注释 exclude={MongoAutoConfiguration.class}
 */
 @Slf4j
-@SpringBootApplication
+//20250616 cfm modi for 嵌入事务支持: 增加(...)，禁用JPA自动配置（JPA不支持嵌入事务所需的savepoints）
+@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
 //@EnableAutoConfiguration(exclude={MongoAutoConfiguration.class})
 @ComponentScan(basePackages = {"org.jeecg","io.finer"}) // 20211005 cfm add
 public class JeecgSystemApplication extends SpringBootServletInitializer {
@@ -40,7 +43,6 @@ public class JeecgSystemApplication extends SpringBootServletInitializer {
                 "External: \thttp://" + ip + ":" + port + path + "/\n\t" +
                 "Swagger文档: \thttp://" + ip + ":" + port + path + "/doc.html\n" +
                 "----------------------------------------------------------");
-
     }
 
 }

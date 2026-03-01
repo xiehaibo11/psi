@@ -12,7 +12,7 @@
           </a-col>
           <a-col :xl="6" :lg="7" :md="8" :sm="24">
             <a-form-item label="物料">
-              <j-search-select-tag v-model="queryParam.material_id" :async="true" dict="bas_material,aux_name,id" placeholder="请选择"/>
+              <j-search-select-tag v-model="queryParam.material_id" dict="bas_material,aux_name,id" placeholder="请选择"/>
             </a-form-item>
           </a-col>
 
@@ -55,11 +55,12 @@
 <script>
   import { JeecgListMixin } from '@/mixins/JeecgListMixin'
   import { ListMixin } from '../../common/mixins/ListMixin'
+  import { CgreportMixin } from '../../common/mixins/CgreportMixin'
   import XEUtils from "xe-utils";
 
   export default {
     name: "StkInventoryWm",
-    mixins:[JeecgListMixin, ListMixin],
+    mixins:[JeecgListMixin, ListMixin, CgreportMixin],
 
     data () {
       return {
@@ -102,7 +103,7 @@
             title:'单位',
             width:80,
             align:"center",
-            dataIndex: 'unit_id_dictText'
+            dataIndex: 'unit_id'
           },
           {
             title:'数量',
@@ -128,11 +129,8 @@
           {
           },
         ],
-        url: {
-          list: "/wrapper/cgreport/getData/1573320640724779009",
-          exportXlsUrl: "/online/cgreport/api/exportManySheetXls/1573320640724779009",
-        },
 
+        cgreportId: '1573320640724779009',
         disableMixinCreated: true
       }
     },
@@ -140,7 +138,7 @@
     created() {
       this.isorter.column = 'material_code';
       this.isorter.order = 'asc';
-      this.loadData();
+      this.initReport();
     },
   }
 </script>

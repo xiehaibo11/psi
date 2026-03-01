@@ -3,9 +3,9 @@
     <!-- 主表单区域 -->
     <div>
       <a-form-model ref="form" :model="model" :rules="validatorRules">
-        <bill-header ref="billHeader" :model="model" :disabled="disabled" :moreStatus.sync="moreStatus"/>
+        <bill-header ref="billHeader" :model="model" :disabled="disabled" :moreStatus.sync="moreStatus" :moreStatus2.sync="moreStatus2"/>
         <a-row v-show="moreStatus">
-          <a-col :span="8">
+          <a-col :xl="8" :lg="12" :md="24">
             <a-form-model-item label="源单类型" :labelCol="labelCol3" :wrapperCol="wrapperCol3" prop="srcBillType">
               <j-dict-select-tag v-model="model.srcBillType" dictCode="x_bill_type" :disabled="true"/>
             </a-form-model-item>
@@ -13,30 +13,24 @@
         </a-row>
 
         <a-row>
-          <a-col :span="8" >
-            <a-form-model-item label="单据主题" :labelCol="labelCol3" :wrapperCol="wrapperCol3" prop="subject">
-              <a-input v-model="model.subject" placeholder="请输入" :readOnly="disabled"/>
-            </a-form-model-item>
-          </a-col>
-          <a-col :span="8">
+          <a-col :xl="8" :lg="12" :md="24">
             <a-form-model-item label="客户" :labelCol="labelCol3" :wrapperCol="wrapperCol3" prop="customerId">
               <a-tooltip :title="disabled || entryTable.rowCount===0 ? '' : '有明细时不能改变！'" placement="bottom">
-                <j-search-select-tag v-model="model.customerId" :async="true" dict="bas_customer,aux_name,id"
-                                     :disabled="disabled || entryTable.rowCount>0"/>
+                <j-search-select-tag v-model="model.customerId" dict="bas_customer,aux_name,id" :disabled="disabled || entryTable.rowCount>0"/>
               </a-tooltip>
             </a-form-model-item>
           </a-col>
-          <a-col :span="8">
+          <a-col :xl="8" :lg="12" :md="24">
             <a-form-model-item label="发票类型" :labelCol="labelCol3" :wrapperCol="wrapperCol3" prop="invoiceType">
-              <j-dict-select-tag v-model="model.invoiceType" :disabled="disabled" :async="true" dictCode="x_invoice_type"/>
+              <j-dict-select-tag v-model="model.invoiceType" :disabled="disabled" dictCode="x_invoice_type"/>
             </a-form-model-item>
           </a-col>
-          <a-col :span="8">
+          <a-col :xl="8" :lg="12" :md="24">
             <a-form-model-item label="发票号" :labelCol="labelCol3" :wrapperCol="wrapperCol3" prop="invoiceNo">
               <a-input v-model="model.invoiceNo" :readOnly="disabled"/>
             </a-form-model-item>
           </a-col>
-          <a-col :span="8">
+          <a-col :xl="8" :lg="12" :md="24">
             <a-form-model-item label="开票日期" :labelCol="labelCol3" :wrapperCol="wrapperCol3" prop="invoiceDate">
               <j-date v-model="model.invoiceDate" :readOnly="disabled" placeholder="请选择日期" style="width: 100%"
                       :allowClear="false" :inputReadOnly="true" />
@@ -44,12 +38,31 @@
           </a-col>
         </a-row>
 
+        <a-row>
+          <a-col :xl="8" :lg="12" :md="24" v-show="moreStatus2 || !!model.subject && model.subject.length > 0">
+            <a-form-model-item label="单据主题" :labelCol="labelCol3" :wrapperCol="wrapperCol3" prop="subject">
+              <a-input v-model="model.subject" placeholder="请输入" :readOnly="disabled"/>
+            </a-form-model-item>
+          </a-col>
+          <a-col :xl="8" :lg="12" :md="24" v-show="moreStatus2 || !!model.remark && model.remark.length > 0">
+            <a-form-model-item label="备注" :labelCol="labelCol3" :wrapperCol="wrapperCol3" prop="remark">
+              <a-textarea v-model="model.remark" :readOnly="disabled" rows="1" autoSize/>
+            </a-form-model-item>
+          </a-col>
+          <a-col :xl="8" :lg="12" :md="24" v-show="moreStatus2 || !!model.attachment && model.attachment.length > 0">
+            <a-form-model-item label="附件" :labelCol="labelCol3" :wrapperCol="wrapperCol3" prop="attachment">
+              <j-upload v-model="model.attachment" :disabled="disabled" bizPath="erp"/>
+            </a-form-model-item>
+          </a-col>
+        </a-row>
+
         <!-- 子表单区域 -->
         <a-tabs v-model="activeKey" @change="handleChangeTabs">
-          <a-tab-pane tab="销售出库单" :key="refKeys[1]" :forceRender="true">
+          <!--20251101 cfm modi for 内置BPM：各源单tab增加 v-if... -->
+          <a-tab-pane v-if="srcVisible" tab="销售出库单" key="srcTable" :forceRender="true">
             <j-vxe-table
               keep-source
-              :ref="refKeys[2]"
+              ref="srcTable"
               :loading="srcTable.loading"
               :columns="srcTable.columns"
               :dataSource="srcTable.dataSource"
@@ -81,7 +94,7 @@
             <j-vxe-table
               style="margin-top: 24px"
               keep-source
-              :ref="refKeys[1]"
+              ref="srcEntryTable"
               :loading="srcEntryTable.loading"
               :columns="srcEntryTable.columns"
               :dataSource="srcEntryTable.dataSource"
@@ -96,17 +109,15 @@
               @selectRowChange="({selectedRows}) => this.srcEntryTable.selectedRowCount = selectedRows.length">
 
               <template v-if="!disabled" v-slot:toolbarSuffix>
-                <a-button :disabled="srcEntryTable.selectedRowCount===0" @click="handleAddFromSrcEntry">
-                  添加<a-icon type="right"/>
-                </a-button>
+                <a-button :disabled="srcEntryTable.selectedRowCount===0" @click="handleAddEntryFromSrc">添加<a-icon type="right"/></a-button>
               </template>
             </j-vxe-table>
           </a-tab-pane>
 
-          <a-tab-pane tab="明细" :key="refKeys[0]" :forceRender="true">
+          <a-tab-pane tab="明细" key="entryTable" :forceRender="true">
             <j-vxe-table
               keep-source
-              :ref="refKeys[0]"
+              ref="entryTable"
               :loading="entryTable.loading"
               :columns="entryTable.columns"
               :dataSource="entryTable.dataSource"
@@ -133,7 +144,7 @@
           </template>
         </a-tabs>
 
-       <bill-footer ref="billFooter" :model="model" :disabled="disabled" :action="action"/>
+       <bill-approval v-if="action==='check' || action==='ebpm'" :model="model" :disabled="disabled" style="margin-top: 16px"/>
       </a-form-model>
     </div>
 
@@ -141,19 +152,25 @@
 </template>
 
 <script>
-  import { JVxeTableModelMixin } from '@/mixins/JVxeTableModelMixin'
-  import { JVXETypes } from '@/components/jeecg/JVxeTable'
-  import { getRefPromise} from '@/components/jeecg/JVxeTable/utils/vxeUtils.js'
-  import {BillFormMixin, BillFormGridMixin} from '../../common/mixins/BillFormMixin'
-  import {BillVxeTableMixin} from "../../common/mixins/BillVxeTableMixin";
-  import BillHeader from "../../common/components/BillHeader";
-  import BillFooter from "../../common/components/BillFooter";
-  import VxeTableColumnsSetter from "../../common/components/VxeTableColumnsSetter";
+  import {JVXETypes} from '@/components/jeecg/JVxeTable'
+  import {getRefPromise} from '@/components/jeecg/JVxeTable/utils/vxeUtils.js'
+  import {JVxeTableModelMixin} from '@/mixins/JVxeTableModelMixin'
+  import {BillFormMixin} from '../../common/mixins/bill/BillFormMixin'
+  import {BillFormGridMixin} from '../../common/mixins/bill/BillFormGridMixin'
+  import {DetailMixin} from '../../common/mixins/bill/DetailMixin'
+  import {DetailValueMixin} from '../../common/mixins/bill/DetailValueMixin'
+  import {DetailFormatMixin} from '../../common/mixins/bill/DetailFormatMixin'
+  import {DetailValidatorMixin} from '../../common/mixins/bill/DetailValidatorMixin'
+  import {DataMixin} from '../../common/mixins/DataMixin'
+  import BillHeader from "../../common/components/BillHeader"
+  import BillApproval from "../../common/components/BillApproval"
+  import VxeTableColumnsSetter from "../../common/components/VxeTableColumnsSetter"
+  import {stringIsEmpty} from "../../common/utils/util";
 
   export default {
     name: 'SalInvoiceForm',
-    mixins: [JVxeTableModelMixin, BillFormMixin, BillFormGridMixin, BillVxeTableMixin],
-    components: {BillHeader, BillFooter, VxeTableColumnsSetter},
+    mixins: [JVxeTableModelMixin, BillFormMixin, BillFormGridMixin, DetailMixin, DetailValueMixin, DetailFormatMixin, DetailValidatorMixin, DataMixin],
+    components: {BillHeader, BillApproval, VxeTableColumnsSetter},
 
     data() {
       return {
@@ -177,8 +194,8 @@
 
         entryNoStep: 10,
         addDefaultRowNum: 0,
-        refKeys: ['entryTable', 'srcEntryTable', 'srcTable'],
-        tableKeys:['entryTable', ],//用于校验和提交子表数据的方法getAllTable(),须与refkeys中位置相同
+        refKeys:  ['entryTable', ],
+        tableKeys:['entryTable', ],
         activeKey: 'entryTable',
 
         // 明细：销售发票明细
@@ -186,6 +203,7 @@
           loading: false,
           dataSource: [],
           rowCount: 0,
+          selectedRowCount:0,
           url: {list: '/finance/finSalInvoice/queryEntryByMainId'},
           columns: [
             {
@@ -205,20 +223,11 @@
               ],
             },
             {
-              title: '源单分录号',
-              key: 'srcNo',
-              type: JVXETypes.input,
-              width:"180px",
-              align:"center",
-              fixed: 'left',
-              defaultValue: '',
-              disabled: true,
-            },
-            {
               title: '物料',
               key: 'materialId',
               type: JVXETypes.selectSearch,
               dictCode:"bas_material,aux_name,id",
+              options:[],
               width:"160px",
               fixed: 'left',
               defaultValue: '',
@@ -228,14 +237,14 @@
               title: '规格型号',
               key: 'materialModel',
               type: JVXETypes.input,
-              width:"200px",
+              width:"160px",
               defaultValue:'',
               disabled: true,
             },
             {
               title: '单位',
               key: 'unitId',
-              type: JVXETypes.selectSearch,
+              type: JVXETypes.select,
               dictCode:"bas_unit,name,id",
               width:"90px",
               align:"center",
@@ -249,6 +258,7 @@
               key: 'taxRate',
               type: JVXETypes.selectSearch,
               dictCode:"x_tax_rate",
+              options:[],
               width:"80px",
               align:"center",
               defaultValue: '',
@@ -262,10 +272,7 @@
               formatter: this.formatQty,
               placeholder: '请输入',
               defaultValue: '',
-              validateRules: [
-                {required: true, message: '${title}不能为空'},
-                { handler: this.rubricValidator },
-                {handler: this.invoiceQtyValidator}],
+              validateRules: [{required: true, message: '${title}不能为空'}, { handler: this.rubricValidator }, {handler: this.invoiceQtyValidator}],
               statistics: ['sum'],
             },
             {
@@ -277,31 +284,38 @@
               formatter: this.formatAmt,
               placeholder: '请输入',
               defaultValue: '',
-              validateRules: [
-                {required: true, message: '${title}不能为空'},
-                { handler: this.rubricValidator },
-                {handler: this.invoiceAmtValidator}],
+              validateRules: [{required: true, message: '${title}不能为空'}, { handler: this.rubricValidator }, {handler: this.invoiceAmtValidator}],
               statistics: ['sum'],
+            },
+            {
+              title: '源单分录号',
+              key: 'srcNo',
+              type: JVXETypes.input,
+              width:"180px",
+              align:"center",
+              fixed: 'left',
+              defaultValue: '',
+              disabled: true,
             },
             {
               title: '备注',
               key: 'remark',
               type: JVXETypes.input,
-              width:"160px",
+              width:"100px",
               defaultValue: '',
             },
             {
               title: '自定义1',
               key: 'custom1',
               type: JVXETypes.input,
-              width:"100px",
+              width:"80px",
               defaultValue: '',
             },
             {
               title: '自定义2',
               key: 'custom2',
               type: JVXETypes.input,
-              width:"100px",
+              width:"80px",
               defaultValue: '',
             },
           ]
@@ -332,14 +346,6 @@
               sortable: true,
             },
             {
-              title: '单据主题',
-              key: 'subject',
-              type: JVXETypes.input,
-              width:"200px",
-              defaultValue:'',
-              sortable: true,
-            },
-            {
               title: '源单号',
               key: 'srcNo',
               type: JVXETypes.input,
@@ -348,10 +354,11 @@
               sortable: true,
             },
             {
-              title: '入库经办',
+              title: '库管员',
               key: 'handler',
               type: JVXETypes.select,
               dictCode:"sys_user,realname,username",
+              options:[],
               width:"100px",
               align:"center",
               sortable: true,
@@ -385,6 +392,14 @@
               formatter: this.formatAmt,
               defaultValue:'',
               statistics: ['sum'],
+            },
+            {
+              title: '单据主题',
+              key: 'subject',
+              type: JVXETypes.input,
+              width:"200px",
+              defaultValue:'',
+              sortable: true,
             },
             {
               title: '备注',
@@ -426,6 +441,7 @@
               key: 'materialId',
               type: JVXETypes.selectSearch,
               dictCode:"bas_material,aux_name,id",
+              options:[],
               width:"160px",
               fixed: 'left',
               sortable: true,
@@ -434,14 +450,14 @@
               title: '规格型号',
               key: 'materialModel',
               type: JVXETypes.input,
-              width:"200px",
+              width:"160px",
               defaultValue:'',
               disabled: true,
             },
             {
               title: '单位',
               key: 'unitId',
-              type: JVXETypes.selectSearch,
+              type: JVXETypes.select,
               dictCode:"bas_unit,name,id",
               width:"90px",
               align:"center",
@@ -493,6 +509,7 @@
               key: 'taxRate',
               type: JVXETypes.selectSearch,
               dictCode:"x_tax_rate",
+              options:[],
               width:"120px",
               align:"center",
               defaultValue:'',
@@ -584,7 +601,28 @@
           ebpm: "/finance/finSalInvoice/bpm/end",
           execute: "/finance/finSalInvoice/execute",
           void: "/finance/finSalInvoice/void",
+          queryById: "/finance/finSalInvoice/queryById", //20251101 cfm add for 内置BPM
         },
+      }
+    },
+
+    watch:{
+      'entryTable.dataSource'() {
+        this.entryTable.rowCount = this.entryTable.dataSource.length;
+      },
+
+      'entryTable.loading': {
+        immediate: true,
+        handler() {
+          this.$emit("update:loading", this.entryTable.loading);
+        }
+      },
+
+      'entryTable.rowCount': {
+        immediate: true,
+        handler() {
+          this.$emit("update:entryCount", this.entryTable.rowCount);
+        }
       }
     },
 
@@ -596,10 +634,6 @@
       },
     },
 
-    created() {
-      if (!this.disabled) this.initMaterialRelated();
-    },
-
     methods: {
       addBefore(){
         this.entryTable.dataSource=[];
@@ -609,7 +643,7 @@
 
       addAfter() {
         this.$refs.billHeader.fillBillNo('fin_xsfp_bill_no');
-        this.activeKey = this.refKeys[1];
+        this.activeKey = "srcTable";
       },
 
       getAllTable() {
@@ -618,8 +652,7 @@
       },
 
       editAfter() {
-        if (this.model.id)
-          this.requestSubDatas(this.entryTable, this.srcTable, this.srcEntryTable);
+        if (this.model.id) this.requestSubDatas(this.entryTable, this.srcTable, this.srcEntryTable);
       },
 
       classifyIntoFormData(allValues) {
@@ -630,7 +663,7 @@
         }
       },
 
-      handleAddFromSrcEntry(){
+      handleAddEntryFromSrc(){
         for(let srcRow of this.$refs.srcEntryTable.selectedRows) {
           let row = {};
           row.srcBillType = this.model.srcBillType;
@@ -654,10 +687,13 @@
 
         switch (column.property) {
           case "unitId":
-            if (!oldValue || oldValue.length === 0 || !value || value.length === 0) break;
-            const rate =this.getUnitRate(row.materialId, oldValue, value);
-            let values = !!rate ? {qty: (row.qty * rate).toFixed(3)} : {unitId: ''};
-            target.setValues([{rowKey: row.id, values: values}]);
+            if (stringIsEmpty(oldValue)) break;
+            // unitId下列代码限制由非空变为空：因为value空，得到的rate为空，将恢复原值
+            const rate = this.getUnitRate(row.materialId, oldValue, value);
+            if (!rate) //unitId新值不合法：与原值不能转换，恢复原值
+              target.setValues([{rowKey: row.id, values: {unitId: oldValue} }]);
+            else
+              target.setValues([{ rowKey: row.id, values: {qty: (row.qty * rate).toFixed(3)} }]);
             break;
         }
       },

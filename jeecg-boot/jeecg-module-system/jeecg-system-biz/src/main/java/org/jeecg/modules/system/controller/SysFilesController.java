@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.aspect.annotation.AutoLog;
 import org.jeecg.common.system.base.controller.JeecgController;
@@ -64,6 +65,7 @@ public class SysFilesController extends JeecgController<SysFiles, ISysFilesServi
      */
     @AutoLog(value = "知识库-文档管理-添加")
     @ApiOperation(value = "知识库-文档管理-添加", notes = "知识库-文档管理-添加")
+    @RequiresPermissions("system:files:add") //20240806 cfm add
     @PostMapping(value = "/add")
     public Result<?> add(@RequestBody SysFiles sysFiles) {
         sysFilesService.save(sysFiles);
@@ -78,6 +80,7 @@ public class SysFilesController extends JeecgController<SysFiles, ISysFilesServi
      */
     @AutoLog(value = "知识库-文档管理-编辑")
     @ApiOperation(value = "知识库-文档管理-编辑", notes = "知识库-文档管理-编辑")
+    @RequiresPermissions("system:files:edit") //20240806 cfm add
     @RequestMapping(value = "/edit", method = {RequestMethod.PUT, RequestMethod.POST})
     public Result<?> edit(@RequestBody SysFiles sysFiles) {
         sysFilesService.updateById(sysFiles);
@@ -92,6 +95,7 @@ public class SysFilesController extends JeecgController<SysFiles, ISysFilesServi
      */
     @AutoLog(value = "知识库-文档管理-通过id删除")
     @ApiOperation(value = "知识库-文档管理-通过id删除", notes = "知识库-文档管理-通过id删除")
+    @RequiresPermissions("system:files:delete") //20240806 cfm add
     @DeleteMapping(value = "/delete")
     public Result<?> delete(@RequestParam(name = "id", required = true) String id) {
         sysFilesService.removeById(id);
@@ -106,6 +110,7 @@ public class SysFilesController extends JeecgController<SysFiles, ISysFilesServi
      */
     @AutoLog(value = "知识库-文档管理-批量删除")
     @ApiOperation(value = "知识库-文档管理-批量删除", notes = "知识库-文档管理-批量删除")
+    @RequiresPermissions("system:files:delete") //20240806 cfm add
     @DeleteMapping(value = "/deleteBatch")
     public Result<?> deleteBatch(@RequestParam(name = "ids", required = true) String ids) {
         this.sysFilesService.removeByIds(Arrays.asList(ids.split(",")));
@@ -144,6 +149,7 @@ public class SysFilesController extends JeecgController<SysFiles, ISysFilesServi
      * @param response
      * @return
      */
+    @RequiresPermissions("system:files:import") //20240806 cfm add
     @RequestMapping(value = "/importExcel", method = RequestMethod.POST)
     public Result<?> importExcel(HttpServletRequest request, HttpServletResponse response) {
         return super.importExcel(request, response, SysFiles.class);

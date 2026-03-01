@@ -60,10 +60,10 @@ public class StkIo extends Bill {
     @Dict(dictTable = "sys_user", dicText = "realname", dicCode = "username")
     @ApiModelProperty(value = "业务员")
     private java.lang.String operator;
-    /**出入库经办*/
-    @Excel(name = "出入库经办", width = 15, dictTable = "sys_user", dicText = "realname", dicCode = "username")
+    /**库管员*/
+    @Excel(name = "库管员", width = 15, dictTable = "sys_user", dicText = "realname", dicCode = "username")
     @Dict(dictTable = "sys_user", dicText = "realname", dicCode = "username")
-    @ApiModelProperty(value = "出入库经办")
+    @ApiModelProperty(value = "库管员")
     private java.lang.String handler;
     /**成本*/
     @Excel(name = "成本", width = 15)
@@ -81,6 +81,17 @@ public class StkIo extends Bill {
     @Excel(name = "已开票金额", width = 15)
     @ApiModelProperty(value = "已开票金额")
     private java.math.BigDecimal invoicedAmt;
+    //20231224 cfm add
+    /**BOM*/
+    @Excel(name = "BOM", width = 15, dictTable = "bas_bom", dicText = "name", dicCode = "id")
+    @Dict(dictTable = "bas_bom", dicText = "aux_name", dicCode = "id")
+    @ApiModelProperty(value = "BOM")
+    private java.lang.String bomId;
+    //20250406 cfm add
+    /**主物料数量*/
+    @Excel(name = "主物料数量", width = 15)
+    @ApiModelProperty(value = "主物料数量")
+    private java.math.BigDecimal mainMaterialQty;
 
     @Override
     public String getBillType() {
@@ -96,4 +107,11 @@ public class StkIo extends Bill {
         }
         return stockIoType == null ? null : (stockIoType.equals("1011") || stockIoType.equals("2011")) ? 1 : 0;
     }
+
+    //20230917 cfm add
+    /**是否有个体明细*/
+    @Excel(name = "是否有个体明细", width = 15, dicCode = "yn")
+    @Dict(dicCode = "yn")
+    @ApiModelProperty(value = "是否有个体明细")
+    private java.lang.Integer hasSingle;
 }

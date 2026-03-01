@@ -3,9 +3,6 @@ package org.jeecg.modules.system.controller;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.baomidou.dynamic.datasource.DynamicRoutingDataSource;
-import com.baomidou.dynamic.datasource.creator.DruidDataSourceCreator;
-import com.baomidou.dynamic.datasource.spring.boot.autoconfigure.DataSourceProperty;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -13,7 +10,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.apache.shiro.authz.annotation.RequiresRoles;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.aspect.annotation.AutoLog;
 import org.jeecg.common.exception.JeecgBootException;
@@ -30,7 +27,6 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.sql.DataSource;
 import java.util.Arrays;
 import java.util.List;
 
@@ -61,7 +57,7 @@ public class SysDataSourceController extends JeecgController<SysDataSource, ISys
      */
     @AutoLog(value = "多数据源管理-分页列表查询")
     @ApiOperation(value = "多数据源管理-分页列表查询", notes = "多数据源管理-分页列表查询")
-    //@RequiresRoles("admin")
+    @RequiresPermissions("system:dataSource:list") //20240806 cfm add
     @GetMapping(value = "/list")
     public Result<?> queryPageList(
             SysDataSource sysDataSource,
@@ -75,6 +71,7 @@ public class SysDataSourceController extends JeecgController<SysDataSource, ISys
         return Result.ok(pageList);
     }
 
+    @RequiresPermissions("system:dataSource:options") //20240806 cfm add
     @GetMapping(value = "/options")
     public Result<?> queryOptions(SysDataSource sysDataSource, HttpServletRequest req) {
         QueryWrapper<SysDataSource> queryWrapper = QueryGenerator.initQueryWrapper(sysDataSource, req.getParameterMap());
@@ -98,6 +95,7 @@ public class SysDataSourceController extends JeecgController<SysDataSource, ISys
      */
     @AutoLog(value = "多数据源管理-添加")
     @ApiOperation(value = "多数据源管理-添加", notes = "多数据源管理-添加")
+    @RequiresPermissions("system:dataSource:add") //20240806 cfm add
     @PostMapping(value = "/add")
     public Result<?> add(@RequestBody SysDataSource sysDataSource) {
         //update-begin-author:taoyan date:2022-8-10 for: jdbc连接地址漏洞问题
@@ -119,6 +117,7 @@ public class SysDataSourceController extends JeecgController<SysDataSource, ISys
      */
     @AutoLog(value = "多数据源管理-编辑")
     @ApiOperation(value = "多数据源管理-编辑", notes = "多数据源管理-编辑")
+    @RequiresPermissions("system:dataSource:edit") //20240806 cfm add
     @RequestMapping(value = "/edit", method ={RequestMethod.PUT, RequestMethod.POST})
     public Result<?> edit(@RequestBody SysDataSource sysDataSource) {
         //update-begin-author:taoyan date:2022-8-10 for: jdbc连接地址漏洞问题
@@ -140,6 +139,7 @@ public class SysDataSourceController extends JeecgController<SysDataSource, ISys
      */
     @AutoLog(value = "多数据源管理-通过id删除")
     @ApiOperation(value = "多数据源管理-通过id删除", notes = "多数据源管理-通过id删除")
+    @RequiresPermissions("system:dataSource:delete") //20240806 cfm add
     @DeleteMapping(value = "/delete")
     public Result<?> delete(@RequestParam(name = "id") String id) {
         return sysDataSourceService.deleteDataSource(id);
@@ -153,6 +153,7 @@ public class SysDataSourceController extends JeecgController<SysDataSource, ISys
      */
     @AutoLog(value = "多数据源管理-批量删除")
     @ApiOperation(value = "多数据源管理-批量删除", notes = "多数据源管理-批量删除")
+    @RequiresPermissions("system:dataSource:delete") //20240806 cfm add
     @DeleteMapping(value = "/deleteBatch")
     public Result<?> deleteBatch(@RequestParam(name = "ids") String ids) {
         List<String> idList = Arrays.asList(ids.split(","));
@@ -172,6 +173,7 @@ public class SysDataSourceController extends JeecgController<SysDataSource, ISys
      */
     @AutoLog(value = "多数据源管理-通过id查询")
     @ApiOperation(value = "多数据源管理-通过id查询", notes = "多数据源管理-通过id查询")
+    @RequiresPermissions("system:dataSource:queryById") //20240806 cfm add
     @GetMapping(value = "/queryById")
     public Result<?> queryById(@RequestParam(name = "id") String id) throws InterruptedException {
         SysDataSource sysDataSource = sysDataSourceService.getById(id);
@@ -190,6 +192,7 @@ public class SysDataSourceController extends JeecgController<SysDataSource, ISys
      * @param request
      * @param sysDataSource
      */
+    @RequiresPermissions("system:dataSource:export") //20240806 cfm add
     @RequestMapping(value = "/exportXls")
     public ModelAndView exportXls(HttpServletRequest request, SysDataSource sysDataSource) {
         return super.exportXls(request, sysDataSource, SysDataSource.class, "多数据源管理");
@@ -202,6 +205,7 @@ public class SysDataSourceController extends JeecgController<SysDataSource, ISys
      * @param response
      * @return
      */
+    @RequiresPermissions("system:dataSource:import") //20240806 cfm add
     @RequestMapping(value = "/importExcel", method = RequestMethod.POST)
     public Result<?> importExcel(HttpServletRequest request, HttpServletResponse response) {
         return super.importExcel(request, response, SysDataSource.class);

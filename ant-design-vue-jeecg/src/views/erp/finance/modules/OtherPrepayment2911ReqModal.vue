@@ -5,13 +5,12 @@
     :visible="visible"
     :maskClosable="false"
     :keyboard="false"
-    draggable
     switchFullscreen
     :okButtonProps="{ class:{'jee-hidden': disableSubmit} }"
     @cancel="handleCancel">
 
     <template slot="footer">
-      <a-button v-if="disableSubmit" key="print" @click="handlePrint" style="margin-right: 48px">打印</a-button>
+      <a-button v-if="disableSubmit" :disabled="isDisabledAuth('OtherPrepayment2911Req:print')" key="print" @click="handlePrint" style="margin-right: 48px">打印</a-button>
       <a-button @click="handleCancel" :type="action==='detail'?'primary':''">{{action==='detail'?'关闭':'取消'}}</a-button>
       <a-button v-if="!disableSubmit" key="save" @click="handleSave" type="primary">保存</a-button>
       <a-button v-if="!disableSubmit" key="submit" @click="handleSubmit" type="primary">提交</a-button>
@@ -28,20 +27,12 @@
 
 <script>
   import PaymentReqForm from './OtherPrepayment2911ReqForm'
-  import { BillModalMixin } from '../../common/mixins/BillModalMixin';
+  import { BillModalMixin } from '../../common/mixins/bill/BillModalMixin';
 
   export default {
     name: 'OtherPrepayment2911ReqModal',
     mixins: [BillModalMixin],
     components: {PaymentReqForm},
 
-    data() {
-      return {
-        width:1300,
-      }
-    },
   }
 </script>
-
-<style scoped>
-</style>

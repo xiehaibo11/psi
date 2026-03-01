@@ -5,17 +5,22 @@
     :visible="visible"
     :maskClosable="false"
     :keyboard="false"
-    draggable
     switchFullscreen
     :okButtonProps="{ class:{'jee-hidden': disableSubmit} }"
     @cancel="handleCancel">
 
     <template slot="footer">
-      <p style="float: left;">提示：采购退货出库单生效后自动生成采购应付单（红字）！</p>
-      <a-button v-if="disableSubmit" key="print" @click="handlePrint" style="margin-right: 48px">打印</a-button>
+      <a-tooltip v-if="isMobile()" :title="tip" placement="topLeft">
+        <a-icon type="info-circle" style="float: left; font-size: 20px; margin-top: 6px"/>
+      </a-tooltip>
+      <span v-else style="float: left">{{tip}}</span>
+
+      <a-button v-if="disableSubmit" :disabled="isDisabledAuth('RubricPurIn:print')" key="print" @click="handlePrint" style="margin-right: 48px">打印</a-button>
       <a-button @click="handleCancel" :type="action==='detail'?'primary':''">{{action==='detail'?'关闭':'取消'}}</a-button>
-      <a-button v-if="!disableSubmit" key="save" @click="handleSave" type="primary">保存</a-button>
-      <a-button v-if="!disableSubmit" key="submit" @click="handleSubmit" type="primary">提交</a-button>
+      <a-button v-if="!disableSubmit" key="save" @click="handleSave" type="primary" :disabled="loading">保存</a-button>
+      <a-tooltip :title="entryCount===0 ? '无明细不能提交！' : ''" placement="top">
+        <a-button v-if="!disableSubmit" key="submit" @click="handleSubmit" type="primary" :disabled="loading || entryCount===0">提交</a-button>
+      </a-tooltip>
       <a-button v-if="action==='check'" key="check" @click="handleCheck" type="primary">审核</a-button>
       <a-button v-if="action==='ebpm'" key="ebpm" @click="handleEbpm" type="primary">结束审批</a-button>
       <a-button v-if="action==='execute'" key="execute" @click="handleExecute" type="primary">执行</a-button>
@@ -23,27 +28,24 @@
         <a-button v-if="action==='void'" key="void" type="primary">作废</a-button>
       </a-popconfirm>
     </template>
-    <rubric-pur-in-bill-form ref="realForm" @ok="submitCallback" :disabled="disableSubmit"/>
+    <rubric-pur-in-form ref="realForm" @ok="submitCallback" :disabled="disableSubmit" :loading.sync="loading" :entryCount.sync="entryCount"/>
   </j-modal>
 </template>
 
 <script>
-
-  import RubricPurInBillForm from './RubricPurInForm'
-  import { BillModalMixin } from '../../common/mixins/BillModalMixin'
+  import RubricPurInForm from './RubricPurInForm'
+  import { BillModalMixin } from '../../common/mixins/bill/BillModalMixin'
+  import { mixinDevice } from '@/utils/mixin.js'
 
   export default {
     name: 'RubricPurInModal',
-    mixins: [BillModalMixin],
-    components: {RubricPurInBillForm},
+    mixins: [BillModalMixin, mixinDevice],
+    components: {RubricPurInForm},
 
     data() {
       return {
-        width:1300,
+        tip: '提示：采购退货出库单生效后自动生成采购应付单（红字）！',
       }
     },
   }
 </script>
-
-<style scoped>
-</style>

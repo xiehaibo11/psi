@@ -10,12 +10,15 @@
         v-if="device==='mobile'"
         class="trigger"
         :type="collapsed ? 'menu-fold' : 'menu-unfold'"
-        @click="toggle"></a-icon>
+        @click="toggle"/>
       <a-icon
         v-else
         class="trigger"
         :type="collapsed ? 'menu-unfold' : 'menu-fold'"
         @click="toggle"/>
+
+      <!-- 20240425 cfm add -->
+      <span v-if="device==='mobile'" style="font-size: 20px">{{activeMenuTitle}}</span>
 
       <user-menu :theme="theme"/>
     </div>
@@ -83,6 +86,12 @@
         type: String,
         required: false,
         default: 'desktop'
+      },
+      //20240425 cfm add
+      activeMenuTitle: {
+        type: String,
+        required: false,
+        default: '首页'
       }
     },
     data() {

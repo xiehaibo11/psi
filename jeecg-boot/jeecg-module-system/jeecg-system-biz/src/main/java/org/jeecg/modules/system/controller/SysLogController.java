@@ -5,6 +5,7 @@ import java.util.Arrays;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.constant.CommonConstant;
 import org.jeecg.common.system.query.QueryGenerator;
@@ -83,6 +84,7 @@ public class SysLogController {
 	 * @param id
 	 * @return
 	 */
+	@RequiresPermissions("system:log:delete") //20240806 cfm add
 	@RequestMapping(value = "/delete", method = RequestMethod.DELETE)
 	public Result<SysLog> delete(@RequestParam(name="id",required=true) String id) {
 		Result<SysLog> result = new Result<SysLog>();
@@ -103,6 +105,7 @@ public class SysLogController {
 	 * @param ids
 	 * @return
 	 */
+	@RequiresPermissions("system:log:delete") //20240806 cfm add
 	@RequestMapping(value = "/deleteBatch", method = RequestMethod.DELETE)
 	public Result<SysRole> deleteBatch(@RequestParam(name="ids",required=true) String ids) {
 		Result<SysRole> result = new Result<SysRole>();

@@ -19,7 +19,7 @@
           @updateMenuTitle="handleUpdateMenuTitle"
           :theme="navTheme"
           :collapsed="false"
-          :collapsible="true"></side-menu>
+          :collapsible="true"/>
       </a-drawer>
 
       <side-menu
@@ -58,12 +58,14 @@
       :class="[layoutMode, `content-width-${contentWidth}`]"
       :style="{ paddingLeft: fixSiderbar && isDesktop() ? `${sidebarOpened ? 200 : 80}px` : '0' }">
       <!-- layout header -->
+      <!-- 20240425 cfm modi: 增加:activeMenuTitle... -->
       <global-header
         :mode="layoutMode"
         :menus="menus"
         :theme="navTheme"
         :collapsed="collapsed"
         :device="device"
+        :activeMenuTitle="activeMenuTitle"
         @toggle="toggle"
         @updateMenuTitle="handleUpdateMenuTitle"
       />
@@ -114,6 +116,7 @@
       return {
         collapsed: false,
         activeMenu:{},
+        activeMenuTitle:'', //20240425 cfm add
         menus: []
       }
     },
@@ -136,7 +139,7 @@
       this.menus = this.permissionMenuList
       
       //--update-begin----author:liusq---date:20210223------for:关于测边菜单遮挡内容问题详细说明 #2255
-      this.collapsed=!this.sidebarOpened;
+      this.collapsed = this.isMobile() || !this.sidebarOpened; //20240426 cfm add: “this.isMobile() ||”
       //--update-begin----author:liusq---date:20210223------for:关于测边菜单遮挡内容问题详细说明 #2255
   
       // 根据后台配置菜单，重新排序加载路由信息
@@ -177,6 +180,13 @@
 
       // update-begin-author:sunjianlei date:20210409 for: 修复动态功能测试菜单、带参数菜单标题错误、展开错误的问题
       handleUpdateMenuTitle(value) {
+        if (this.isMobile()) {
+          if (this.activeMenuTitle !== '首页') //20240426 cfm add：不if，则首次点击菜单不能打开
+            this.menuSelect(); //20240424 cfm add：点击打开页面后菜单不自动收起处理（menuSelect、myMenuSelect事件好像不触发）
+
+          this.activeMenuTitle = value.meta.title; //20240425 cfm add：顶部显示菜单名
+        }
+
         this.findMenuBykey(this.menus, value.path)
         this.activeMenu.meta.title = value.meta.title
         this.$emit('dynamicRouterShow', value.path, this.activeMenu.meta.title)

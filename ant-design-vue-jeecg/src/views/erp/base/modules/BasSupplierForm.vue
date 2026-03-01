@@ -20,7 +20,7 @@
           </a-col>
           <a-col :span="24">
             <a-form-model-item label="供应商分类" :labelCol="labelCol" :wrapperCol="wrapperCol" prop="supplierCategory">
-              <j-dict-select-tag v-model="model.supplierCategory" dictCode="x_supplierr_category" placeholder="请选择" :disabled="disabled"/>
+              <j-dict-select-tag v-model="model.supplierCategory" dictCode="x_supplier_category" placeholder="请选择" :disabled="disabled"/>
             </a-form-model-item>
           </a-col>
           <a-col :span="24">
@@ -211,7 +211,7 @@
               </a-col>
               <a-col :span="24">
                 <a-form-model-item label="附件" :labelCol="labelCol" :wrapperCol="wrapperCol" prop="attachment">
-                  <j-upload v-model="model.attachment" :disabled="disabled"/>
+                  <j-upload v-model="model.attachment" :disabled="disabled" bizPath="erp"/>
                 </a-form-model-item>
               </a-col>
             </a-row>

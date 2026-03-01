@@ -86,7 +86,7 @@ public class oConvertUtils {
 	}
 
 	public static int getInt(String s, int defval) {
-		if (s == null || s == "") {
+		if (s == null || s.equals("")) {
 			return (defval);
 		}
 		try {
@@ -97,7 +97,7 @@ public class oConvertUtils {
 	}
 
 	public static int getInt(String s) {
-		if (s == null || s == "") {
+		if (s == null || s.equals("")) {
 			return 0;
 		}
 		try {
@@ -108,7 +108,7 @@ public class oConvertUtils {
 	}
 
 	public static int getInt(String s, Integer df) {
-		if (s == null || s == "") {
+		if (s == null || s.equals("")) {
 			return df;
 		}
 		try {
@@ -131,7 +131,7 @@ public class oConvertUtils {
 	}
 
 	public static double getDouble(String s, double defval) {
-		if (s == null || s == "") {
+		if (s == null || s.equals("")) {
 			return (defval);
 		}
 		try {
@@ -352,18 +352,18 @@ public class oConvertUtils {
 
 	/**
 	 * 判断元素是否在数组内
-	 * 
-	 * @param substring
-	 * @param source
+	 *
+	 * @param child
+	 * @param all
 	 * @return
 	 */
-	public static boolean isIn(String substring, String[] source) {
-		if (source == null || source.length == 0) {
+	public static boolean isIn(String child, String[] all) {
+		if (all == null || all.length == 0) {
 			return false;
 		}
-		for (int i = 0; i < source.length; i++) {
-			String aSource = source[i];
-			if (aSource.equals(substring)) {
+		for (int i = 0; i < all.length; i++) {
+			String aSource = all[i];
+			if (aSource.equals(child)) {
 				return true;
 			}
 		}

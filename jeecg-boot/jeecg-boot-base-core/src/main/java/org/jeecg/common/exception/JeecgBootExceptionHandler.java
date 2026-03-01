@@ -71,7 +71,7 @@ public class JeecgBootExceptionHandler {
 	@ExceptionHandler({UnauthorizedException.class, AuthorizationException.class})
 	public Result<?> handleAuthorizationException(AuthorizationException e){
 		log.error(e.getMessage(), e);
-		return Result.noauth("没有权限，请联系管理员授权");
+		return Result.noauth("后端接口没有权限，请联系管理员授权"); //20250710 cfm modi: 增加“后端接口”
 	}
 
 	@ExceptionHandler(Exception.class)
@@ -132,5 +132,24 @@ public class JeecgBootExceptionHandler {
     	log.error(e.getMessage(), e);
         return Result.error("Redis 连接异常!");
     }
+
+	/**
+	 * SQL注入风险，全局异常处理
+	 *
+	 * @param exception
+	 * @return
+	 */
+	@ExceptionHandler(JeecgSqlInjectionException.class)
+	public Result<?> handleSQLException(Exception exception) {
+		String msg = exception.getMessage().toLowerCase();
+		final String extractvalue = "extractvalue";
+		final String updatexml = "updatexml";
+		boolean hasSensitiveInformation = msg.indexOf(extractvalue) >= 0 || msg.indexOf(updatexml) >= 0;
+		if (msg != null && hasSensitiveInformation) {
+			log.error("校验失败，存在SQL注入风险！{}", msg);
+			return Result.error("校验失败，存在SQL注入风险！");
+		}
+		return Result.error("校验失败，存在SQL注入风险！" + msg);
+	}
 
 }

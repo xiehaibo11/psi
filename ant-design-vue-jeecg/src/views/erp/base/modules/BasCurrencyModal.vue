@@ -24,10 +24,6 @@
     name: "BasCurrencyModal",
     components: {BasCurrencyForm},
     mixins: [DrawerMixin],
-
-    data() {
-      return { width:600}
-    },
   }
 </script>
 

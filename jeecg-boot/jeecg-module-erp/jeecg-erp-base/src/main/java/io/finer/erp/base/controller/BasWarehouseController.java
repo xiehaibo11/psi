@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.system.query.QueryGenerator;
 import org.jeecg.common.util.oConvertUtils;
@@ -142,6 +144,7 @@ public class BasWarehouseController extends JeecgController<BasWarehouse, IBasWa
 	 */
 	@AutoLog(value = "仓库-添加")
 	@ApiOperation(value="仓库-添加", notes="仓库-添加")
+	@RequiresPermissions("base:warehouse:add") //20240806 cfm add
 	@PostMapping(value = "/add")
 	public Result<String> add(@RequestBody BasWarehouse basWarehouse) {
 		basWarehouseService.addBasWarehouse(basWarehouse);
@@ -156,6 +159,7 @@ public class BasWarehouseController extends JeecgController<BasWarehouse, IBasWa
 	 */
 	@AutoLog(value = "仓库-编辑")
 	@ApiOperation(value="仓库-编辑", notes="仓库-编辑")
+	@RequiresPermissions("base:warehouse:edit") //20240806 cfm add
 	@RequestMapping(value = "/edit", method = {RequestMethod.PUT,RequestMethod.POST})
 	public Result<String> edit(@RequestBody BasWarehouse basWarehouse) {
 		basWarehouseService.updateBasWarehouse(basWarehouse);
@@ -170,6 +174,7 @@ public class BasWarehouseController extends JeecgController<BasWarehouse, IBasWa
 	 */
 	@AutoLog(value = "仓库-通过id删除")
 	@ApiOperation(value="仓库-通过id删除", notes="仓库-通过id删除")
+	@RequiresPermissions("base:warehouse:delete") //20240806 cfm add
 	@DeleteMapping(value = "/delete")
 	public Result<String> delete(@RequestParam(name="id",required=true) String id) {
 		basWarehouseService.deleteBasWarehouse(id);
@@ -184,6 +189,7 @@ public class BasWarehouseController extends JeecgController<BasWarehouse, IBasWa
 	 */
 	@AutoLog(value = "仓库-批量删除")
 	@ApiOperation(value="仓库-批量删除", notes="仓库-批量删除")
+	@RequiresPermissions("base:warehouse:delete") //20240806 cfm add
 	@DeleteMapping(value = "/deleteBatch")
 	public Result<String> deleteBatch(@RequestParam(name="ids",required=true) String ids) {
 		this.basWarehouseService.removeByIds(Arrays.asList(ids.split(",")));
@@ -210,7 +216,8 @@ public class BasWarehouseController extends JeecgController<BasWarehouse, IBasWa
 	 * @return
 	 */
 	@AutoLog(value = "通过excel导入数据")
-    @RequestMapping(value = "/importExcel", method = RequestMethod.POST)
+	@RequiresPermissions("base:warehouse:import") //20240806 cfm add
+	@RequestMapping(value = "/importExcel", method = RequestMethod.POST)
 	public Result<?> importExcel(HttpServletRequest request, HttpServletResponse response) {
 		return super.importExcel(request, response, BasWarehouse.class);
 	}

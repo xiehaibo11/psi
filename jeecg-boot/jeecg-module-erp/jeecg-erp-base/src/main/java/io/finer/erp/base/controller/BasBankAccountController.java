@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import io.finer.erp.base.entity.BasBankAccount;
 import io.finer.erp.base.service.IBasBankAccountService;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.system.query.QueryGenerator;
 
@@ -83,6 +84,7 @@ public class BasBankAccountController extends JeecgController<BasBankAccount, IB
 	 */
 	@AutoLog(value = "银行账户-新增")
 	@ApiOperation(value="银行账户-新增", notes="银行账户-新增")
+	@RequiresPermissions("base:bankAccount:add") //20240806 cfm add
 	@PostMapping(value = "/add")
 	public Result<?> add(@RequestBody BasBankAccount basBankAccount) {
 		basBankAccountService.save(basBankAccount);
@@ -97,6 +99,7 @@ public class BasBankAccountController extends JeecgController<BasBankAccount, IB
 	 */
 	@AutoLog(value = "银行账户-编辑")
 	@ApiOperation(value="银行账户-编辑", notes="银行账户-编辑")
+	@RequiresPermissions("base:bankAccount:edit") //20240806 cfm add
 	@PutMapping(value = "/edit")
 	public Result<?> edit(@RequestBody BasBankAccount basBankAccount) {
 		basBankAccountService.updateById(basBankAccount);
@@ -111,6 +114,7 @@ public class BasBankAccountController extends JeecgController<BasBankAccount, IB
 	 */
 	@AutoLog(value = "银行账户-通过id删除")
 	@ApiOperation(value="银行账户-通过id删除", notes="银行账户-通过id删除")
+	@RequiresPermissions("base:bankAccount:delete") //20240806 cfm add
 	@DeleteMapping(value = "/delete")
 	public Result<?> delete(@RequestParam(name="id",required=true) String id) {
 		basBankAccountService.removeById(id);
@@ -125,6 +129,7 @@ public class BasBankAccountController extends JeecgController<BasBankAccount, IB
 	 */
 	@AutoLog(value = "银行账户-批量删除")
 	@ApiOperation(value="银行账户-批量删除", notes="银行账户-批量删除")
+	@RequiresPermissions("base:bankAccount:delete") //20240806 cfm add
 	@DeleteMapping(value = "/deleteBatch")
 	public Result<?> deleteBatch(@RequestParam(name="ids",required=true) String ids) {
 		this.basBankAccountService.removeByIds(Arrays.asList(ids.split(",")));
@@ -151,7 +156,8 @@ public class BasBankAccountController extends JeecgController<BasBankAccount, IB
     * @return
     */
 	@AutoLog(value = "通过excel导入数据")
-    @RequestMapping(value = "/importExcel", method = RequestMethod.POST)
+	@RequiresPermissions("base:bankAccount:import") //20240806 cfm add
+	@RequestMapping(value = "/importExcel", method = RequestMethod.POST)
     public Result<?> importExcel(HttpServletRequest request, HttpServletResponse response) {
         return super.importExcel(request, response, BasBankAccount.class);
     }

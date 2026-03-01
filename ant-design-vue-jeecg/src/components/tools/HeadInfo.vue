@@ -46,13 +46,13 @@
       color: rgba(0, 0, 0, .45);
       display: inline-block;
       font-size: 14px;
-      line-height: 22px;
-      margin-bottom: 4px;
+      line-height: 14px;
+      margin-bottom: 0px;
     }
     p {
       color: rgba(0, 0, 0, .85);
       font-size: 24px;
-      line-height: 32px;
+      line-height: 24px;
       margin: 0;
     }
     em {

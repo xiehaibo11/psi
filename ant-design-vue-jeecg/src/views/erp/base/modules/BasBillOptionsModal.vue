@@ -24,10 +24,6 @@
     name: 'BasBillOptionsModal',
     components: {BasBillOptionsForm},
     mixins: [DrawerMixin],
-
-    data() {
-      return { width:750}
-    },
   }
 </script>
 

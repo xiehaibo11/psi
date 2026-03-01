@@ -24,10 +24,6 @@
     name: "StkInventoryModal",
     components: {StkInventoryForm},
     mixins: [DrawerMixin],
-
-    data() {
-      return { width:600}
-    },
 }
 </script>
 

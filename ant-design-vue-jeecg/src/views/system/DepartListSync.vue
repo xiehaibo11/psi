@@ -11,7 +11,7 @@
           <a-upload name="file" :showUploadList="false" :multiple="false" :headers="tokenHeader" :action="importExcelUrl" @change="handleImportExcel">
             <a-button type="primary" icon="import">导入</a-button>
           </a-upload>
-          <j-third-app-button biz-type="depart" :selected-row-keys="selectedRowKeys" syncToApp @sync-finally="onSyncFinally"/>
+          <j-third-app-button biz-type="depart" :selected-row-keys="selectedRowKeys" syncToApp syncToLocal @sync-finally="onSyncFinally"/>
           <a-button title="删除多条数据" @click="batchDel" type="default">批量删除</a-button>
         </a-row>
         <div style="background: #fff;padding-left:16px;height: 100%; margin-top: 5px">

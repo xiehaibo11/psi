@@ -1,22 +1,25 @@
 package io.finer.erp.stock.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.toolkit.IdWorker;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import io.finer.erp.base.entity.BasBizOptions;
+import io.finer.erp.base.service.IBasBizOptionsService;
 import io.finer.erp.common.service.impl.BillWithEntryServiceImpl;
 import io.finer.erp.common.util.BillUtils;
 import io.finer.erp.finance.entity.*;
 import io.finer.erp.finance.service.*;
-import io.finer.erp.purchase.service.IPurOrderService;
-import io.finer.erp.sale.service.ISalOrderService;
-import io.finer.erp.stock.entity.StkCheck;
-import io.finer.erp.stock.entity.StkCheckEntry;
-import io.finer.erp.stock.entity.StkIo;
-import io.finer.erp.stock.entity.StkIoEntry;
+import io.finer.erp.stock.entity.*;
 import io.finer.erp.stock.mapper.StkIoEntryMapper;
 import io.finer.erp.stock.mapper.StkIoMapper;
+import io.finer.erp.stock.service.IStkCheckService;
 import io.finer.erp.stock.service.IStkInventoryService;
+import io.finer.erp.stock.service.IStkIoSingleService;
 import io.finer.erp.stock.service.IStkIoService;
 import org.apache.commons.lang3.StringUtils;
 import org.jeecg.common.exception.JeecgBootException;
 import org.jeecg.common.util.FillRuleUtil;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.util.Pair;
@@ -45,9 +48,6 @@ public class StkIoServiceImpl
 
 	@Lazy
 	@Autowired
-	private IPurOrderService purOrderService;
-	@Lazy
-	@Autowired
 	private IFinPayableService finPayableService;
 	@Lazy
 	@Autowired
@@ -61,9 +61,6 @@ public class StkIoServiceImpl
 
 	@Lazy
 	@Autowired
-	private ISalOrderService salOrderService;
-	@Lazy
-	@Autowired
 	private IFinReceivableService finReceivableService;
 	@Lazy
 	@Autowired
@@ -71,6 +68,107 @@ public class StkIoServiceImpl
 	@Lazy
 	@Autowired
 	private IFinReceiptService finReceiptService;
+	@Lazy
+	@Autowired
+	private IFinReceiptReqService finReceiptReqService;
+
+	//20250711 cfm add
+	@Autowired
+	private IBasBizOptionsService basBizOptionsService;
+	@Lazy
+	@Autowired
+	private IStkCheckService stkCheckService;
+
+	//begin-20230916 cfm add
+	@Autowired
+	private IStkIoSingleService stkIoSingleService;
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void saveAdd(StkIo bill, List<StkIoEntry> entryList, List<StkIoSingle> singleList) throws Exception {
+		saveAdd(bill, entryList);
+		saveAdd(bill, singleList);
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void submitAdd(StkIo bill, List<StkIoEntry> entryList, List<StkIoSingle> singleList) throws Exception {
+		validateLockInventory(); //20250711 cfm add
+
+		if (singleList != null && singleList.size() > 0) {
+			String id = IdWorker.getIdStr(bill);
+			bill.setId(id);
+			saveAdd(bill, singleList); //须在submit前保存(假定子表无外键)，否则单据生效后的处理用到StkIoSingle时却还未保存。
+		}
+		submitAdd(bill, entryList);
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void saveEdit(StkIo bill, List<StkIoEntry> entryList, List<StkIoSingle> singleList) throws Exception {
+		saveEdit(bill, entryList);
+		saveEdit(bill, singleList);
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void submitEdit(StkIo bill, List<StkIoEntry> entryList, List<StkIoSingle> singleList) throws Exception {
+		validateLockInventory(); //20250711 cfm add
+
+		saveEdit(bill, singleList);  //须在submit前保存，否则单据生效后的处理用到StkIoSingle时却还未保存。
+		submitEdit(bill, entryList);
+	}
+
+	//20250711 cfm add
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void check(String id, @NotNull String approvalResultType, String approvalRemark) throws Exception {
+		validateLockInventory();
+		super.check(id, approvalResultType, approvalRemark);
+	}
+
+	//20250711 cfm add
+	private void validateLockInventory() {
+		BasBizOptions basBizOptions = basBizOptionsService.getOne(Wrappers.emptyWrapper());
+		if (basBizOptions == null ||
+				basBizOptions.getIsLockedWhenCheck() == null ||
+				basBizOptions.getIsLockedWhenCheck() == 0) return;
+
+		List<StkCheck> list = stkCheckService.listNotEffective();
+		if (list != null && list.size() > 0) throw new JeecgBootException("盘点中（有未作废且未生效的盘点卡），不能提交和核批出入库单！");
+	}
+
+	//20231210 cfm add
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void saveAddBatch(Map<StkIo,List<StkIoEntry>> billMap, Map<StkIo, List<StkIoSingle>> billMap2) throws Exception {
+		for (Map.Entry<StkIo,List<StkIoEntry>> entry : billMap.entrySet()) {
+			this.saveAdd(entry.getKey(), entry.getValue(), billMap2.get(entry.getKey()));
+		}
+	}
+
+	private void saveAdd(StkIo bill, List<StkIoSingle> singleList) {
+		if(singleList!=null && singleList.size()>0) {
+			for(StkIoSingle s: singleList) {
+				s.setMid(bill.getId());//外键设置
+				stkIoSingleService.save(s);
+			}
+		}
+	}
+
+	private void saveEdit(StkIo bill, List<StkIoSingle> singleList) {
+		//子表数据：删除后重新插入
+		stkIoSingleService.deleteByMainId(bill.getId());
+		saveAdd(bill, singleList);
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void delete(String id) {
+		stkIoSingleService.deleteByMainId(id);
+		super.delete(id);
+	}
+	//end-20230916 cfm add
 
 	@Override
 	protected  void beforePersistAdd(StkIo bill, List<StkIoEntry> entryList){
@@ -91,6 +189,11 @@ public class StkIoServiceImpl
 		}
 		bill.setCost(cost);
 		bill.setSettleAmt(settleAmt);
+
+		//20230917 cfm add
+		if (bill.getHasSingle() == null){
+			bill.setHasSingle(0);
+		}
 	}
 
 	@Override
@@ -98,11 +201,18 @@ public class StkIoServiceImpl
 		this.beforePersistAdd(bill, entryList);
 	}
 
+	//20250505 cfm add for 内置BPM
+	@Override
+	public JSONObject getVo(String id) throws Exception {
+		JSONObject result = super.getVo(id);
+		List<StkIoSingle> singleList = stkIoSingleService.selectByMainId(id);
+		result.put("singleList", BillUtils.parseDictText(singleList));
+		return result;
+	}
+
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	protected void createSubBill(StkIo bill) throws Exception {
-		List<StkIoEntry> entryList = this.entryMapper.selectByMainId(bill.getId());
-
 		//后置单据-应收应付：自动生成
 		if (bill.getHasRp() == 1) {
 			if (bill.getStockIoType().startsWith("1")){
@@ -113,8 +223,10 @@ public class StkIoServiceImpl
 			}
 		}
 
-		//后置单据-实时库存：更新
-		stkInventoryService.updateInventory(bill, entryList, false);
+		//20230206 modi: 移入writeBack()中
+		//后置单据-即时库存：更新
+		//List<StkIoEntry> entryList = this.entryMapper.selectByMainId(bill.getId());
+		//stkInventoryService.updateInventory(bill, entryList, false);
 	}
 
 	@Override
@@ -135,27 +247,23 @@ public class StkIoServiceImpl
 
 	@Override
 	protected void writeBack(StkIo bill, boolean reverse) {
-		//如果是退货，不向前回写订单（订单可能已关闭、结算毛利润等）
-		String srcBillType = bill.getSrcBillType();
-		if (bill.getIsReturned() == 0 && !StringUtils.isEmpty(srcBillType)) {
-			List<StkIoEntry> entryList = this.entryMapper.selectByMainId(bill.getId());
+		List<StkIoEntry> entryList = this.entryMapper.selectByMainId(bill.getId());
 
-			//如果源单不为PurOrder、SalOrder，不用获取purOrderService、salOrderService
-			if (srcBillType.startsWith("PurOrder")) {
-				purOrderService.stkIoWriteBack(entryList, reverse);
-			}
-			else if (srcBillType.startsWith("SalOrder")) {
-				salOrderService.stkIoWriteBack(entryList, reverse);
-			}
-		}
+		//20230917 cfm add
+		List<StkIoSingle> ioSingleList = stkIoSingleService.selectByMainId(bill.getId());
+
+		//20230206 modi: 从writeBack()、voidBillPreprocess()移入
+		//更新-即时库存
+		stkInventoryService.updateInventory(bill, entryList, ioSingleList, reverse);
 	}
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	protected void voidBillPreprocess(StkIo bill) throws Exception {
+		//BEGIN-20240509 cfm modi for：修复【BUG】采购发票、付款申请未作废时采购入库不应能作废，销售发票、销售退货退款申请未作废时销售出库不应能作废。
 		//后置单据-采购发票、采购付款申请、采购付款
 		String billNos = null;
-		if (!bill.getStockIoType().startsWith("1")) {
+		if (bill.getStockIoType().startsWith("1")) {
 			billNos = finPurInvoiceService.getNotVoidedBillNos(bill.getBillType(), bill.getId());
 			if (StringUtils.isEmpty(billNos)) {
 				billNos = finPaymentReqService.getNotVoidedBillNos(bill.getBillType(), bill.getId());
@@ -166,12 +274,22 @@ public class StkIoServiceImpl
 		}
 
 		//后置单据-销售发票、销售收款
-		if (StringUtils.isEmpty(billNos) && !bill.getStockIoType().startsWith("2")) {
+		if (StringUtils.isEmpty(billNos) && bill.getStockIoType().startsWith("2")) {
 			billNos = finSalInvoiceService.getNotVoidedBillNos(bill.getBillType(), bill.getId());
+			if (StringUtils.isEmpty(billNos)) {
+				billNos = finReceiptReqService.getNotVoidedBillNos(bill.getBillType(), bill.getId());
+			}
 			if (StringUtils.isEmpty(billNos)) {
 				billNos = finReceiptService.getNotVoidedBillNos(bill.getBillType(), bill.getId());
 			}
 		}
+		//END-20240509 cfm modi for：修复【BUG】采购发票、付款申请未作废时采购入库不应能作废，销售发票、销售退货退款申请未作废时销售出库不应能作废。
+
+		//20250409 cfm add for: 修复【BUG】生产退料、采购退货出库、销售退货入库未作废时，相应的生产领料、采购入库、销售出库不应能作废
+		if (StringUtils.isEmpty(billNos)) {
+			billNos = getNotVoidedBillNos(bill.getBillType(), bill.getId());
+		}
+
 		if (!StringUtils.isEmpty(billNos)) {
 			throw new JeecgBootException("不能作废！有未作废的后置单据：" + billNos);
 		}
@@ -203,25 +321,24 @@ public class StkIoServiceImpl
 		if (!StringUtils.isEmpty(billNos)) {
 			throw new JeecgBootException("不能作废！有未作废的后置单据：" + billNos);
 		}
-
-		//后置单据-实时库存：更新
-		List<StkIoEntry> entryList = this.entryMapper.selectByMainId(bill.getId());
-		stkInventoryService.updateInventory(bill, entryList, true);
 	}
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public void createInBill(StkCheck stkCheck, List<StkCheckEntry> stkCheckEntryList) throws Exception {
-		createBill("102", stkCheck, stkCheckEntryList);
+    //20231101 cfm modi: 增加参数 stkCheckSingleList
+	public void createInBill(StkCheck stkCheck, List<StkCheckEntry> stkCheckEntryList, List<StkCheckSingle> stkCheckSingleList) throws Exception {
+		createBill("102", stkCheck, stkCheckEntryList, stkCheckSingleList);
 	}
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public void createOutBill(StkCheck stkCheck, List<StkCheckEntry> stkCheckEntryList) throws Exception {
-		createBill("202", stkCheck, stkCheckEntryList);
+    //20231101 cfm modi: 增加参数 stkCheckSingleList
+	public void createOutBill(StkCheck stkCheck, List<StkCheckEntry> stkCheckEntryList, List<StkCheckSingle> stkCheckSingleList) throws Exception {
+		createBill("202", stkCheck, stkCheckEntryList, stkCheckSingleList);
 	}
 
-	private void createBill(String stockIoType, StkCheck stkCheck, List<StkCheckEntry> stkCheckEntryList) throws Exception {
+    //20231101 cfm modi: 增加参数 stkCheckSingleList
+	private void createBill(String stockIoType, StkCheck stkCheck, List<StkCheckEntry> stkCheckEntryList, List<StkCheckSingle> stkCheckSingleList) throws Exception {
 		StkIo bill = new StkIo();
 		bill.setStockIoType(stockIoType);
 		bill.setIsAuto(1);
@@ -235,14 +352,13 @@ public class StkIoServiceImpl
 		bill.setHandler(stkCheck.getChecker());
 		bill.setHasRp(0);
 		bill.setHasSwell(0);
+		bill.setHasSingle(stkCheck.getHasSingle()); //20231109 cfm add
 
 		List<StkIoEntry> entryList = new ArrayList<>();
 		int entryNo = 0;
 		for(StkCheckEntry checkEntity: stkCheckEntryList) {
-			BigDecimal qty = checkEntity.getProfitQty(); //profitQty: 盘盈为正，盘亏为负
-			if (stockIoType.equals("202")) {
-				qty = qty.negate();
-			}
+			//20231112 cfm modi
+			BigDecimal qty = stockIoType.equals("102") ? checkEntity.getProfitQty() : checkEntity.getLossQty();
 
 			StkIoEntry entry = new StkIoEntry();
 			entry.setEntryNo(++entryNo);
@@ -263,7 +379,29 @@ public class StkIoServiceImpl
 			entryList.add(entry);
 		}
 
-		this.submitAdd(bill, entryList);
+        //20231101 cfm add
+        List<StkIoSingle> singleList = new ArrayList<>();
+        for(StkCheckSingle checkSingle: stkCheckSingleList) {
+			BigDecimal qty = checkSingle.getQty().subtract(checkSingle.getBookQty());
+			if (stockIoType.equals("202")) { //如果是盘亏出库，则取反
+				qty = qty.negate();
+			}
+            StkIoSingle single = new StkIoSingle();
+            single.setStockIoDirection(stockIoType.substring(0,1));
+            single.setMaterialId(checkSingle.getMaterialId());
+            single.setSn(checkSingle.getSn());
+            single.setBatchNo(checkSingle.getBatchNo());
+            single.setWarehouseId(checkSingle.getWarehouseId());
+            single.setUnitId(checkSingle.getUnitId());
+            single.setQty(qty);
+            single.setSettleAmt(BigDecimal.ZERO);
+            single.setExpense(BigDecimal.ZERO);
+            single.setCost(BigDecimal.ZERO);
+            singleList.add(single);
+        }
+
+        //20231101 cfm modi: 增加参数 singleList
+        this.submitAdd(bill, entryList, singleList);
 	}
 
 	@Override
@@ -298,15 +436,6 @@ public class StkIoServiceImpl
 		for(StkIo bill: billMap.values()) {
 			this.baseMapper.updateById(bill);
 			this.refreshExecuteStage(bill);
-		}
-
-		//向前回写
-		for(FinPayableCheckEntry entry: checkEntryList1) {
-			//如果源单不为 PurOrder，不用获取 purOrderService
-			if (!StringUtils.isEmpty(entry.getSrcBillType()) && entry.getSrcBillType().startsWith("PurOrder")) {
-				purOrderService.payableCheckWriteBackSettledAmt(checkEntryList1, reverse);
-				break;
-			}
 		}
 	}
 
@@ -343,15 +472,6 @@ public class StkIoServiceImpl
 			this.baseMapper.updateById(bill);
 			this.refreshExecuteStage(bill);
 		}
-
-		//向前回写
-		for(FinReceivableCheckEntry entry: checkEntryList1) {
-			//如果源单不为SalOrder，不用获取salOrderService
-			if (!StringUtils.isEmpty(entry.getSrcBillType()) && entry.getSrcBillType().startsWith("SalOrder")) {
-				salOrderService.receivableCheckWriteBackSettledAmt(checkEntryList1, reverse);
-				break;
-			}
-		}
 	}
 
 	@Override
@@ -381,15 +501,6 @@ public class StkIoServiceImpl
 			this.baseMapper.updateById(bill);
 			this.refreshExecuteStage(bill);
 		}
-
-		//向前回调
-		for(FinPurInvoiceEntry entry: invoiceEntryList1) {
-			//如果源单不为PurOrder，不用获取purOrderService
-			if (!StringUtils.isEmpty(entry.getSrcBillType()) && entry.getSrcBillType().startsWith("PurOrder")) {
-				purOrderService.purInvoiceWriteBack(invoiceEntryList1, reverse);
-				break;
-			}
-		}
 	}
 
 	@Override
@@ -418,15 +529,6 @@ public class StkIoServiceImpl
 		for(StkIo bill: billMap.values()) {
 			this.baseMapper.updateById(bill);
 			this.refreshExecuteStage(bill);
-		}
-
-		//向前回调
-		for(FinSalInvoiceEntry entry: invoiceEntryList1) {
-			//如果源单不为SalOrder，不用获取salOrderService
-			if (!StringUtils.isEmpty(entry.getSrcBillType()) && entry.getSrcBillType().startsWith("SalOrder")) {
-				salOrderService.salInvoiceWriteBack(invoiceEntryList1, reverse);
-				break;
-			}
 		}
 	}
 

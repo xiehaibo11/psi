@@ -14,6 +14,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.aspect.annotation.AutoLog;
 import org.jeecg.common.exception.JeecgBootException;
@@ -126,6 +127,7 @@ public class FinReceivableCheckController {
     */
    @AutoLog(value = "应收核销单-新增")
    @ApiOperation(value="应收核销单-新增", notes="应收核销单-新增")
+   @RequiresPermissions("finance:receivable:check:add") //20240806 cfm add
    @PostMapping(value = "/add/{action}")
    public Result<?> add(@RequestBody FinReceivableCheckPage finReceivableCheckPage, @PathVariable String action) {
        FinReceivableCheck bill = new FinReceivableCheck();
@@ -151,6 +153,7 @@ public class FinReceivableCheckController {
     */
    @AutoLog(value = "应收核销单-编辑")
    @ApiOperation(value="应收核销单-编辑", notes="应收核销单-编辑")
+   @RequiresPermissions("finance:receivable:check:edit") //20240806 cfm add
    @PutMapping(value = "/edit/{action}")
    public Result<?> edit(@RequestBody FinReceivableCheckPage finReceivableCheckPage, @PathVariable String action) {
        FinReceivableCheck bill = new FinReceivableCheck();
@@ -176,6 +179,7 @@ public class FinReceivableCheckController {
     */
    @AutoLog(value = "应收核销单-通过id删除")
    @ApiOperation(value="应收核销单-通过id删除", notes="应收核销单-通过id删除")
+   @RequiresPermissions("finance:receivable:check:delete") //20240806 cfm add
    @DeleteMapping(value = "/delete")
    public Result<?> delete(@RequestParam(name="id",required=true) String id) {
        try {
@@ -194,6 +198,7 @@ public class FinReceivableCheckController {
     */
    @AutoLog(value = "应收核销单-批量删除")
    @ApiOperation(value="应收核销单-批量删除", notes="应收核销单-批量删除")
+   @RequiresPermissions("finance:receivable:check:delete") //20240806 cfm add
    @DeleteMapping(value = "/deleteBatch")
    public Result<?> deleteBatch(@RequestParam(name="ids",required=true) String ids) {
        try {
@@ -206,6 +211,7 @@ public class FinReceivableCheckController {
 
     @AutoLog(value = "应收核销单-审核")
     @ApiOperation(value="应收核销单-审核", notes="应收核销单-审核")
+    @RequiresPermissions("finance:receivable:check:check") //20240806 cfm add
     @PutMapping(value = "/check")
     public Result<?> check(@RequestBody JSONObject json) {
         try {
@@ -232,6 +238,7 @@ public class FinReceivableCheckController {
 
     @AutoLog(value = "应收核销单-结束审批")
     @ApiOperation(value="应收核销单-结束审批", notes="应收核销单-结束审批")
+    @RequiresPermissions("finance:receivable:check:bpm:end") //20240806 cfm add
     @PutMapping(value = "/bpm/end")
     public Result<?> bpmInstanceManualEnd(@RequestBody JSONObject json) {
         try {
@@ -246,6 +253,7 @@ public class FinReceivableCheckController {
 
     @AutoLog(value = "应收核销单-执行")
     @ApiOperation(value="应收核销单-执行", notes="应收核销单-执行")
+    @RequiresPermissions("finance:receivable:check:execute") //20240806 cfm add
     @PutMapping(value = "/execute")
     public Result<?> execute(@RequestBody JSONObject json) {
         try {
@@ -258,6 +266,7 @@ public class FinReceivableCheckController {
 
     @AutoLog(value = "应收核销单-关闭")
     @ApiOperation(value="应收核销单-关闭", notes="应收核销单-关闭")
+    @RequiresPermissions("finance:receivable:check:close") //20240806 cfm add
     @PutMapping(value = "/close")
     public Result<?> close(@RequestBody JSONObject json) {
         try {
@@ -270,6 +279,7 @@ public class FinReceivableCheckController {
 
     @AutoLog(value = "应收核销单--反关闭")
     @ApiOperation(value="应收核销单--反关闭", notes="应收核销单--反关闭")
+    @RequiresPermissions("finance:receivable:check:unclose") //20240806 cfm add
     @PutMapping(value = "/unclose")
     public Result<?> unclose(@RequestBody JSONObject json) {
         try {
@@ -288,6 +298,7 @@ public class FinReceivableCheckController {
      */
     @AutoLog(value = "应收核销单-批量关闭")
     @ApiOperation(value="应收核销单-批量关闭", notes="应收核销单-批量关闭")
+    @RequiresPermissions("finance:receivable:check:close") //20240806 cfm add
     @PutMapping(value = "/closeBatch")
     public Result<String> closeBatch(@RequestBody JSONObject json) {
         try {
@@ -306,6 +317,7 @@ public class FinReceivableCheckController {
      */
     @AutoLog(value = "应收核销单-批量反关闭")
     @ApiOperation(value="应收核销单-批量反关闭", notes="应收核销单-批量反关闭")
+    @RequiresPermissions("finance:receivable:check:unclose") //20240806 cfm add
     @PutMapping(value = "/uncloseBatch")
     public Result<String> uncloseBatch(@RequestBody JSONObject json) {
         try {
@@ -335,6 +347,7 @@ public class FinReceivableCheckController {
    * @param finReceivableCheck
    */
     @AutoLog(value = "导出为excel")
+    @RequiresPermissions("finance:receivable:check:export") //20240806 cfm add
     @RequestMapping(value = {"/exportXls", "/exportXls/{receivableCheckType}"})
     public ModelAndView exportXls(HttpServletRequest request, FinReceivableCheck finReceivableCheck) {
      // Step.1 组装查询条件查询数据
@@ -379,6 +392,7 @@ public class FinReceivableCheckController {
    * @return
    */
    @AutoLog(value = "通过excel导入数据")
+   @RequiresPermissions("finance:receivable:check:import") //20240806 cfm add
    @RequestMapping(value = {"/importExcel", "/importExcel/{receivableCheckType}"}, method = RequestMethod.POST)
    public Result<?> importExcel(HttpServletRequest request,
                                 @PathVariable(required = false) String receivableCheckType) {

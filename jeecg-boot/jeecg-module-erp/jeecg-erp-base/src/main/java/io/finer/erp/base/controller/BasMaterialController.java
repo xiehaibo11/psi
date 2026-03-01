@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import io.finer.erp.base.entity.BasMaterial;
 import io.finer.erp.base.service.IBasMaterialService;
 import io.finer.erp.base.service.IBasUnitService;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.system.query.QueryGenerator;
 
@@ -67,9 +68,10 @@ public class BasMaterialController extends JeecgController<BasMaterial, IBasMate
 		 QueryWrapper<BasMaterial> queryWrapper = QueryGenerator.initQueryWrapper(basMaterial, req.getParameterMap());
 		 queryWrapper.eq("is_enabled", 1);
 		 List<BasMaterial> list = basMaterialService.list(queryWrapper);
-		 for(BasMaterial m: list) {
-			 m.setValidUnitList(basUnitService.selectConvertibleById(m.getUnitId()));
-		 }
+		 //20230217 del：下列查询太慢，改在前端处理
+		 // for(BasMaterial m: list) {
+		 // 	m.setValidUnitList(basUnitService.selectConvertibleById(m.getUnitId()));
+		 // }
 		 return Result.OK(list);
 	 }
 
@@ -98,6 +100,7 @@ public class BasMaterialController extends JeecgController<BasMaterial, IBasMate
 	 */
 	@AutoLog(value = "物料-新增")
 	@ApiOperation(value="物料-新增", notes="物料-新增")
+	@RequiresPermissions("base:material:add") //20240806 cfm add
 	@PostMapping(value = "/add")
 	public Result<?> add(@RequestBody BasMaterial basMaterial) {
 		basMaterialService.save(basMaterial);
@@ -106,15 +109,17 @@ public class BasMaterialController extends JeecgController<BasMaterial, IBasMate
 
 	/**
 	 *  编辑
+	 *  注意：如果请求中salePrice属性不存在或为null，数据库中将被设置为null
 	 *
 	 * @param basMaterial
 	 * @return
 	 */
 	@AutoLog(value = "物料-编辑")
 	@ApiOperation(value="物料-编辑", notes="物料-编辑")
+	@RequiresPermissions("base:material:edit") //20240806 cfm add
 	@PutMapping(value = "/edit")
 	public Result<?> edit(@RequestBody BasMaterial basMaterial) {
-		basMaterialService.updateById(basMaterial);
+		basMaterialService.edit(basMaterial); //20251030 cfm modi: updateById 改为 edit
 		return Result.ok("编辑成功!");
 	}
 
@@ -126,6 +131,7 @@ public class BasMaterialController extends JeecgController<BasMaterial, IBasMate
 	 */
 	@AutoLog(value = "物料-通过id删除")
 	@ApiOperation(value="物料-通过id删除", notes="物料-通过id删除")
+	@RequiresPermissions("base:material:delete") //20240806 cfm add
 	@DeleteMapping(value = "/delete")
 	public Result<?> delete(@RequestParam(name="id",required=true) String id) {
 		basMaterialService.removeById(id);
@@ -140,6 +146,7 @@ public class BasMaterialController extends JeecgController<BasMaterial, IBasMate
 	 */
 	@AutoLog(value = "物料-批量删除")
 	@ApiOperation(value="物料-批量删除", notes="物料-批量删除")
+	@RequiresPermissions("base:material:delete") //20240806 cfm add
 	@DeleteMapping(value = "/deleteBatch")
 	public Result<?> deleteBatch(@RequestParam(name="ids",required=true) String ids) {
 		this.basMaterialService.removeByIds(Arrays.asList(ids.split(",")));
@@ -153,6 +160,7 @@ public class BasMaterialController extends JeecgController<BasMaterial, IBasMate
     * @param basMaterial
     */
 	@AutoLog(value = "导出为excel")
+	@RequiresPermissions("base:material:export") //20240806 cfm add
     @RequestMapping(value = "/exportXls")
     public ModelAndView exportXls(HttpServletRequest request, BasMaterial basMaterial) {
         return super.exportXls(request, basMaterial, BasMaterial.class, "物料");
@@ -166,6 +174,7 @@ public class BasMaterialController extends JeecgController<BasMaterial, IBasMate
     * @return
     */
 	@AutoLog(value = "通过excel导入数据")
+	@RequiresPermissions("base:material:import") //20240806 cfm add
     @RequestMapping(value = "/importExcel", method = RequestMethod.POST)
     public Result<?> importExcel(HttpServletRequest request, HttpServletResponse response) {
         return super.importExcel(request, response, BasMaterial.class);

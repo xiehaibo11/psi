@@ -210,7 +210,7 @@ public class SysCommentController extends JeecgController<SysComment, ISysCommen
      */
     //@AutoLog(value = "系统评论回复表-批量删除")
     @ApiOperation(value = "系统评论回复表-批量删除", notes = "系统评论回复表-批量删除")
-    //@RequiresPermissions("org.jeecg.modules.demo:sys_comment:deleteBatch")
+    //@RequiresPermissions("org.jeecg.modules.demo:sys_comment:delete")
     @DeleteMapping(value = "/deleteBatch")
     public Result<String> deleteBatch(@RequestParam(name = "ids", required = true) String ids) {
         this.sysCommentService.removeByIds(Arrays.asList(ids.split(",")));

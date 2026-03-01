@@ -1,6 +1,7 @@
 package io.finer.erp.stock.vo;
 
 import io.finer.erp.common.vo.BillPage;
+import io.finer.erp.stock.entity.StkIoSingle;
 import io.finer.erp.stock.entity.StkIoEntry;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -62,10 +63,10 @@ public class StkIoPage extends BillPage {
 	@Dict(dictTable = "sys_user", dicText = "realname", dicCode = "username")
 	@ApiModelProperty(value = "业务员")
 	private java.lang.String operator;
-	/**出入库经办*/
-	@Excel(name = "出入库经办", width = 15, dictTable = "sys_user", dicText = "realname", dicCode = "username")
+	/**库管员*/
+	@Excel(name = "库管员", width = 15, dictTable = "sys_user", dicText = "realname", dicCode = "username")
 	@Dict(dictTable = "sys_user", dicText = "realname", dicCode = "username")
-	@ApiModelProperty(value = "出入库经办")
+	@ApiModelProperty(value = "库管员")
 	private java.lang.String handler;
 	/**成本*/
 	@Excel(name = "成本", width = 15)
@@ -87,6 +88,29 @@ public class StkIoPage extends BillPage {
 	@ExcelCollection(name="明细")
 	@ApiModelProperty(value = "明细")
 	private List<StkIoEntry> stkIoEntryList;
+
+	//20230917 cfm add
+	/**是否有个体明细*/
+	@Excel(name = "是否有个体明细", width = 15, dicCode = "yn")
+	@Dict(dicCode = "yn")
+	@ApiModelProperty(value = "是否有个体明细")
+	private java.lang.Integer hasSingle;
+
+	@ExcelCollection(name="个体")
+	@ApiModelProperty(value = "个体")
+	private List<StkIoSingle> stkIoSingleList;
+
+	//20231224 cfm add
+	/**BOM*/
+	@Excel(name = "BOM", width = 15, dictTable = "bas_bom", dicText = "name", dicCode = "id")
+	@Dict(dictTable = "bas_bom", dicText = "aux_name", dicCode = "id")
+	@ApiModelProperty(value = "BOM")
+	private java.lang.String bomId;
+	//20250406 cfm add
+	/**主物料数量*/
+	@Excel(name = "主物料数量", width = 15)
+	@ApiModelProperty(value = "主物料数量")
+	private java.math.BigDecimal mainMaterialQty;
 
 	@Override
 	public String getBillType() {
