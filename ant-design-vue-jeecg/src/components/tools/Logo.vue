@@ -21,7 +21,7 @@
     props: {
       title: {
         type: String,
-        default: '进销存',
+        default: () => (typeof window !== 'undefined' && window._CONFIG && window._CONFIG.VUE_APP_PLATFORM_NAME) || '水产品管理系统',
         required: false
       },
       showTitle: {

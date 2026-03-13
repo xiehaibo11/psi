@@ -92,4 +92,9 @@ const updateColorWeak = colorWeak => {
   colorWeak ? document.body.classList.add('colorWeak') : document.body.classList.remove('colorWeak')
 };
 
-export { updateTheme, colorList, updateColorWeak }
+/** 中老年适配模式：大字号、高对比度、可访问性增强 */
+const updateElderlyMode = enabled => {
+  enabled ? document.body.classList.add('elderlyMode') : document.body.classList.remove('elderlyMode')
+};
+
+export { updateTheme, colorList, updateColorWeak, updateElderlyMode }

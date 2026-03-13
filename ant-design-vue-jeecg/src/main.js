@@ -31,6 +31,7 @@ import {
   DEFAULT_THEME,
   DEFAULT_LAYOUT_MODE,
   DEFAULT_COLOR_WEAK,
+  DEFAULT_ELDERLY_MODE,
   SIDEBAR_TYPE,
   DEFAULT_FIXED_HEADER,
   DEFAULT_FIXED_HEADER_HIDDEN,
@@ -39,6 +40,7 @@ import {
   DEFAULT_MULTI_PAGE
 } from "@/store/mutation-types"
 import config from '@/defaultSettings'
+import { updateElderlyMode } from '@/components/tools/setting'
 
 import JDictSelectTag from './components/dict/index.js'
 import hasPermission from '@/utils/hasPermission'
@@ -80,6 +82,8 @@ function main() {
       store.commit('TOGGLE_CONTENT_WIDTH', Vue.ls.get(DEFAULT_CONTENT_WIDTH_TYPE, config.contentWidth))
       store.commit('TOGGLE_FIXED_HEADER_HIDDEN', Vue.ls.get(DEFAULT_FIXED_HEADER_HIDDEN, config.autoHideHeader))
       store.commit('TOGGLE_WEAK', Vue.ls.get(DEFAULT_COLOR_WEAK, config.colorWeak))
+      store.commit('TOGGLE_ELDERLY_MODE', Vue.ls.get(DEFAULT_ELDERLY_MODE, config.elderlyMode))
+      updateElderlyMode(Vue.ls.get(DEFAULT_ELDERLY_MODE, config.elderlyMode))
       store.commit('TOGGLE_COLOR', Vue.ls.get(DEFAULT_COLOR, config.primaryColor))
       store.commit('SET_TOKEN', Vue.ls.get(ACCESS_TOKEN))
       store.commit('SET_MULTI_PAGE',Vue.ls.get(DEFAULT_MULTI_PAGE,config.multipage))

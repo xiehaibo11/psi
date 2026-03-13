@@ -2,4 +2,24 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="io.finer.erp.stock.mapper.StkInventoryMapper">
 
+    <!-- 库存预警：当前库存 < 安全库存 的物料 -->
+    <select id="selectInventoryAlertList" resultType="io.finer.erp.stock.vo.StkInventoryAlertVo">
+        SELECT m.id AS materialId, m.code AS materialCode, m.name AS materialName, m.model AS materialModel,
+               m.unit_id AS unitId, u.name AS unitId_dictText, m.safety_stock AS safetyStock,
+               IFNULL(q.qty, 0) AS currentQty
+          FROM bas_material m
+          LEFT JOIN bas_unit u ON m.unit_id = u.id
+          LEFT JOIN stk_material_qty q ON m.id = q.id
+         WHERE m.safety_stock IS NOT NULL AND m.safety_stock > 0
+           AND m.is_enabled = 1
+           AND IFNULL(q.qty, 0) &lt; m.safety_stock
+        <if test="materialCode != null and materialCode != ''">
+           AND m.code LIKE CONCAT('%', #{materialCode}, '%')
+        </if>
+        <if test="materialName != null and materialName != ''">
+           AND m.name LIKE CONCAT('%', #{materialName}, '%')
+        </if>
+         ORDER BY (m.safety_stock - IFNULL(q.qty, 0)) DESC
+    </select>
+
 </mapper>

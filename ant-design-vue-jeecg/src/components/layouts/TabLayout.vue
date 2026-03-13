@@ -184,7 +184,7 @@
        * @param title 要修改的新标题
        */
       changeTitle(title) {
-        let projectTitle = "Finer 进销存"
+        let projectTitle = "水产品管理系统"
         // 首页特殊处理
         if (this.$route.path === indexKey) {
           document.title = projectTitle

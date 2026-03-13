@@ -5,6 +5,7 @@ import {
   DEFAULT_LAYOUT_MODE,
   DEFAULT_COLOR,
   DEFAULT_COLOR_WEAK,
+  DEFAULT_ELDERLY_MODE,
   DEFAULT_FIXED_HEADER,
   DEFAULT_FIXED_SIDEMENU,
   DEFAULT_FIXED_HEADER_HIDDEN,
@@ -27,6 +28,7 @@ const app = {
     autoHideHeader: false,
     color: null,
     weak: false,
+    elderlyMode: false,
     multipage: true //默认多页签模式
   },
   mutations: {
@@ -75,6 +77,10 @@ const app = {
       Vue.ls.set(DEFAULT_COLOR_WEAK, flag)
       state.weak = flag
     },
+    TOGGLE_ELDERLY_MODE: (state, flag) => {
+      Vue.ls.set(DEFAULT_ELDERLY_MODE, flag)
+      state.elderlyMode = flag
+    },
     SET_MULTI_PAGE (state, multipageFlag) {
       Vue.ls.set(DEFAULT_MULTI_PAGE, multipageFlag)
       state.multipage = multipageFlag
@@ -116,6 +122,9 @@ const app = {
     },
     ToggleWeak({ commit }, weakFlag) {
       commit('TOGGLE_WEAK', weakFlag)
+    },
+    ToggleElderlyMode({ commit }, flag) {
+      commit('TOGGLE_ELDERLY_MODE', flag)
     },
     ToggleMultipage({ commit }, multipageFlag) {
       commit('SET_MULTI_PAGE', multipageFlag)

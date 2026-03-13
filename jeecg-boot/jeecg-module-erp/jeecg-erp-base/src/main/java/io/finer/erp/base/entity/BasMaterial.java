@@ -66,6 +66,10 @@ public class BasMaterial implements Serializable {
 	@Dict(dictTable = "bas_unit", dicText = "name", dicCode = "id")
     @ApiModelProperty(value = "计量单位")
     private java.lang.String unitId;
+	/**安全库存（最小库存）*/
+	@Excel(name = "安全库存", width = 15)
+	@ApiModelProperty(value = "安全库存（最小库存）")
+	private java.math.BigDecimal safetyStock;
 	/**销售价格*/
 	@Excel(name = "销售价格", width = 15)
     @ApiModelProperty(value = "销售价格")

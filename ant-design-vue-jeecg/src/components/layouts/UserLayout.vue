@@ -5,7 +5,7 @@
         <div class="header">
           <a href="/">
             <img src="~@/assets/logo.svg" class="logo" alt="logo">
-            <span class="title">进销存</span>
+            <span class="title">{{ platformName }}</span>
           </a>
         </div>
         <div class="desc">
@@ -26,8 +26,10 @@
     name: "UserLayout",
     components: { RouteView },
     mixins: [mixinDevice],
-    data () {
-      return {}
+    computed: {
+      platformName() {
+        return (typeof window !== 'undefined' && window._CONFIG && window._CONFIG.VUE_APP_PLATFORM_NAME) || process.env.VUE_APP_PLATFORM_NAME || '水产品管理系统'
+      }
     },
     mounted () {
       document.body.classList.add('userLayout')

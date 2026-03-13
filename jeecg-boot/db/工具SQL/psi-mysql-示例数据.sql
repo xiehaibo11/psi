@@ -50,6 +50,11 @@ INSERT IGNORE INTO `bas_material_category` (`id`, `pid`, `has_child`, `code`, `n
 INSERT IGNORE INTO `bas_material_category` (`id`, `pid`, `has_child`, `code`, `name`, `fullname`, `is_enabled`, `create_by`, `create_time`, `update_by`, `update_time`, `version`) VALUES ('1778762450929315842', '0', '0', '02', '手机', NULL, 1, 'admin', '2025-11-01 20:29:51', NULL, NULL, NULL);
 INSERT IGNORE INTO `bas_material_category` (`id`, `pid`, `has_child`, `code`, `name`, `fullname`, `is_enabled`, `create_by`, `create_time`, `update_by`, `update_time`, `version`) VALUES ('1812861498720063490', '0', '0', '11', '食品饮料', NULL, 1, 'admin', '2024-07-15 22:47:17', NULL, NULL, NULL);
 INSERT IGNORE INTO `bas_material_category` (`id`, `pid`, `has_child`, `code`, `name`, `fullname`, `is_enabled`, `create_by`, `create_time`, `update_by`, `update_time`, `version`) VALUES ('1812861545553661954', '0', '0', '99', '其他', NULL, 1, 'admin', '2024-07-15 22:47:28', NULL, NULL, NULL);
+-- 水产行业分类
+INSERT IGNORE INTO `bas_material_category` (`id`, `pid`, `has_child`, `code`, `name`, `fullname`, `is_enabled`, `create_by`, `create_time`, `update_by`, `update_time`, `version`) VALUES ('1890010000000000001', '0', '0', '20', '虾苗', NULL, 1, 'admin', NOW(), NULL, NULL, NULL);
+INSERT IGNORE INTO `bas_material_category` (`id`, `pid`, `has_child`, `code`, `name`, `fullname`, `is_enabled`, `create_by`, `create_time`, `update_by`, `update_time`, `version`) VALUES ('1890010000000000002', '0', '0', '21', '饲料', NULL, 1, 'admin', NOW(), NULL, NULL, NULL);
+INSERT IGNORE INTO `bas_material_category` (`id`, `pid`, `has_child`, `code`, `name`, `fullname`, `is_enabled`, `create_by`, `create_time`, `update_by`, `update_time`, `version`) VALUES ('1890010000000000003', '0', '0', '22', '渔药', NULL, 1, 'admin', NOW(), NULL, NULL, NULL);
+INSERT IGNORE INTO `bas_material_category` (`id`, `pid`, `has_child`, `code`, `name`, `fullname`, `is_enabled`, `create_by`, `create_time`, `update_by`, `update_time`, `version`) VALUES ('1890010000000000004', '0', '0', '23', '设备', NULL, 1, 'admin', NOW(), NULL, NULL, NULL);
 
 -- ----------------------------
 -- Records of bas_sequence

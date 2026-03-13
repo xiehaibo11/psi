@@ -4,7 +4,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.finer.erp.stock.entity.StkInventory;
+import io.finer.erp.stock.mapper.StkInventoryMapper;
 import io.finer.erp.stock.service.IStkInventoryService;
+import io.finer.erp.stock.vo.StkInventoryAlertVo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +22,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Arrays;
+import java.util.List;
 
  /**
  * @Description: 库存
@@ -35,6 +38,8 @@ public class StkInventoryController extends JeecgController<StkInventory, IStkIn
 
 	@Autowired
 	private IStkInventoryService stkInventoryService;
+	@Autowired
+	private StkInventoryMapper stkInventoryMapper;
 
 	/**
 	 * 分页列表查询
@@ -85,6 +90,27 @@ public class StkInventoryController extends JeecgController<StkInventory, IStkIn
 		 }
 		 return Result.OK(stkInventory);
 	 }
+
+	/**
+	 * 库存预警：查询当前库存低于安全库存的物料列表
+	 */
+	@ApiOperation(value = "库存预警-列表", notes = "当前库存低于安全库存的物料")
+	@GetMapping(value = "/alert/list")
+	public Result<?> alertList(@RequestParam(name = "materialCode", required = false) String materialCode,
+	                           @RequestParam(name = "materialName", required = false) String materialName) {
+		List<StkInventoryAlertVo> list = stkInventoryMapper.selectInventoryAlertList(materialCode, materialName);
+		return Result.OK(list);
+	}
+
+	/**
+	 * 库存预警：预警数量（用于首页展示）
+	 */
+	@ApiOperation(value = "库存预警-数量", notes = "预警物料数量")
+	@GetMapping(value = "/alert/count")
+	public Result<?> alertCount() {
+		List<StkInventoryAlertVo> list = stkInventoryMapper.selectInventoryAlertList(null, null);
+		return Result.OK(list.size());
+	}
 
 	 /**
 	 *  编辑

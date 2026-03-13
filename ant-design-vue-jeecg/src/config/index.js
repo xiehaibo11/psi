@@ -8,3 +8,4 @@ window._CONFIG['casPrefixUrl'] = window._CONFIG.VUE_APP_CAS_BASE_URL?window._CON
 window._CONFIG['onlinePreviewDomainURL'] =  window._CONFIG.VUE_APP_ONLINE_BASE_URL?window._CONFIG.VUE_APP_ONLINE_BASE_URL:process.env.VUE_APP_ONLINE_BASE_URL
 window._CONFIG['staticDomainURL'] = Vue.prototype.API_BASE_URL + '/sys/common/static'
 window._CONFIG['pdfDomainURL'] = Vue.prototype.API_BASE_URL+ '/sys/common/pdf/pdfPreviewIframe'
+window._CONFIG['platformName'] = window._CONFIG.VUE_APP_PLATFORM_NAME || process.env.VUE_APP_PLATFORM_NAME || '水产品管理系统'

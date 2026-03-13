@@ -67,6 +67,7 @@
     <!-- 操作按钮区域 -->
     <div class="table-operator">
       <a-button :disabled="isDisabledAuth('PurPayment2020:edit')" @click="myHandleAdd" type="link" icon="plus">新增</a-button>
+      <a-button type="link" icon="bank" @click="goToCcbEbank" title="前往建行企业网银办理付款">跳转建行企业银行</a-button>
       <a-button :disabled="isDisabledAuth('PurPayment2020:edit')" type="link" icon="download" @click="handleExportXls('付款单')">导出</a-button>
       <a-upload name="file" :showUploadList="false" :multiple="false" :headers="tokenHeader" :action="importExcelUrl" @change="handleImportExcel">
         <a-button :disabled="isDisabledAuth('PurPayment2020:edit')" type="link" icon="import">导入</a-button>
@@ -141,6 +142,7 @@
   import PurPaymentModal from './modules/PurPayment2020Modal'
   import TableColumnsSetter from '../common/components/TableColumnsSetter'
   import { BillListMixin } from '../common/mixins/bill/BillListMixin'
+  import { goToCcbEbank } from './ccbConfig'
   import XEUtils from "xe-utils";
 
   export default {
@@ -330,7 +332,8 @@
     },
 
     methods: {
-      initDictConfig() {}
+      initDictConfig() {},
+      goToCcbEbank,
     }
 
   }

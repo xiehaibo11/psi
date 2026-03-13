@@ -189,6 +189,13 @@
             align:"center",
             dataIndex: 'unitId_dictText'
           },
+          {
+            title:'安全库存',
+            width:100,
+            align:"right",
+            dataIndex: 'safetyStock',
+            customRender: t => t != null ? XEUtils.commafy(t,{digits: 2}) : '-'
+          },
           {//20250408 cfm add
             title: '图片',
             align: "center",

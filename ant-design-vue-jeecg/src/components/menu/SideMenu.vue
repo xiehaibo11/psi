@@ -5,16 +5,25 @@
     :collapsible="collapsible"
     v-model="collapsed"
     :trigger="null">
-    <logo />
-    <s-menu
-      :collapsed="collapsed"
-      :menu="menus"
-      :theme="theme"
-      @select="onSelect"
-      @updateMenuTitle="onUpdateMenuTitle"
-      :mode="mode"
-      :style="smenuStyle">
-    </s-menu>
+    <div class="sider-content">
+      <logo />
+      <s-menu
+        :collapsed="collapsed"
+        :menu="menus"
+        :theme="theme"
+        @select="onSelect"
+        @updateMenuTitle="onUpdateMenuTitle"
+        :mode="mode"
+        :style="smenuStyle">
+      </s-menu>
+      <div
+        class="sider-setting-entry"
+        :class="theme"
+        @click="openSetting">
+        <a-icon type="tool"/>
+        <span class="sider-setting-text" v-show="!collapsed">系统设置</span>
+      </div>
+    </div>
   </a-layout-sider>
 
 </template>
@@ -57,13 +66,13 @@
     },
     computed:{
       smenuStyle() {
-        let style = { 'padding': '0' }
-        if (this.fixSiderbar) {
-          style['height'] = 'calc(100% - 59px)'
-          style['overflow'] = 'auto'
-          style['overflow-x'] = 'hidden'
+        return {
+          padding: '0',
+          flex: '1',
+          minHeight: 0,
+          overflow: 'auto',
+          overflowX: 'hidden'
         }
-        return style
       }
     },
     methods: {
@@ -72,6 +81,10 @@
       },
       onUpdateMenuTitle (obj) {
         this.$emit('updateMenuTitle', obj)
+      },
+      openSetting() {
+        this.$bus.$emit('openSettingDrawer')
+        this.$emit('menuSelect', {}) // 通知父级（移动端可关闭抽屉）
       }
     }
   }
@@ -145,6 +158,35 @@
   }
 
   /* update_end author:sunjianlei date:20190509 for: 修改侧边导航栏滚动条的样式 */
+
+  .sider-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .sider-setting-entry {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    height: 48px;
+    cursor: pointer;
+    transition: all 0.3s;
+    line-height: 48px;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+
+    .anticon { margin-right: 12px; font-size: 16px; }
+    .sider-setting-text { white-space: nowrap; }
+
+    &:hover { background: rgba(0, 0, 0, 0.04); }
+
+    &.dark {
+      color: rgba(255, 255, 255, 0.65);
+      border-top-color: rgba(255, 255, 255, 0.08);
+      &:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
+    }
+  }
 </style>
 
 <!-- update_begin author:sunjianlei date:20190530 for: 选中首页的时候不显示背景颜色 -->

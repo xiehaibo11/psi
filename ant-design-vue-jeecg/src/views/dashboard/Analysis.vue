@@ -1,7 +1,7 @@
 <template>
   <div>
     <a-row :gutter="[8, 8]">
-      <a-col :xl="12" :lg="12" :md="24" :sm="24" :xs="24">
+      <a-col :xl="8" :lg="8" :md="24" :sm="24" :xs="24">
         <a-card title="业务概况" :loading="summary.loading" :bordered="false" >
           <template #extra>
             <a-button type="link" size="small" @click="loadReport(summary)" icon="reload"/>
@@ -18,7 +18,7 @@
           </a-row>
         </a-card>
       </a-col>
-      <a-col :xl="6" :lg="6" :md="12" :sm="24" :xs="24">
+      <a-col :xl="5" :lg="5" :md="12" :sm="24" :xs="24">
         <a-card title="客户" :loading="customer.loading" :bordered="false" >
           <template #extra>
             <a-button type="link" size="small" @click="loadReport(customer)" icon="reload"/>
@@ -32,7 +32,7 @@
           </a-row>
         </a-card>
       </a-col>
-      <a-col :xl="6" :lg="6" :md="12" :sm="24" :xs="24">
+      <a-col :xl="5" :lg="5" :md="12" :sm="24" :xs="24">
         <a-card title="供应商" :loading="supplier.loading" :bordered="false" >
           <template #extra>
             <a-button type="link" size="small" @click="loadReport(supplier)" icon="reload"/>
@@ -43,6 +43,22 @@
                 <head-info :title="rec.label" :content="formatInt(rec.value)" :center="true" />
               </a-col>
             </template>
+          </a-row>
+        </a-card>
+      </a-col>
+      <a-col :xl="6" :lg="6" :md="12" :sm="24" :xs="24">
+        <a-card title="库存预警" :loading="inventoryAlert.loading" :bordered="false">
+          <template #extra>
+            <a-button type="link" size="small" @click="loadInventoryAlert" icon="reload"/>
+          </template>
+          <a-row>
+            <a-col :span="24">
+              <a v-if="inventoryAlert.count > 0" @click="goInventoryAlert">
+                <head-info title="预警数量" :content="inventoryAlert.count + ' 项'" :center="true"/>
+                <div style="margin-top: 8px; font-size: 12px; color: #1890ff;">点击查看详情</div>
+              </a>
+              <head-info v-else title="预警数量" :content="'0 项'" :center="true"/>
+            </a-col>
           </a-row>
         </a-card>
       </a-col>
@@ -108,6 +124,33 @@
               </a-row>
             </a-card>
           </a-col>
+
+          <a-col span="24">
+            <a-card title="今日/本月收支" :loading="receiptPayment.loading" :bordered="false" :body-style="{padding: 0}">
+              <template #extra>
+                <a-button type="link" size="small" @click="loadReport(receiptPayment)" icon="reload"/>
+              </template>
+              <a-row>
+                <template v-for="rec in receiptPayment.dataSource">
+                  <a-col :xl="12" :lg="12" :md="12" :sm="24" :xs="24">
+                    <a-card-grid style="width: 100%" :bordered="true" :body-style="{padding: '0'}">
+                      <h4>{{rec.label}}</h4>
+                      <a-row>
+                        <a-col :span="10" :offset="1">
+                          <head-info title="今日笔数" :content="formatInt(rec.t_count)" :center="false"/>
+                          <div style="margin-top: 16px">本月：{{formatInt(rec.m_count)}}</div>
+                        </a-col>
+                        <a-col :span="13">
+                          <head-info title="今日金额" :content="formatAmt(rec.t_amt)" :center="false"/>
+                          <div style="margin-top: 16px">本月：{{formatAmt(rec.m_amt)}}</div>
+                        </a-col>
+                      </a-row>
+                    </a-card-grid>
+                  </a-col>
+                </template>
+              </a-row>
+            </a-card>
+          </a-col>
         </a-row>
       </a-col>
 
@@ -151,8 +194,9 @@
       <a-col :xl="6" :lg="12" :md="12" :sm="24" :xs="24">
         <a-row :gutter="[8, 8]">
           <a-col :span="24">
-            <a-card title="处理中主要单据" :loading="doingBill.loading" :bordered="false" :body-style="{padding: 0}" style="min-height: 824px">
+            <a-card title="处理中主要单据" :loading="doingBill.loading" :bordered="false" :body-style="{padding: 0}" :style="{ minHeight: isMobile() ? '200px' : '824px' }">
               <template #extra>
+                <a v-if="paymentReqApprCount > 0" @click="goPaymentReqAppr" style="margin-right: 8px; color: #1890ff;">待审批付款 {{ paymentReqApprCount }} 笔</a>
                 <a-button type="link" size="small" @click="loadReport(doingBill)" icon="reload"/>
               </template>
               <a-table
@@ -163,7 +207,12 @@
                 :columns="doingBill.columns"
                 :dataSource="doingBill.dataSource"
                 :pagination="false"
-                class="j-table-force-nowrap"/>
+                class="j-table-force-nowrap">
+                <span slot="appr" slot-scope="text, record">
+                  <a v-if="record.name === '付款申请'" @click="goPaymentReqAppr">{{ text }}</a>
+                  <span v-else>{{ text }}</span>
+                </span>
+              </a-table>
             </a-card>
           </a-col>
         </a-row>
@@ -237,6 +286,16 @@
           dataSource: [],
         },
 
+        receiptPayment: {
+          cgreportId: '1796540450559004676',
+          loading: false,
+          queryParam: {},
+          ipagination: { current: 1, pageSize: 4, total: 0 },
+          isorter: { column: null, order: null },
+          dictOptions: {},
+          dataSource: [],
+        },
+
         saleAmt: {
           cgreportId: '1580915783778701314',
           loading: false,
@@ -275,6 +334,11 @@
           dataSource: [],
         },
 
+        inventoryAlert: {
+          loading: false,
+          count: 0,
+        },
+
         doingBill: {
           cgreportId: '1582194686237454338',
           loading: false,
@@ -299,6 +363,7 @@
               title:'待核批',
               align:"center",
               dataIndex: 'appr',
+              scopedSlots: { customRender: 'appr' },
             },
             {
               title:'执行中',
@@ -314,8 +379,10 @@
       this.loadReport(this.summary);
       this.loadReport(this.customer);
       this.loadReport(this.supplier);
+      this.loadInventoryAlert();
       this.loadReport(this.sale);
       this.loadReport(this.purchase);
+      this.loadReport(this.receiptPayment);
       this.loadReport(this.saleAmt);
       this.loadReport(this.saleProfit);
       this.loadReport(this.purchaseAmt);
@@ -357,8 +424,33 @@
 
       formatInt(i) {
         return XEUtils.commafy(i, {digits: 0}).toString();
-      }
-    }
+      },
+
+      loadInventoryAlert() {
+        this.inventoryAlert.loading = true;
+        getAction('/stock/stkInventory/alert/count').then(res => {
+          if (res.success && res.result != null) {
+            this.inventoryAlert.count = res.result;
+          }
+        }).finally(() => { this.inventoryAlert.loading = false; });
+      },
+
+      goInventoryAlert() {
+        this.$router.push({ path: '/erp/stock/inventory/alert' });
+      },
+
+      goPaymentReqAppr() {
+        this.$router.push({ path: '/erp/purchase/payment2021/req' });
+      },
+    },
+
+    computed: {
+      paymentReqApprCount() {
+        const row = (this.doingBill.dataSource || []).find(r => r.name === '付款申请');
+        const n = row && row.appr != null ? parseInt(row.appr, 10) : 0;
+        return isNaN(n) ? 0 : n;
+      },
+    },
   }
 </script>
 

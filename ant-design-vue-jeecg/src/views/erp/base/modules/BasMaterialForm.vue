@@ -48,6 +48,17 @@
                                  :disabled="disabled || action !== 'add'"/> <!-- 20250410 cfm modi: 增加 action... -->
             </a-form-model-item>
           </a-col>
+          <a-col :span="24">
+            <a-form-model-item label="安全库存" :labelCol="labelCol" :wrapperCol="wrapperCol" prop="safetyStock">
+              <a-input-number
+                v-model="model.safetyStock"
+                :min="0"
+                :precision="6"
+                placeholder="低于此数量将预警，可不填"
+                style="width: 100%"
+                :disabled="disabled"/>
+            </a-form-model-item>
+          </a-col>
 
           <!-- 20250408 cfm add -->
           <a-col :span="24">

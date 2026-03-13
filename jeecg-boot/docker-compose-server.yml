@@ -38,6 +38,8 @@ services:
     image: 81.70.17.111:5000/jeecg-boot-system:1.0
     restart: always
     container_name: jeecg-boot-system
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xms1024m -Xmx2048m"
     volumes:
       - /data/config:/jeecg-boot/config
     ports:

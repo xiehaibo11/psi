@@ -300,33 +300,32 @@ http://117.72.79.154
 - IDE(前端)： Vscode、WebStorm、IDEA
 - 依赖管理：Maven
 - 缓存：Redis
-- 数据库脚本：MySQL5.7
+- 数据库脚本：MySQL 5.7
 
 #### 后端
-- 基础框架：Spring Boot 2.6.6
-- 微服务框架： Spring Cloud Alibaba 2021.0.1.0
-- 持久层框架：MybatisPlus 3.5.1
-- 报表工具： JimuReport 1.6.6
-- 安全框架：Apache Shiro 1.8.0，Jwt 3.11.0
+- 基础框架：Spring Boot 2.6.14
+- 微服务框架：Spring Cloud 2021.0.3、Spring Cloud Alibaba 2021.0.1.0
+- 持久层框架：MybatisPlus 3.5.3.2
+- 报表工具：JimuReport 1.6.6
+- 安全框架：Apache Shiro 1.12.0，JWT 3.11.0
 - 微服务技术栈：Spring Cloud Alibaba、Nacos、Gateway、Sentinel、Skywalking
-- 数据库连接池：阿里巴巴Druid 1.1.22
-- 日志打印：logback
-- 其他：autopoi, fastjson，poi，Swagger-ui，quartz, lombok（简化代码）等。
+- 数据库连接池：阿里巴巴Druid 1.2.22
+- 日志打印：logback 1.2.9
+- 其他：autopoi 1.4.5，fastjson 1.2.83，poi，Knife4j（Swagger-ui），quartz，lombok（简化代码）等。
 
 #### 前端
-- 基础框架：[ant-design-vue](https://github.com/vueComponent/ant-design-vue) - Ant Design Of Vue 实现
-- JavaScript框架：Vue2
-- node 12
+- 基础框架：[ant-design-vue](https://github.com/vueComponent/ant-design-vue) ^1.7.2 - Ant Design Of Vue 实现
+- JavaScript框架：Vue 2.7.14
+- node 12+
 - yarn
-- @vue/cli 3.2.1
+- @vue/cli-service 3.3.0
 - [vue-cropper](https://github.com/xyxiao001/vue-cropper) - 头像裁剪组件
-- [@antv/g2](https://antv.alipay.com/zh-cn/index.html) - Alipay AntV 数据可视化图表
-- [Viser-vue](https://viserjs.github.io/docs.html#/viser/guide/installation)  - antv/g2 封装实现
-- [Vue 2.6.10](https://cn.vuejs.org/),[Vuex](https://vuex.vuejs.org/zh/),[Vue Router](https://router.vuejs.org/zh/)
-- [Axios](https://github.com/axios/axios)
-- [webpack](https://www.webpackjs.com/),[yarn](https://yarnpkg.com/zh-Hans/)
-- eslint，[@vue/cli 3.2.1](https://cli.vuejs.org/zh/guide)
-- vue-print-nb-jeecg - 打印
+- [@antv/data-set](https://github.com/antvis/data-set)、[viser-vue](https://viserjs.github.io/docs.html#/viser/guide/installation) - 数据可视化图表
+- [Vue 2.7](https://cn.vuejs.org/)、[Vuex](https://vuex.vuejs.org/zh/)、[Vue Router](https://router.vuejs.org/zh/) 3.6.5
+- [Axios](https://github.com/axios/axios) ^0.18.0
+- [webpack](https://www.webpackjs.com/)、[yarn](https://yarnpkg.com/zh-Hans/)
+- vxe-table 2.9.13 - 表格组件
+- vue-print-nb-jeecg ^1.0.10 - 打印
 
 
 开发环境搭建
@@ -368,27 +367,93 @@ yarn config set disturl https://registry.npmmirror.com/dist --global
 
 项目下载和运行
 ----
-- 拉取项目代码
+
+#### 1. 拉取项目代码
 ```bash
 git clone https://gitee.com/FINERME/psi.git
-cd  psi/ant-design-vue-jeecg
+cd psi
 ```
-- 安装依赖
+
+#### 2. 环境准备
+确保已启动 MySQL 5.7、Redis，并创建数据库：
 ```bash
+# 创建数据库（或使用 db/psi-mysql-5.7-1.sql、psi-mysql-5.7-2.sql 初始化）
+mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS \`psi-commu\` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;"
+# 若数据库为空，需执行初始化脚本
+# mysql -u root -p psi-commu < jeecg-boot/db/psi-mysql-5.7-1.sql
+# mysql -u root -p psi-commu < jeecg-boot/db/psi-mysql-5.7-2.sql
+```
+
+修改后端数据源配置（如需要）：`jeecg-boot/jeecg-module-system/jeecg-system-start/src/main/resources/application-dev.yml`  
+默认：MySQL 127.0.0.1:3306/psi-commu，用户名 root，密码 root；Redis 127.0.0.1:6379。
+
+---
+
+#### 3. 前端部署
+
+**开发模式**
+```bash
+cd ant-design-vue-jeecg
 yarn install
-```
-- 开发模式启动
-```bash
 yarn run serve
 ```
-- 编译项目
+前端默认访问：http://localhost:3100（开发模式下会代理 API 到后端 8080 端口）
+
+**生产编译**
 ```bash
+cd ant-design-vue-jeecg
+yarn install
 yarn run build
 ```
-- Lints and fixes files
+编译产物在 `dist/` 目录，可将该目录部署至 Nginx 等静态服务器。
+
+**代码检查**
 ```bash
 yarn run lint
 ```
+
+---
+
+#### 4. 后端部署
+
+**开发模式（IDEA）**  
+运行主类：`org.jeecg.JeecgSystemApplication`，使用 `dev` 配置文件。
+
+**开发模式（命令行）**
+```bash
+cd jeecg-boot
+mvn -DskipTests -pl jeecg-module-system/jeecg-system-start -am spring-boot:run
+```
+后端默认访问：http://localhost:8080/jeecg-boot
+
+**生产打包**
+```bash
+cd jeecg-boot
+mvn -DskipTests -pl jeecg-module-system/jeecg-system-start -am package
+```
+
+**生产运行**
+```bash
+# 使用项目自带启动脚本（需先完成上述打包；脚本内 APP_HOME 需与实际部署路径一致）
+./jeecg-boot/scripts/start-jeecg-system.sh
+# 或配置为 systemd 服务：finer-psi.service
+```
+
+---
+
+#### 5. Docker 部署（可选）
+```bash
+cd jeecg-boot
+docker-compose up -d
+```
+将启动 MySQL、Redis 和后端服务，后端端口 8080。
+
+---
+
+#### 6. 访问与登录
+- 前端：http://localhost:3100（开发）或部署后的前端地址
+- 后端 API：http://localhost:8080/jeecg-boot
+- 演示账号：psi / 123456（若使用示例数据）
 
 捐赠
 ----

@@ -135,6 +135,13 @@
                 </a-list-item-meta>
               </a-list-item>
               <a-list-item>
+                <a-switch slot="actions" size="small" :checked="elderlyMode" @change="onElderlyMode" />
+                <a-list-item-meta>
+                  <div slot="title">中老年适配</div>
+                  <div slot="description" style="font-size: 12px; color: #8c8c8c;">大字号、高对比度、可访问性增强</div>
+                </a-list-item-meta>
+              </a-list-item>
+              <a-list-item>
                 <a-switch slot="actions" size="small" :defaultChecked="multipage" @change="onMultipageWeak" />
                 <a-list-item-meta>
                   <div slot="title">多页签模式</div>
@@ -166,7 +173,7 @@
   import DetailList from '@/components/tools/DetailList'
   import SettingItem from '@/components/setting/SettingItem'
   import config from '@/defaultSettings'
-  import { updateTheme, updateColorWeak, colorList } from '@/components/tools/setting'
+  import { updateTheme, updateColorWeak, updateElderlyMode, colorList } from '@/components/tools/setting'
   import { mixin, mixinDevice } from '@/utils/mixin.js'
   import { triggerWindowResizeEvent } from '@/utils/util'
 
@@ -191,6 +198,9 @@
       if (this.colorWeak !== config.colorWeak) {
         updateColorWeak(this.colorWeak)
       }
+      if (this.elderlyMode !== config.elderlyMode) {
+        updateElderlyMode(this.elderlyMode)
+      }
       if (this.multipage !== config.multipage) {
         this.$store.dispatch('ToggleMultipage', this.multipage)
       }
@@ -208,6 +218,10 @@
       onColorWeak (checked) {
         this.$store.dispatch('ToggleWeak', checked)
         updateColorWeak(checked)
+      },
+      onElderlyMode (checked) {
+        this.$store.dispatch('ToggleElderlyMode', checked)
+        updateElderlyMode(checked)
       },
       onMultipageWeak (checked) {
         this.$store.dispatch('ToggleMultipage', checked)

@@ -207,6 +207,53 @@
     &.colorWeak {
       filter: invert(80%);
     }
+
+    /* 中老年适配：大字号、高对比度、可访问性增强 */
+    &.elderlyMode {
+      font-size: 16px;
+
+      .ant-layout,
+      .ant-menu,
+      .ant-table,
+      .ant-btn,
+      .ant-input,
+      .ant-select-selection__rendered,
+      .ant-form-item {
+        font-size: 16px;
+      }
+      .ant-table-tbody > tr > td,
+      .ant-table-thead > tr > th {
+        font-size: 15px;
+      }
+      .ant-btn-sm {
+        font-size: 15px;
+      }
+
+      /* 高对比度：文字加深 */
+      .ant-table,
+      .ant-form-item-label,
+      .ant-menu-item,
+      .ant-btn {
+        color: #1a1a1a;
+      }
+      .ant-table-tbody > tr > td {
+        color: #262626;
+      }
+      .ant-input,
+      .ant-select-selection__placeholder {
+        color: #262626;
+      }
+
+      /* 可访问性：增强焦点指示 */
+      a:focus,
+      .ant-btn:focus,
+      .ant-input:focus,
+      .ant-select-focused .ant-select-selection,
+      .ant-menu-item:focus {
+        outline: 2px solid #1890ff !important;
+        outline-offset: 2px;
+      }
+    }
   }
 
   .layout {

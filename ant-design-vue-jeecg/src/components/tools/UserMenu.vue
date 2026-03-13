@@ -29,6 +29,13 @@
     <!-- update-end author:sunjianlei date:20191220 for: 解决全局样式冲突的问题 -->
     <!-- update_end  author:zhaoxin date:20191129 for: 做头部菜单栏导航 -->
 
+    <!-- 暗黑模式切换 -->
+    <a-tooltip :title="navTheme === 'dark' ? '切换为亮色' : '切换为暗色'">
+      <span class="action" @click="toggleTheme">
+        <a-icon :type="navTheme === 'dark' ? 'bulb' : 'bulb'" theme="twoTone" :twoToneColor="navTheme === 'dark' ? '#faad14' : '#8c8c8c'" />
+      </span>
+    </a-tooltip>
+
     <!--    <span class="action">-->
     <!--      <a class="logout_title" target="_blank" href="http://doc.jeecg.com">-->
     <!--        <a-icon type="question-circle-o"></a-icon>-->
@@ -58,8 +65,7 @@
           <a-icon type="setting"/>
           <span>密码修改</span>
         </a-menu-item>
-        <!-- 20240425 cfm modi: 增加 v-if... -->
-        <a-menu-item v-if="isDesktop()" key="3"  @click="systemSetting">
+        <a-menu-item key="3" @click="systemSetting">
           <a-icon type="tool"/>
           <span>系统设置</span>
         </a-menu-item>
@@ -91,7 +97,7 @@
   import UserPassword from './UserPassword'
   import SettingDrawer from "@/components/setting/SettingDrawer";
   import DepartSelect from './DepartSelect'
-  import { mapActions, mapGetters,mapState } from 'vuex'
+  import { mapActions, mapGetters, mapState } from 'vuex'
   import { mixinDevice } from '@/utils/mixin.js'
   import { getFileAccessHttpUrl,getAction } from "@/api/manage"
   import Vue from 'vue'
@@ -139,7 +145,7 @@
     },
 
     mounted() {
-      //如果是单点登录模式
+      this.$bus.$on('openSettingDrawer', this.systemSetting)
       if (process.env.VUE_APP_SSO == 'true') {
         let depart = this.userInfo().orgCode
         if (!depart) {
@@ -147,11 +153,14 @@
         }
       }
     },
+    beforeDestroy() {
+      this.$bus.$off('openSettingDrawer', this.systemSetting)
+    },
     computed: {
       ...mapState({
         // 后台菜单
-        permissionMenuList: state => state.user.permissionList
-
+        permissionMenuList: state => state.user.permissionList,
+        navTheme: state => state.app.theme
       })
     },
     /* update_end author:zhaoxin date:20191129 for: 做头部菜单栏导航*/
@@ -175,7 +184,7 @@
         this.shows = false
       },
       /* update_end author:zhaoxin date:20191129 for: 做头部菜单栏导航*/
-      ...mapActions(["Logout", "getBizPeriod", "getBizOptions", "getMaterialList", "getUnitList"]),
+      ...mapActions(["Logout", "getBizPeriod", "getBizOptions", "getMaterialList", "getUnitList", "ToggleTheme"]),
       ...mapGetters(["nickname", "avatar","userInfo","bizPeriod", "materialList"]),
       getAvatar(){
         return getFileAccessHttpUrl(this.avatar())
@@ -209,6 +218,10 @@
       },
       updateCurrentDepart(){
         this.$refs.departSelect.show()
+      },
+      toggleTheme() {
+        const next = this.navTheme === 'dark' ? 'light' : 'dark'
+        this.ToggleTheme(next)
       },
       systemSetting(){
         this.$refs.settingDrawer.showDrawer()

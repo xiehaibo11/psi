@@ -22,6 +22,7 @@ export default {
   fixSiderbar: false, // sticky siderbar
   autoHideHeader: false, //  auto hide header
   colorWeak: false,
+  elderlyMode: false, // 中老年适配：大字号、高对比度、可访问性增强
   multipage: true, //默认多页签模式
   // vue-ls options
   storageOptions: {
